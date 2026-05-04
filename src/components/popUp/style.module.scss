@@ -1,0 +1,13 @@
+.wrapper {
+  padding: 9px;
+  margin: 9px 0px;
+
+  &.error {
+    background: red;
+    color: white;
+  }
+  &.success {
+    background: green;
+    color: white;
+  }
+}

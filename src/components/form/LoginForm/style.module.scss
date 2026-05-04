@@ -1,0 +1,322 @@
+/* index.style.module.scss */
+.forminscription {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 1px;
+
+  .container {
+    background-color: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+  }
+
+  .forminfo {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    z-index: 1;
+  }
+
+  .formHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2.5rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #374151;
+    }
+  }
+
+  .createAccountButton {
+    padding: 0.5rem 1rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+  }
+
+  .formact {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 2rem 2.5rem 1.5rem;
+
+    h2 {
+      font-family: "Inter", sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-align: center;
+      color: #1f2937;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      font-family: Roboto, sans-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      text-align: center;
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .googleButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    margin: 0 2.5rem 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: #d1d5db;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .googleIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .separator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 2.5rem 1.5rem;
+  }
+
+  .separatorLine {
+    flex: 1;
+    height: 1px;
+    background-color: #e5e7eb;
+  }
+
+  .separatorText {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .form {
+    width: 100%;
+    padding: 0 2.5rem 2.5rem;
+  }
+
+  .inputFull {
+    width: 100%;
+    margin-bottom: 1rem;
+
+    :global(.parent) {
+      width: 100%;
+    }
+
+    :global(input) {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+    }
+
+    :global(label) {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .passwordWrapper {
+    position: relative;
+    width: 100%;
+
+    :global(.parent) {
+      width: 100%;
+    }
+
+    :global(input) {
+      padding-right: 2.75rem !important;
+    }
+  }
+
+  .eyeButton {
+    position: absolute;
+    right: 0.75rem;
+    top: calc(50% + 0.35rem);
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    z-index: 10;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      color: #374151;
+    }
+  }
+
+  .submitButton {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    margin-top: 0px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #333333;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  }
+
+  .registerLink {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .btnDe {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 1rem;
+
+    &.error {
+      background: red;
+      color: white;
+    }
+
+    &.success {
+      background: green;
+      color: white;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .formHeader {
+      padding: 1rem 1rem;
+      gap: 0.5rem;
+    }
+
+    .backButton {
+      font-size: 0.8rem;
+      gap: 0.35rem;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .form {
+      width: 100%;
+      padding: 0;
+    }
+
+    .googleButton {
+      margin: 5px;
+      padding: 11px;
+    }
+
+    .forminfo {
+      padding: 21px;
+    }
+
+    .formact {
+      padding: 0;
+    }
+
+    .separator {
+      margin: 0;
+    }
+
+    .createAccountButton {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.78rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+  }
+}
