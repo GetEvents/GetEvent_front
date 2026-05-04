@@ -1,0 +1,49 @@
+.footerParent {
+  display: flex;
+  background-image: url("/BOTTOM.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 100%;
+  z-index: 2;
+
+  position: sticky;
+  bottom: 0;
+
+  .footer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    .sous_footer {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 1rem;
+      color: black;
+
+      a {
+        text-decoration: none;
+        color: black;
+      }
+
+      .sous_footer_pol {
+        width: 40%;
+        display: flex;
+        justify-content: space-around;
+        color: black;
+
+        .sous_footer_a {
+          text-decoration: underline !important;
+        }
+      }
+    }
+
+    .sous_footer_reseau {
+      width: 21%;
+      display: flex;
+      justify-content: space-around;
+      gap: 25px;
+      padding: 1rem 0 1rem 0;
+    }
+  }
+}

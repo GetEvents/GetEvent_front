@@ -1,0 +1,56 @@
+.modifomulair {
+  // background-color:red;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  .creatfomulair {
+    width: 100%;
+    padding: 2rem;
+  }
+
+  form {
+    width: 100%;
+  }
+
+  .profil {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+
+    .avatar {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 9999px;
+      overflow: hidden;
+      border: 3px solid #e2e8f0;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      background: #f8fafc;
+    }
+
+    .avatarImage {
+      object-fit: cover;
+    }
+
+    .infouser {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      gap: 4px;
+
+      .infousername {
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .infousermail {
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

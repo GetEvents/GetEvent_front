@@ -1,0 +1,312 @@
+/* VARIABLES & TOKENS */
+$primary: #0b5ed7;
+$bg-primary: #f8fafc;
+$bg-active: #eef2ff;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+
+/* BASE SIDEBAR */
+.sidebar {
+  width: 15rem;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-right: 1px solid $border-color;
+  box-shadow: 2px 0 20px rgba(15, 23, 42, 0.03);
+  // transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 1005;
+  overflow: hidden;
+
+  &.collapsed {
+    width: 4.5rem;
+
+    .logoText,
+    .navText,
+    .profileDetails {
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      overflow: hidden;
+      margin-left: 0;
+    }
+
+    .logoWrapper {
+      justify-content: center;
+    }
+    .toggleBtn {
+      margin: 0 auto;
+    }
+    .sidebarHeader {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem 0;
+    }
+
+    .profileBox {
+      padding: 0;
+      justify-content: center;
+      background: transparent;
+      border: none;
+    }
+
+    .logoutBtn {
+      padding: 0.75rem;
+      justify-content: center;
+      background: transparent;
+      color: $text-muted;
+      border: 1px solid $border-color;
+      &:hover {
+        background: #fef2f2;
+        color: #dc3545;
+        border-color: #fca5a5;
+      }
+    }
+  }
+}
+
+/* HEADER: LOGO & TOGGLE */
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  margin-bottom: 1rem;
+  // transition: all 0.3s ease;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  // transition: opacity 0.2s ease;
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  // transition: all 0.2s;
+
+  &:hover {
+    color: $primary;
+    background: $bg-active;
+  }
+}
+
+/* NAVIGATION */
+.sidebarNav {
+  flex: 1;
+  padding: 0 0.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: $text-muted;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  .navIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    flex-shrink: 0;
+  }
+
+  .navText {
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover {
+    background-color: $bg-primary;
+    color: $text-main;
+  }
+
+  &.active {
+    background-color: $bg-active;
+    color: $primary;
+
+    .navText {
+      font-weight: 600;
+    }
+  }
+}
+
+/* FOOTER */
+.sidebarFooter {
+  padding: 1rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profileBox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: $bg-primary;
+  border-radius: 10px;
+  border: 1px solid $border-color;
+  transition: all 0.3s ease;
+
+  .avatarPlaceholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $text-main, #334155);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .profileDetails {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+
+    .profileName {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: $text-main;
+      line-height: 1.1;
+      margin-bottom: 0.15rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+
+    .profileEmail {
+      font-size: 0.75rem;
+      color: $text-muted;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
+    }
+  }
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: transparent;
+  color: $text-muted;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+
+  .navText {
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: #fef2f2;
+    color: #dc3545;
+  }
+}
+
+/* MOBILE RESPONSIVE BOTTOM BAR */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    border-right: none;
+    border-top: 1px solid $border-color;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    z-index: 10005;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+
+    .sidebarHeader,
+    .sidebarFooter {
+      display: none !important;
+    }
+
+    .sidebarNav {
+      padding: 0;
+      overflow: visible;
+      width: 100%;
+
+      ul {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+      }
+    }
+
+    .navItem {
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.5rem;
+
+      .navIcon {
+        width: 24px;
+      }
+
+      .navText {
+        font-size: 0.7rem;
+      }
+    }
+  }
+}
