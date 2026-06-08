@@ -1,6 +1,6 @@
 import "./globals.css";
 import React from "react";
-import Providers from "./providers";
+import AuthProvider from "@/constext/AuthProvider";
 
 export default function RootLayout({
   children,
@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-full flex flex-col">
-        <Providers> {children} </Providers>
+        <AuthProvider> {children} </AuthProvider>
       </body>
     </html>
   );

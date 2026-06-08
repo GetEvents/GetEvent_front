@@ -88,3 +88,17 @@ export interface UsersApiResponse {
   message: string;
   data: User[];
 }
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error?: string | null;
+}
+
+export interface AuthContextType extends AuthState {
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setToken: React.Dispatch<React.SetStateAction<string | null>>;
+  logout: () => void;
+}
