@@ -8,7 +8,7 @@ import {
   getAllEvent,
   getEventByUser,
 } from "@/actions/event/index";
-import { getUser } from "@/actions/auth/index";
+import { getUser } from "@/actions/auth/authAction";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 const initialState = {

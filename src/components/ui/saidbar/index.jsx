@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import styles from "./style.module.scss";
-import { getUser, logout } from "@/actions/auth";
+import { getUser, logout } from "@/actions/auth/authAction";
 import { initMenuToggle } from "@/../utils/menu";
 import { useEffect, useState, React } from "react";
 import { usePathname, useRouter } from "next/navigation";

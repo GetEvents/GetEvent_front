@@ -13,7 +13,7 @@ import {
   deleteNotification,
   markAllNotificationsAsRead,
 } from "@/actions/notification";
-import { getUser } from "@/actions/auth";
+import { getUser } from "@/actions/auth/authAction";
 
 export default function NotificationModal({
   isOpen,

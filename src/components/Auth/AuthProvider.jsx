@@ -1,6 +1,6 @@
 "use client";
 
-import { getUser } from "@/actions/auth/index";
+import { getUser } from "@/actions/auth/authAction";
 import {
   createContext,
   useCallback,

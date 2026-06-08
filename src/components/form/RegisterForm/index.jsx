@@ -1,7 +1,7 @@
 "use client";
 import Input from "../../Input/input";
 import Button from "../../Button/index";
-import { editProfil, getUser, register } from "@/actions/auth";
+import { editProfil, getUser, register } from "@/actions/auth/authAction";
 import { useActionState, useEffect, useState, React } from "react";
 import style from "./style.module.scss";
 import Link from "next/link";

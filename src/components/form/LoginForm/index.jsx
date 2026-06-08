@@ -1,6 +1,6 @@
 "use client";
 import Input from "../../Input/input";
-import { login } from "@/actions/auth";
+import { login } from "@/actions/auth/authAction";
 import { useActionState, useEffect, React } from "react";
 import style from "./style.module.scss";
 import Link from "next/link";
