@@ -182,6 +182,18 @@ export const auth = {
     return result;
   },
 
+  refresh: async (refreshToken: string) => {
+    return apiRequest<AuthApiResponse>("POST", "/auth/refresh", {
+      body: { refreshToken },
+    });
+  },
+
+  logout: async (refreshToken: string) => {
+    return apiRequest("POST", "/auth/logout", {
+      body: { refreshToken },
+    });
+  },
+
   /**
    * Vérifier l'email
    */
@@ -293,12 +305,6 @@ export const auth = {
   /**
    * Se déconnecter
    */
-  logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
-    return { success: true };
-  },
 };
 
 // =====================================================

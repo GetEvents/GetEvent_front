@@ -75,6 +75,7 @@ export type GetAllUsersResponse =
 
 export interface AuthApiResponse {
   token: string;
+  refreshToken: string;
   message: string;
 }
 

@@ -31,13 +31,24 @@ const isImageFile = (value: FormDataEntryValue | null): value is File => {
   return ["image/jpeg", "image/png"].includes(value.type);
 };
 
-const setAuthCookie = async (token: string): Promise<void> => {
+const setAuthCookies = async (
+  token: string,
+  refreshToken: string,
+): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.set("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    maxAge: 15 * 60,
+  });
+  cookieStore.set("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 30 * 24 * 60 * 60,
   });
 };
 
@@ -95,7 +106,7 @@ export async function register(
     const response = await auth.register(sendData);
 
     if (response.success) {
-      await setAuthCookie(response.data.token);
+      await setAuthCookies(response.data.token, response.data.refreshToken);
 
       return {
         error: false,
@@ -144,7 +155,7 @@ export async function login(
       };
     }
 
-    await setAuthCookie(res.data.token);
+    await setAuthCookies(res.data.token, res.data.refreshToken);
     return {
       error: false,
       message: res.data.message,
@@ -363,16 +374,57 @@ export async function getAllUser(): Promise<GetAllUsersResponse | null> {
 
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken")?.value;
+
+  if (refreshToken) {
+    await auth.logout(refreshToken);
+  }
 
   cookieStore.delete("token");
+  cookieStore.delete("refreshToken");
 
   redirect("/auth/login");
+}
+
+export async function refreshAccessToken(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken")?.value;
+
+  if (!refreshToken) {
+    return null;
+  }
+
+  const response = await auth.refresh(refreshToken);
+
+  if (!response.success) {
+    cookieStore.delete("token");
+    cookieStore.delete("refreshToken");
+    return null;
+  }
+
+  await setAuthCookies(response.data.token, response.data.refreshToken);
+  return response.data.token;
 }
 
 export async function getTokenFromCookie(): Promise<string | undefined> {
   const cookieStore = await cookies();
   return cookieStore.get("token")?.value;
 }
-export async function setTokenInCookie(token: string): Promise<void> {
-  await setAuthCookie(token);
+export async function setTokenInCookie(
+  token: string,
+  refreshToken?: string,
+): Promise<void> {
+  if (refreshToken) {
+    await setAuthCookies(token, refreshToken);
+    return;
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 15 * 60,
+  });
 }
