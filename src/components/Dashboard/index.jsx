@@ -8,7 +8,7 @@ import Chart from "chart.js/auto";
 import { getEventByUser } from "@/actions/event";
 
 import { getParticipantByEventId } from "@/actions/participant";
-import Loading from "../Loading";
+import Loading from "@/components/ui/Loading";
 
 // --- STYLES/ICONS ---
 const ICONS = {
@@ -121,7 +121,7 @@ const COLORS = ["#0b5ed7", "#17a2b8", "#28a745", "#ffc107", "#dc3545"];
 // ==========================================
 // COMPOSANT PRINCIPAL
 // ==========================================
-export default function Dashboard({ count }) {
+export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const chartRefBar = useRef(null);
@@ -152,13 +152,8 @@ export default function Dashboard({ count }) {
     try {
       const eventsRes = await getEventByUser();
       // On s'assure que c'est bien la liste (selon l'API)
-      const list = eventsRes?.events || [];
+      const list = Array.isArray(eventsRes) ? eventsRes : [];
       setEventsList(list);
-
-      // Met à jour le compteur global du parent si la prop existe
-      if (typeof count === "function") {
-        count(list.length);
-      }
 
       // Calcul des KPIs
       let tEvents = list.length;
@@ -265,7 +260,7 @@ export default function Dashboard({ count }) {
     } finally {
       setLoading(false);
     }
-  }, [count]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();

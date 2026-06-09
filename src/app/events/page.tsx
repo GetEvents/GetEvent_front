@@ -1,16 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
-import { getAllEvent } from "@/actions/event";
-import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
 import { fetchGetNotifications } from "@/actions/notification";
+import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
 import type { Event, EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
+import { useEvents, fetchEvents } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
 import { loadGoogleMapsScript } from "@/utils/loadGoogleMap";
 import style from "./style.module.scss";
@@ -41,7 +41,7 @@ interface Feedback {
 
 export default function Welcome() {
   const { user, setUser, setToken, isAuthenticated } = useAuth();
-  const [eventList, setEventList] = useState<Event[]>([]);
+  const [extraEvents, setExtraEvents] = useState<Event[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,22 +50,38 @@ export default function Welcome() {
     useState<EventFilters["filter"]>("recent");
   const [location, setLocation] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [queryParams, setQueryParams] = useState<EventFilters>({
+    page: 1,
+    category: "all",
+    filter: "recent",
+    location: "",
+  });
 
-  const loadInitialData = useCallback(async () => {
-    setLoading(true);
+  const {
+    data: queryEvents = [],
+    isFetching,
+    isLoading,
+    error,
+  } = useEvents(queryParams);
 
-    try {
-      const [eventsResponse, userResponse, token] = await Promise.all([
-        getAllEvent({ page: 1 }),
+  const eventList = useMemo(
+    () => [...queryEvents, ...extraEvents],
+    [queryEvents, extraEvents],
+  );
+
+  const effectiveFeedback =
+    feedback || (error ? { error: true, message: error.message } : null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const [userResponse, token] = await Promise.all([
         getUser(),
         getTokenFromCookie(),
       ]);
 
-      setEventList(eventsResponse.events);
       setUser(userResponse?.user || null);
       setToken(token || null);
 
@@ -78,26 +94,13 @@ export default function Welcome() {
           ).length,
         );
       }
+    };
 
-      if (eventsResponse.error) {
-        setFeedback({ error: true, message: eventsResponse.error });
-      }
-    } catch {
-      setFeedback({
-        error: true,
-        message: "Impossible de charger les événements.",
-      });
-    } finally {
-      setLoading(false);
-    }
+    void loadUser();
   }, [setToken, setUser]);
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      void loadInitialData();
-    }, 0);
-    return () => window.clearTimeout(timeout);
-  }, [loadInitialData]);
+  const isSearching = isFetching || isLoadingMore;
+  const loading = isLoading && !isLoadingMore;
 
   useEffect(() => {
     loadGoogleMapsScript(() => {
@@ -114,50 +117,43 @@ export default function Welcome() {
     });
   }, []);
 
-  const searchEvents = async (options: SearchOptions = {}) => {
+  const searchEvents = (options: SearchOptions = {}) => {
     const category = options.category ?? activeFilter;
     const filter = options.filter ?? sortFilter;
 
-    setIsSearching(true);
     setFeedback(null);
-
-    try {
-      const response = await getAllEvent({
-        search: searchQuery,
-        category,
-        location,
-        filter,
-      });
-      setEventList(response.events);
-      setCurrentPage(1);
-
-      if (response.error) {
-        setFeedback({ error: true, message: response.error });
-      }
-    } catch {
-      setEventList([]);
-      setFeedback({
-        error: true,
-        message: "La recherche n'a pas pu être effectuée.",
-      });
-    } finally {
-      setIsSearching(false);
-    }
+    setCurrentPage(1);
+    setQueryParams({
+      page: 1,
+      search: searchQuery,
+      category,
+      filter,
+      location,
+    });
   };
 
   const handleLoadMore = async () => {
-    setIsSearching(true);
+    setIsLoadingMore(true);
+
     try {
-      const response = await getAllEvent({
+      const response = await fetchEvents({
         page: Math.ceil(eventList.length / 10) + 1,
         search: searchQuery,
         category: activeFilter,
         location,
         filter: sortFilter,
       });
-      setEventList((previous) => [...previous, ...response.events]);
+      setExtraEvents((previous) => [...previous, ...response]);
+    } catch (error) {
+      setFeedback({
+        error: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Impossible de charger plus d'événements.",
+      });
     } finally {
-      setIsSearching(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -326,12 +322,12 @@ export default function Welcome() {
           </div>
 
           <EventCard
-            message={feedback}
+            message={effectiveFeedback}
             eventList={visibleEvents}
             loading={loading}
             current_user={user}
-            state={feedback}
-            show={Boolean(feedback)}
+            state={effectiveFeedback}
+            show={Boolean(effectiveFeedback)}
             handleClose={() => setFeedback(null)}
           />
 
