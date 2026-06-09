@@ -159,6 +159,83 @@ export async function login(
   }
 }
 
+export async function forgotPassword(
+  _state: ServerActionState,
+  formData: FormData,
+): Promise<ActionResponse> {
+  const email = getFormString(formData, "email");
+
+  if (!email) {
+    return {
+      error: true,
+      message: "Veuillez saisir votre adresse e-mail.",
+    };
+  }
+
+  const response = await auth.forgotPassword(email);
+
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error,
+    };
+  }
+
+  return {
+    error: false,
+    message:
+      (response.data as { message?: string }).message ||
+      "Un e-mail de réinitialisation vous a été envoyé.",
+  };
+}
+
+export async function resetPassword(
+  _state: ServerActionState,
+  formData: FormData,
+): Promise<ActionResponse> {
+  const token = getFormString(formData, "token");
+  const password = getFormString(formData, "password");
+  const passwordConfirmation = getFormString(formData, "passwordConfirmation");
+
+  if (!token) {
+    return {
+      error: true,
+      message: "Le lien de réinitialisation est invalide ou incomplet.",
+    };
+  }
+
+  if (password.length < 8) {
+    return {
+      error: true,
+      message: "Le mot de passe doit contenir au moins 8 caractères.",
+    };
+  }
+
+  if (password !== passwordConfirmation) {
+    return {
+      error: true,
+      message: "Les mots de passe ne correspondent pas.",
+    };
+  }
+
+  const response = await auth.resetPassword(password, token);
+
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error,
+    };
+  }
+
+  return {
+    error: false,
+    message:
+      (response.data as { message?: string }).message ||
+      "Votre mot de passe a été modifié.",
+    redirect: "/auth/login",
+  };
+}
+
 export async function editProfil(
   _state: ServerActionState,
   formData: FormData,

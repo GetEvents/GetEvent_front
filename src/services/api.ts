@@ -205,10 +205,10 @@ export const auth = {
    * Réinitialiser le mot de passe
    * @param {Object} params - { email, newPassword, token }
    */
-  resetPassword: async (email: string, newPassword: string, token: string) => {
+  resetPassword: async (password: string, token: string) => {
     return apiRequest("PATCH", "/auth/password/reset", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: { email, newPassword, token: token },
+      body: { password },
     });
   },
 

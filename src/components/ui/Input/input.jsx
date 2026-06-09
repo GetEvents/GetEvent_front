@@ -13,6 +13,7 @@ export default function Input({
   options = [],
   disabled,
   defaultValue,
+  ...inputProps
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,6 +41,7 @@ export default function Input({
 
         {type === "select" ? (
           <select
+            {...inputProps}
             name={name}
             id={id}
             className="form-control"
@@ -57,6 +59,7 @@ export default function Input({
           </select>
         ) : type === "textarea" ? (
           <textarea
+            {...inputProps}
             className="form-control"
             name={name}
             id={id}
@@ -68,6 +71,7 @@ export default function Input({
         ) : (
           <div className={isPasswordField ? style.passwordField : undefined}>
             <input
+              {...inputProps}
               type={inputType}
               className="form-control"
               name={name}
@@ -77,6 +81,7 @@ export default function Input({
               required={required}
               onChange={handleInputChange}
               value={type === "file" ? undefined : value}
+              defaultValue={defaultValue}
               accept={type === "file" ? "image/*" : undefined}
             />
 
