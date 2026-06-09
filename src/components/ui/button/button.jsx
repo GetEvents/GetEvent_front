@@ -1,4 +1,4 @@
-const Index = ({ type, label, className, onClick, disabled }) => {
+const ButtonComponent = ({ type, label, className, onClick, disabled }) => {
   return (
     <input
       type={type}
@@ -10,4 +10,4 @@ const Index = ({ type, label, className, onClick, disabled }) => {
   );
 };
 
-export default Index;
+export default ButtonComponent;
