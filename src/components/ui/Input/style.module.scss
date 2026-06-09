@@ -1,4 +1,4 @@
-/* Input Component Styles - Modern Design */
+﻿/* Input Component Styles - Modern Design */
 .parent {
   display: flex;
   flex-direction: column;
@@ -6,9 +6,9 @@
   width: 100%;
 
   label {
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
+    font-weight: var(--app-font-weight-semibold);
+    color: var(--app-color-text);
+    margin-bottom: var(--app-space-2);
     display: block;
     font-size: 0.9rem;
     letter-spacing: 0.3px;
@@ -17,35 +17,35 @@
   input {
     width: 100%;
     padding: 0.9rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
+    border: 2px solid var(--app-color-border);
+    border-radius: var(--app-radius-md);
     font-size: 0.95rem;
-    color: #1e293b;
-    background: white;
-    transition: all 0.3s ease;
-    font-family: inherit;
+    color: var(--app-color-text);
+    background: var(--app-color-white);
+    transition: all var(--app-transition-base);
+    font-family: var(--app-font-family-sans);
     margin-top: 0.35rem;
     margin-bottom: 0.75rem;
 
     &::placeholder {
-      color: #94a3b8;
+      color: var(--app-color-placeholder);
     }
 
     &:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      background: #f8fafc;
+      border-color: var(--app-color-primary);
+      box-shadow: var(--app-shadow-focus);
+      background: var(--app-color-surface);
     }
 
     &:hover:not(:disabled) {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: var(--app-color-border-hover);
+      background: var(--app-color-surface);
     }
 
     &:disabled {
-      background: #f1f5f9;
-      color: #94a3b8;
+      background: var(--app-color-surface-muted);
+      color: var(--app-color-placeholder);
       cursor: not-allowed;
     }
 
@@ -60,14 +60,14 @@
   select {
     width: 100%;
     padding: 0.9rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
+    border: 2px solid var(--app-color-border);
+    border-radius: var(--app-radius-md);
     font-size: 0.95rem;
-    color: #1e293b;
-    background: white;
+    color: var(--app-color-text);
+    background: var(--app-color-white);
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: inherit;
+    font-family: var(--app-font-family-sans);
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -83,25 +83,25 @@
 
     &:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      background: #f8fafc;
+      border-color: var(--app-color-primary);
+      box-shadow: var(--app-shadow-focus);
+      background: var(--app-color-surface);
     }
 
     &:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: var(--app-color-border-hover);
+      background: var(--app-color-surface);
     }
 
     &:disabled {
-      background: #f1f5f9;
-      color: #94a3b8;
+      background: var(--app-color-surface-muted);
+      color: var(--app-color-placeholder);
       cursor: not-allowed;
     }
 
     option {
-      color: #1e293b;
-      background: white;
+      color: var(--app-color-text);
+      background: var(--app-color-white);
       padding: 0.5rem;
       line-height: 1.5;
     }
@@ -110,52 +110,60 @@
   textarea {
     width: 100%;
     padding: 0.9rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
+    border: 2px solid var(--app-color-border);
+    border-radius: var(--app-radius-md);
     font-size: 0.95rem;
-    color: #1e293b;
-    background: white;
+    color: var(--app-color-text);
+    background: var(--app-color-white);
     transition: all 0.3s ease;
-    font-family: inherit;
+    font-family: var(--app-font-family-sans);
     resize: vertical;
     min-height: 100px;
     margin-top: 0.35rem;
     margin-bottom: 0.75rem;
 
     &::placeholder {
-      color: #94a3b8;
+      color: var(--app-color-placeholder);
     }
 
     &:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      background: #f8fafc;
+      border-color: var(--app-color-primary);
+      box-shadow: var(--app-shadow-focus);
+      background: var(--app-color-surface);
     }
 
     &:hover:not(:disabled) {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: var(--app-color-border-hover);
+      background: var(--app-color-surface);
     }
   }
 
   input[type="submit"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
+    background: linear-gradient(
+      135deg,
+      var(--app-color-primary) 0%,
+      var(--app-color-primary-hover) 100%
+    );
+    color: var(--app-color-white);
     cursor: pointer;
     border: none;
     font-weight: 600;
     padding: 0.9rem 1.5rem;
     transition: all 0.3s ease;
     width: auto;
-    border-radius: 10px;
+    border-radius: var(--app-radius-md);
     font-size: 0.95rem;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      background: linear-gradient(
+        135deg,
+        var(--app-color-primary-hover) 0%,
+        var(--app-color-primary-active) 100%
+      );
     }
 
     &:active:not(:disabled) {

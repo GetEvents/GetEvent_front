@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Chart from "chart.js/auto";
@@ -147,7 +147,7 @@ export default function Dashboard({ count }) {
     participantsCounts: [],
   });
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     try {
       const eventsRes = await getEventByUser();
@@ -265,87 +265,89 @@ export default function Dashboard({ count }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [count]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, [count]);
+  }, [fetchDashboardData]);
+
+  useEffect(() => {
+    if (activeTab !== "overview") return;
+
+    if (
+      !chartRefBar.current ||
+      !chartRefDoughnut.current ||
+      chartData.labels.length === 0
+    )
+      return;
+
+    const ctxBar = chartRefBar.current.getContext("2d");
+    const ctxPie = chartRefDoughnut.current.getContext("2d");
+
+    const barChart = new Chart(ctxBar, {
+      type: "bar",
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: "Revenus par événement (€)",
+            data: chartData.revenues,
+            backgroundColor: "rgba(11, 94, 215, 0.6)",
+            borderColor: "rgb(11, 94, 215)",
+            borderWidth: 1,
+            borderRadius: 8,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: "#1a1a2e" },
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: "#f1f3f5" } },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+
+    const pieChart = new Chart(ctxPie, {
+      type: "doughnut",
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: "Nombre de participants",
+            data: chartData.participantsCounts,
+            backgroundColor: COLORS,
+            borderWidth: 2,
+            borderColor: "#ffffff",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { boxWidth: 12, padding: 15 },
+          },
+          tooltip: { backgroundColor: "#1a1a2e" },
+        },
+        cutout: "70%",
+      },
+    });
+
+    return () => {
+      barChart.destroy();
+      pieChart.destroy();
+    };
+  }, [activeTab, chartData]);
 
   const OverviewSection = () => {
-    useEffect(() => {
-      if (
-        !chartRefBar.current ||
-        !chartRefDoughnut.current ||
-        chartData.labels.length === 0
-      )
-        return;
-
-      const ctxBar = chartRefBar.current.getContext("2d");
-      const ctxPie = chartRefDoughnut.current.getContext("2d");
-
-      const barChart = new Chart(ctxBar, {
-        type: "bar",
-        data: {
-          labels: chartData.labels,
-          datasets: [
-            {
-              label: "Revenus par événement (€)",
-              data: chartData.revenues,
-              backgroundColor: "rgba(11, 94, 215, 0.6)",
-              borderColor: "rgb(11, 94, 215)",
-              borderWidth: 1,
-              borderRadius: 8,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { backgroundColor: "#1a1a2e" },
-          },
-          scales: {
-            y: { beginAtZero: true, grid: { color: "#f1f3f5" } },
-            x: { grid: { display: false } },
-          },
-        },
-      });
-
-      const pieChart = new Chart(ctxPie, {
-        type: "doughnut",
-        data: {
-          labels: chartData.labels,
-          datasets: [
-            {
-              label: "Nombre de participants",
-              data: chartData.participantsCounts,
-              backgroundColor: COLORS,
-              borderWidth: 2,
-              borderColor: "#ffffff",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { boxWidth: 12, padding: 15 },
-            },
-            tooltip: { backgroundColor: "#1a1a2e" },
-          },
-          cutout: "70%",
-        },
-      });
-
-      return () => {
-        barChart.destroy();
-        pieChart.destroy();
-      };
-    }, [chartData]);
-
     return (
       <>
         <div className={styles.kpi_grid}>
@@ -459,7 +461,7 @@ export default function Dashboard({ count }) {
           <table className={styles.modern_table}>
             <thead>
               <tr>
-                <th>Titre de l'événement</th>
+                <th>Titre de l&apos;événement</th>
                 <th>Date & Lieu</th>
                 <th>Capacité</th>
                 <th>Statut</th>
@@ -657,7 +659,7 @@ export default function Dashboard({ count }) {
     <div className={styles.dashboard_container}>
       <div className={styles.dashboard_header}>
         <h1>Dashboard Organisateur</h1>
-        <p>Suivez l'activité de vos événements en un coup d'œil.</p>
+        <p>Suivez l&apos;activité de vos événements en un coup d&apos;œil.</p>
       </div>
 
       <div className={styles.tabs_nav}>
@@ -665,7 +667,7 @@ export default function Dashboard({ count }) {
           className={`${styles.tab_btn} ${activeTab === "overview" ? styles.active : ""}`}
           onClick={() => setActiveTab("overview")}
         >
-          Vue d'ensemble
+          Vue d&apos;ensemble
         </button>
         <button
           className={`${styles.tab_btn} ${activeTab === "participants" ? styles.active : ""}`}

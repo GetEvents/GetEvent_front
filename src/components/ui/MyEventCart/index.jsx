@@ -1,47 +1,24 @@
-'use client";';
+"use client";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, React } from "react";
-import {
-  delectEvent,
-  getAllEvent,
-  getEventByUser,
-} from "@/actions/event/index";
-import { getUser } from "@/actions/auth/index";
-import { useActionState } from "react";
-import { useRouter } from "next/navigation";
-const initialState = {
-  message: "loliol",
-};
-import Notification from "../popUp/index";
+import { delectEvent, getEventByUser } from "@/actions/event/index";
+import { getUser } from "@/actions/auth/authAction";
 import Loading from "../Loading";
 import DelectModal from "../DelectModal";
 
 export default function EventCard({ count }) {
-  const router = useRouter();
-  const [state, formAction, pending] = useActionState(
-    getAllEvent,
-    initialState,
-  );
   const [eventList, setEventList] = useState([]);
   const [currentUser, setCurrentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState(null);
-  const [show, setShow] = useState(false);
-  const [error, setError] = useState(null); // ← Ajoutez ceci
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentTime] = useState(Date.now);
 
   useEffect(() => {
     console.log("useEffect déclenché"); // ← Vérifiez que c'est affiché
-
-    if (state?.message && state?.redirect) {
-      window.location.href = state.redirect;
-    }
-
-    setLoading(true);
 
     getEventByUser()
       .then((response) => {
@@ -53,7 +30,6 @@ export default function EventCard({ count }) {
       })
       .catch((error) => {
         console.error("Error fetching event data:", error);
-        setError("Failed to fetch event data");
       })
       .finally(() => {
         setLoading(false);
@@ -66,12 +42,8 @@ export default function EventCard({ count }) {
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
-        setError("Failed to fetch user data");
       });
-  }, []);
-  const handleClose = () => {
-    setShow(false);
-  };
+  }, [count]);
 
   const openDeleteModal = (event) => {
     setEventToDelete(event);
@@ -111,7 +83,7 @@ export default function EventCard({ count }) {
       endDateTime.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
     }
 
-    return endDateTime.getTime() < Date.now();
+    return endDateTime.getTime() < currentTime;
   };
 
   var current_user = currentUser;
@@ -148,30 +120,6 @@ export default function EventCard({ count }) {
 
   return (
     <div className={styles.event_schow}>
-      {message?.message && show && (
-        <div
-          className={`${styles.btnDe} ${state?.error ? styles.error : styles.success}`}
-        >
-          {state?.message && show && (
-            <Notification
-              message={state.message}
-              type={state.error ? "error" : "success"}
-              visible={show}
-            />
-          )}
-          {state?.message && show && (
-            <button
-              type="button"
-              className="btn-close"
-              aria-label="Close"
-              onClick={handleClose}
-            >
-              X
-            </button>
-          )}
-        </div>
-      )}
-
       {loading ? (
         <Loading message="Chargement de l'événement..." />
       ) : eventList != null && eventList.length > 0 ? (

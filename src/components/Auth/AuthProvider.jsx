@@ -1,6 +1,6 @@
 "use client";
 
-import { getUser } from "@/actions/auth/index";
+import { getUser } from "@/actions/auth/authAction";
 import {
   createContext,
   useCallback,
@@ -23,7 +23,7 @@ export function AuthProvider({ children, initialUser = null }) {
       const user = response?.user || null;
       setCurrentUser(user);
       return user;
-    } catch (error) {
+    } catch {
       setCurrentUser(null);
       return null;
     } finally {

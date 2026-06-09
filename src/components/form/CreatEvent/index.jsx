@@ -3,12 +3,12 @@
 import Button from "@/component/Button";
 import style from "./style.module.scss";
 import Input from "@/component/Input/input";
-import { useActionState, useEffect, useState, React } from "react";
+import { useActionState, useEffect, useRef, useState, React } from "react";
 import { addEvent, getEventById, editeEvent } from "@/actions/event/index";
 import { initMapAuto } from "../../../../utils/autocomplet";
 import { loadGoogleMapsScript } from "../../../../utils/loadGoogleMap";
 import { useRouter } from "next/navigation";
-import { useNotification } from "@/component/Notification/NotificationProvider";
+import { useNotification } from "@/components/Notification/NotificationProvider";
 const initialState = {
   message: "",
 };
@@ -21,6 +21,7 @@ const CreatEvent = ({ id }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [eventImage, setEventImage] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const imagePreviewUrlRef = useRef(null);
   const [event, setEvent] = useState(null);
   const { notify } = useNotification();
   const [form, setForm] = useState({
@@ -55,16 +56,24 @@ const CreatEvent = ({ id }) => {
     const [hour = "00", minute = "00"] = timeString.split(":");
     return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
   };
-  // Effect pour gérer l'URL de l'image
-  useEffect(() => {
-    if (eventImage && typeof window !== "undefined") {
-      const url = URL.createObjectURL(eventImage);
-      setImagePreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setImagePreviewUrl(null);
+  const handleEventImageChange = (file) => {
+    if (imagePreviewUrlRef.current) {
+      URL.revokeObjectURL(imagePreviewUrlRef.current);
     }
-  }, [eventImage]);
+
+    const nextPreviewUrl = file ? URL.createObjectURL(file) : null;
+    imagePreviewUrlRef.current = nextPreviewUrl;
+    setEventImage(file || null);
+    setImagePreviewUrl(nextPreviewUrl);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrlRef.current) {
+        URL.revokeObjectURL(imagePreviewUrlRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     console.log("lkl");
@@ -278,7 +287,7 @@ const CreatEvent = ({ id }) => {
                 <div className="mb-3">
                   <div className={style.descriptionHeader}>
                     <label htmlFor="description" className="form-label">
-                      Description de l'événement
+                      Description de l&apos;événement
                     </label>
                     <span className={style.charCount}>
                       {form.description.length}
@@ -346,7 +355,7 @@ const CreatEvent = ({ id }) => {
                     onDrop={(e) => {
                       e.preventDefault();
                       const file = e.dataTransfer.files[0];
-                      if (file) setEventImage(file);
+                      if (file) handleEventImageChange(file);
                     }}
                     style={{ cursor: "pointer", display: "block" }}
                   >
@@ -373,7 +382,7 @@ const CreatEvent = ({ id }) => {
                               document.getElementById("imageInput").click();
                             }}
                           >
-                            Changer l'image
+                            Changer l&apos;image
                           </button>
                         </div>
                       </div>
@@ -404,7 +413,9 @@ const CreatEvent = ({ id }) => {
                       type="file"
                       className={style.hiddenInput}
                       accept="image/*"
-                      onChange={(e) => setEventImage(e.target.files[0])}
+                      onChange={(e) =>
+                        handleEventImageChange(e.target.files[0])
+                      }
                     />
                   </label>
                 </div>
@@ -414,7 +425,7 @@ const CreatEvent = ({ id }) => {
             {/* ÉTAPE 2: LOGISTIQUE */}
             {currentStep === 2 && (
               <div>
-                <h3 className="mb-3">🗓️ Logistique de l'événement</h3>
+                <h3 className="mb-3">🗓️ Logistique de l&apos;événement</h3>
                 <p className="text-muted mb-4">
                   Définissez quand et où votre événement aura lieu
                 </p>
@@ -791,7 +802,9 @@ const CreatEvent = ({ id }) => {
                   <div className={style.recapInfoBlock}>
                     <div className={style.recapInfoHeader}>
                       <span className={style.recapInfoIcon}>🔓</span>
-                      <h6 className={style.recapInfoTitle}>Type d'accès</h6>
+                      <h6 className={style.recapInfoTitle}>
+                        Type d&apos;accès
+                      </h6>
                     </div>
                     <p className={style.recapAccessType}>Public</p>
                   </div>
