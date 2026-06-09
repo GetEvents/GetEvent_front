@@ -22,7 +22,7 @@ const LocationInput = ({
         onChange({ target: { name, value: place.formatted_address } });
       }
     });
-  }, []);
+  }, [name, onChange]);
 
   return (
     <div className="mb-3 pac_card">

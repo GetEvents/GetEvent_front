@@ -1,0 +1,122 @@
+.triangle {
+  background-image: url("/Rectangle.svg");
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 0;
+  width: 663px;
+  height: 89px;
+  //   opacity: 0px;
+  z-index: 0;
+  // border-bottom: 10px solid #f00; /* Change color as needed */
+}
+
+.circle_red {
+  background-image: url("/circle_red.svg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border: 43.83px 0px 0px 0px;
+  // opacity: 0px;
+  z-index: 0;
+}
+
+.circle_redii {
+  background-image: url("/circle_redii.svg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  position: absolute;
+  width: 365px;
+  height: 347px;
+  top: 1426px;
+  right: 0px;
+  z-index: 0;
+}
+
+.circle_green {
+  position: absolute;
+  z-index: 0;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 0, 0.18) 0%,
+    rgba(0, 255, 0, 0) 70%
+  );
+  border-radius: 50%;
+  width: 415px;
+  height: 415px;
+  top: 1318px;
+  right: 0;
+  opacity: 0.25px;
+}
+
+.loginIsTrue {
+  display: flex;
+  flex-direction: row;
+}
+
+:global(body.hide-sidebar) {
+  .containerSaideBar {
+    display: none;
+  }
+}
+
+/* Responsive: when sidebar is bottom on mobile */
+@media (max-width: 768px) {
+  .loginIsTrue {
+    flex-direction: column;
+    position: relative;
+  }
+
+  .containerSaideBar {
+    order: 2; /* Move sidebar to bottom */
+    width: 100%;
+  }
+
+  /* Add padding to prevent content from hiding behind fixed bottom sidebar */
+  :global(main),
+  :global(body) {
+    padding-bottom: 64px;
+  }
+}
+
+/* Tablet responsive adjustments */
+@media (768px < width <= 1024px) {
+  .loginIsTrue {
+    flex-direction: row;
+  }
+
+  .containerSaideBar {
+    width: auto;
+    order: auto;
+  }
+
+  /* Reduce decoration sizes on tablet */
+  .triangle {
+    width: 450px;
+    height: 60px;
+  }
+
+  .circle_red {
+    width: 280px;
+    height: 280px;
+  }
+
+  .circle_redii {
+    width: 280px;
+    height: 280px;
+  }
+
+  .circle_green {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* Medium tablet and up */
+@media (width > 1024px) {
+  .containerSaideBar {
+    order: auto;
+    width: auto;
+  }
+}

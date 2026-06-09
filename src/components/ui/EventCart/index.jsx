@@ -24,6 +24,7 @@ export default function EventCard({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentTime] = useState(Date.now);
 
   const isEventExpired = (event) => {
     if (!event?.endDate) return false;
@@ -37,7 +38,7 @@ export default function EventCard({
       endDateTime.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
     }
 
-    return endDateTime.getTime() < Date.now();
+    return endDateTime.getTime() < currentTime;
   };
 
   const formatDate = (dateString) => {
@@ -89,7 +90,6 @@ export default function EventCard({
       const response = await delectEvent(eventToDelete.id);
       console.log("response", response);
 
-      message = response.message;
       if (response.redirect) {
         console.log("redirect", response.redirect);
 

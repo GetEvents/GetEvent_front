@@ -1,10 +1,10 @@
 "use client";
-import Input from "../../Input/input";
-import { login } from "@/actions/auth/authAction";
+import Input from "@/components/ui/Input/input";
+import { login } from "@/actions/auth/authActions";
 import { useActionState, useEffect, React } from "react";
 import style from "./style.module.scss";
 import Link from "next/link";
-import { useNotification } from "@/component/Notification/NotificationProvider";
+import { useNotification } from "@/components/Notification/NotificationProvider";
 
 const initialState = {
   message: "",

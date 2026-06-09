@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { setTokenInCookie } from "@/actions/auth/authAction";
+import { setTokenInCookie } from "@/actions/auth/authActions";
 import ButtonComponent from "@/components/ui/button/button";
 import Loading from "@/components/ui/Loading";
 import styles from "./style.module.scss";

@@ -1,9 +1,10 @@
 import React from "react";
+import WelcomePage from "@/components/welcome";
 
 export default function Home() {
   return (
-    <div className="p-4">
-      <h1>Salut</h1>
-    </div>
+    <>
+      <WelcomePage />
+    </>
   );
 }

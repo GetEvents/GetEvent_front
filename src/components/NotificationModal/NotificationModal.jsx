@@ -25,15 +25,6 @@ export default function NotificationModal({
   const [notificationsData, setNotificationsData] = useState(
     notifications || [],
   );
-  const [userId, setUserId] = useState(null);
-
-  // ✅ Synchroniser avec les props quand elles changent
-  useEffect(() => {
-    if (notifications) {
-      setNotificationsData(notifications);
-    }
-  }, [notifications]);
-
   // ✅ Initialiser les sockets et écouter les mises à jour
   useEffect(() => {
     if (!isOpen) return;
@@ -49,7 +40,6 @@ export default function NotificationModal({
         const currentUserId = userResponse?.user?.id;
 
         if (currentUserId) {
-          setUserId(currentUserId);
           subscribeNotifications(currentUserId);
         }
         // Écouter les nouvelles notifications

@@ -38,7 +38,7 @@ function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.includes(pathname);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   console.log("🔍 [MIDDLEWARE] EXECUTED");
 
   try {
