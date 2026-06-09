@@ -1,12 +1,18 @@
 "use client";
 
-import Button from "@/component/Button";
 import style from "./style.module.scss";
-import Input from "@/component/Input/input";
-import { useActionState, useEffect, useRef, useState, React } from "react";
+import Button from "@/components/ui/button";
+import Input from "@/components/ui/Input/input";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { addEvent, getEventById, editeEvent } from "@/actions/event/index";
-import { initMapAuto } from "../../../../utils/autocomplet";
-import { loadGoogleMapsScript } from "../../../../utils/loadGoogleMap";
+import { initMapAuto } from "@/utils/autocomplet";
+import { loadGoogleMapsScript } from "@/utils/loadGoogleMap";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 const initialState = {
@@ -112,7 +118,7 @@ const CreatEvent = ({ id }) => {
           title: response.event?.title ?? "",
           category: response.event?.category ?? "",
           description: response.event?.description ?? "",
-          image: response.event?.image ?? null,
+          photo: response.event?.image ?? null,
           startDate: response.event?.startDate ?? "",
           startTime: response.event?.startTime ?? "",
           endDate: response.event?.endDate ?? "",
@@ -178,7 +184,7 @@ const CreatEvent = ({ id }) => {
           description: form.description,
           category: form.category,
           paymentPrice: form.paymentPrice,
-          image: imageBase64,
+          photo: imageBase64,
           imageName: eventImage.name,
           imageType: eventImage.type,
         };
@@ -204,9 +210,11 @@ const CreatEvent = ({ id }) => {
       formData.append("paymentPrice", form.paymentPrice);
     }
     if (event?.id) formData.append("id", event.id);
-    if (eventImage) formData.append("image", eventImage);
+    if (eventImage) formData.append("photo", eventImage);
 
-    formAction(formData);
+    startTransition(() => {
+      formAction(formData);
+    });
   };
   return (
     <div className={`${style.fullPageForm}`}>
@@ -412,7 +420,7 @@ const CreatEvent = ({ id }) => {
                       id="imageInput"
                       type="file"
                       className={style.hiddenInput}
-                      accept="image/*"
+                      accept="photo/*"
                       onChange={(e) =>
                         handleEventImageChange(e.target.files[0])
                       }

@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/ui/Footer/Bar_page";
@@ -77,7 +76,6 @@ export default async function RootLayout({
             <Footer currentUser={isLoggedIn} />
           </NotificationProvider>
         </AuthProvider>
-        <Script src="/js/anime.js" strategy="lazyOnload" />
       </body>
     </html>
   );

@@ -1,67 +1,70 @@
-var mess = document.querySelector("#message");
-var suc = document.querySelector("#succes");
+(function () {
+  "use strict";
 
-setTimeout(() => {
-  suc.style.display = "none";
-}, 10000);
+  function hideAfterDelay(selector, delay) {
+    var element = document.querySelector(selector);
+    if (!element) return;
 
-setTimeout(() => {
-  mess.style.display = "none";
-}, 10000);
+    window.setTimeout(function () {
+      element.style.display = "none";
+    }, delay);
+  }
 
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("BONJOUR");
+  function initializeDropdowns() {
+    document.querySelectorAll(".titre").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var currentDropdown = button.parentElement;
+        if (!currentDropdown) return;
 
-  let dropdownBtns = document.querySelectorAll(".dropdownp_btn");
-  let faqbnt = document.querySelectorAll(".titre");
-  console.log("les drop ", dropdownBtns);
-
-  (faqbnt.forEach(function (btnf) {
-    btnf.addEventListener("click", function () {
-      let parentDropdown = this.parentElement;
-      let faqaffiches = document.querySelectorAll(".sous-faq");
-      faqaffiches.forEach(function (faqaffiche) {
-        if (faqaffiche != parentDropdown) {
-          faqaffiche.classList.remove("open");
-        }
-      });
-      parentDropdown.classList.toggle("open");
-    });
-  }),
-    dropdownBtns.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        let parentDropdown = this.parentElement;
-        let dropdowns = document.querySelectorAll(".dropdownp");
-        let parentDropdownt = this.firstElementChild.lastElementChild;
-        let retote = document.querySelectorAll(".chevron");
-
-        // Fermer les autres dropdowns
-        dropdowns.forEach(function (dropdown) {
-          if (dropdown !== parentDropdown) {
+        document.querySelectorAll(".sous-faq").forEach(function (dropdown) {
+          if (dropdown !== currentDropdown) {
             dropdown.classList.remove("open");
           }
         });
-        retote.forEach(function (retotes) {
-          if (retotes !== parentDropdownt) {
-            retotes.classList.toggle("retateh");
+
+        currentDropdown.classList.toggle("open");
+      });
+    });
+
+    document.querySelectorAll(".dropdownp_btn").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var currentDropdown = button.parentElement;
+        var chevron = button.querySelector(".chevron");
+        if (!currentDropdown) return;
+
+        document.querySelectorAll(".dropdownp").forEach(function (dropdown) {
+          if (dropdown !== currentDropdown) {
+            dropdown.classList.remove("open");
           }
         });
 
-        // Toggle la classe "open" sur le dropdown actuel
-        parentDropdown.classList.toggle("open");
-        parentDropdownt.classList.toggle("retate");
+        currentDropdown.classList.toggle("open");
+        chevron?.classList.toggle("retate");
       });
-    }));
-});
-window.toggleVisibility = function toggleVisibility() {
-  var paragraphe = document.getElementById("paragraphe");
-  var cacher = document.getElementById("cacher");
-  console.log("uv");
-  paragraphe.classList.toggle("nothidden");
-  paragraphe.classList.toggle("hidden");
-  if (paragraphe.classList.contains("hidden")) {
-    cacher.innerHTML = "<a href='#' onclick='toggleVisibility()'>Voir moin</a>";
-  } else {
-    cacher.innerHTML = "<a href='#' onclick='toggleVisibility()'>Voir tout</a>";
+    });
   }
-};
+
+  function initialize() {
+    hideAfterDelay("#message", 10000);
+    hideAfterDelay("#succes", 10000);
+    initializeDropdowns();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
+  } else {
+    initialize();
+  }
+
+  window.toggleVisibility = function toggleVisibility() {
+    var paragraph = document.getElementById("paragraphe");
+    var toggleContainer = document.getElementById("cacher");
+    if (!paragraph || !toggleContainer) return;
+
+    paragraph.classList.toggle("nothidden");
+    paragraph.classList.toggle("hidden");
+    toggleContainer.textContent = paragraph.classList.contains("hidden")
+      ? "Voir tout"
+      : "Voir moins";
+  };
+})();

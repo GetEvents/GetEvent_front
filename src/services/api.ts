@@ -52,9 +52,11 @@ interface FormTokenParam {
 }
 
 interface GetAllParams {
-  skip?: number;
-  take?: number;
+  page?: number;
   search?: string;
+  location?: string;
+  category?: string;
+  filter?: string;
 }
 interface NotificationParams {
   token: string;
@@ -400,17 +402,17 @@ export const events = {
   getAll: async (params: GetAllParams = {}) => {
     const queryString = new URLSearchParams();
 
-    if (params.skip !== undefined) {
-      queryString.set("skip", params.skip.toString());
-    }
-
-    if (params.take !== undefined) {
-      queryString.set("take", params.take.toString());
+    if (params.page !== undefined) {
+      queryString.set("page", params.page.toString());
     }
 
     if (params.search) {
       queryString.set("search", params.search);
     }
+
+    if (params.location) queryString.set("location", params.location);
+    if (params.category) queryString.set("category", params.category);
+    if (params.filter) queryString.set("filter", params.filter);
 
     return apiRequest("GET", `/events/getAllEvent?${queryString.toString()}`);
   },
