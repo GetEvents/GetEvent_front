@@ -1,5 +1,27 @@
-import { User } from "./auth";
-import { PaymentProvider } from "./payement";
+import type { User } from "./auth";
+import type { PaymentProvider } from "./payement";
+
+export type TicketStatus = "VALID" | "USED" | "CANCELLED";
+
+export interface EventTicket {
+  id: number;
+  userId: number;
+  eventId: number;
+  qrCode: string;
+  status: TicketStatus;
+  createdAt: string;
+  transactionId?: string | null;
+  user?: User;
+}
+
+export interface EventMessage {
+  id: number;
+  text: string;
+  createdAt: string;
+  senderId: number;
+  eventId: number;
+  sender?: User;
+}
 
 export interface Event {
   id: number;
@@ -18,6 +40,21 @@ export interface Event {
   priceId?: string | null;
   priceProvider?: PaymentProvider | null;
   paymentRequired: boolean;
-
   organisateur?: User;
+  tickets?: EventTicket[];
+  messages?: EventMessage[];
+}
+
+export interface EventFilters {
+  page?: number;
+  search?: string;
+  location?: string;
+  category?: string;
+  filter?: "recent" | "popular" | "price-asc" | "price-desc";
+}
+
+export interface EventActionState {
+  error: boolean;
+  message: string;
+  redirect?: string;
 }

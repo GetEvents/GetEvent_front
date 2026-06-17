@@ -1,5 +1,7 @@
-import React from "react";
-import { useEffect, useRef } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 interface EventMapProps {
   title: string;
   location: string;
@@ -7,22 +9,37 @@ interface EventMapProps {
 
 export default function EventMap({ title, location }: EventMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [unavailable, setUnavailable] = useState(false);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const hasMapConfig = Boolean(location && apiKey);
 
   useEffect(() => {
-    // Retourner si pas de location
-    if (!location) {
-      console.warn("EventMap: location est manquant");
-      return;
-    }
+    if (!hasMapConfig) return;
 
-    // Charger Google Maps script dynamiquement
     const loadGoogleMapsScript = async () => {
-      if (window.google) return Promise.resolve();
-      return new Promise((resolve) => {
+      if (window.google) return;
+
+      await new Promise<void>((resolve, reject) => {
+        const existingScript = document.querySelector<HTMLScriptElement>(
+          'script[data-google-maps="true"]',
+        );
+
+        if (existingScript) {
+          existingScript.addEventListener("load", () => resolve(), {
+            once: true,
+          });
+          existingScript.addEventListener("error", () => reject(), {
+            once: true,
+          });
+          return;
+        }
+
         const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB7F40ScgF_mzivb6E4itBxANpz3qdju2k`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+        script.dataset.googleMaps = "true";
         script.async = true;
-        script.onload = resolve;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
         document.body.appendChild(script);
       });
     };
@@ -30,68 +47,77 @@ export default function EventMap({ title, location }: EventMapProps) {
     const initMap = async () => {
       try {
         await loadGoogleMapsScript();
-
         if (!mapRef.current) return;
 
         const map = new google.maps.Map(mapRef.current, {
-          center: { lat: 48.8566, lng: 2.3522 }, // Paris par défaut
+          center: { lat: 48.8566, lng: 2.3522 },
           zoom: 13,
         });
-
         const geocoder = new google.maps.Geocoder();
-        console.log("Localisation de l'événement:", location);
 
         geocoder.geocode({ address: location }, (results, status) => {
-          if (status === "OK" && results?.[0]) {
-            const coordinates = results[0].geometry.location;
-            const marker = new google.maps.Marker({
-              map,
-              position: coordinates,
-              title: title || "Événement",
-              animation: google.maps.Animation.BOUNCE,
-            });
-
-            // Arrêter l'animation après 3 secondes
-            setTimeout(() => {
-              marker.setAnimation(null);
-            }, 5000);
-
-            const infoWindow = new google.maps.InfoWindow({
-              content: `
-                <div style="width:200px; text-align:center;">
-                  <p><strong>${title || "Événement"}</strong></p>
-                  <p>${location}</p>
-                </div>
-              `,
-            });
-
-            marker.addListener("click", () => {
-              infoWindow.open(map, marker);
-            });
-
-            map.setZoom(15);
-            map.setCenter(coordinates);
-          } else {
-            console.error("Erreur de géocodage:", status);
+          if (status !== "OK" || !results?.[0]) {
+            setUnavailable(true);
+            return;
           }
+
+          const coordinates = results[0].geometry.location;
+          const marker = new google.maps.Marker({
+            map,
+            position: coordinates,
+            title: title || "Événement",
+            animation: google.maps.Animation.DROP,
+          });
+          const infoWindow = new google.maps.InfoWindow({
+            content: `<div style="max-width:220px"><strong>${title}</strong><p>${location}</p></div>`,
+          });
+
+          marker.addListener("click", () =>
+            infoWindow.open({ map, anchor: marker }),
+          );
+          map.setCenter(coordinates);
+          map.setZoom(15);
         });
-      } catch (error) {
-        console.error("Erreur lors de l'initialisation de la carte:", error);
+      } catch {
+        setUnavailable(true);
       }
     };
 
-    initMap();
-  }, [location, title]);
+    void initMap();
+  }, [apiKey, hasMapConfig, location, title]);
+
+  if (!hasMapConfig || unavailable) {
+    return (
+      <div
+        style={{
+          display: "grid",
+          minHeight: 200,
+          placeItems: "center",
+          padding: 24,
+          borderRadius: 10,
+          background: "#f1f5f9",
+          textAlign: "center",
+        }}
+      >
+        <div>
+          <p>{location}</p>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ouvrir dans Google Maps
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      id="map"
       ref={mapRef}
-      style={{
-        width: "100%",
-        height: "200px",
-        borderRadius: "10px",
-      }}
+      aria-label={`Carte de ${location}`}
+      style={{ width: "100%", height: 200, borderRadius: 10 }}
     />
   );
 }

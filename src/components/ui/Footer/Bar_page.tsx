@@ -3,9 +3,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Footer.module.scss";
-import React from "react";
 
-export default function Footer({ currentUser }) {
+interface FooterProps {
+  currentUser: boolean;
+}
+
+export default function Footer({ currentUser }: FooterProps) {
   const pathname = usePathname();
   if (
     pathname === "/auth/login" ||
@@ -27,6 +30,7 @@ export default function Footer({ currentUser }) {
               width={140}
               height={140}
               className="rounded-full"
+              style={{ width: "140px", height: "auto" }}
               priority
             />
           </div>

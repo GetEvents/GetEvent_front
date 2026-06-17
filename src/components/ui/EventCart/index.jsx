@@ -4,9 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 
-import Notification from "../popUp/index";
 import Loading from "../Loading";
-import DelectModal from "../DelectModal";
+import DelectModal from "../../DelectModal";
 import { delectEvent } from "@/actions/event";
 import React from "react";
 
@@ -109,13 +108,7 @@ export default function EventCard({
         <div
           className={`${styles.btnDe} ${state?.error ? styles.error : styles.success}`}
         >
-          {state?.message && show && (
-            <Notification
-              message={state.message}
-              type={state.error ? "error" : "success"}
-              visible={show}
-            />
-          )}
+          {state?.message && show && <p>{state.message}</p>}
           {state?.message && show && (
             <button
               type="button"

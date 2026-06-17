@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/ui/Footer/Bar_page";
@@ -6,6 +5,7 @@ import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import SaidBar from "@/components/ui/saidbar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import AuthProvider from "@/constext/AuthProvider";
+import Providers from "./providers";
 import styles from "./layout.module.scss";
 import { cookies } from "next/headers";
 import { getUser } from "@/actions/auth/authActions";
@@ -59,25 +59,21 @@ export default async function RootLayout({
       >
         <AuthProvider>
           <NotificationProvider>
-            <NavbarWrapper currentUser={isLoggedIn} />
-            {/* {!isLoggedIn && (
-              <>
-                <div className={styles.triangle}></div>
-                <div className={styles.circle_red}></div>
-                <div className={styles.circle_redii}></div>
-                <div className={styles.circle_green}></div>
-              </>
-            )} */}
-            <div className={isLoggedIn ? styles.loginIsTrue : styles.container}>
-              <div className={styles.containerSaideBar}>
-                {isLoggedIn && <SaidBar visible={true} />}
+            <Providers>
+              <NavbarWrapper currentUser={isLoggedIn} />
+
+              <div
+                className={isLoggedIn ? styles.loginIsTrue : styles.container}
+              >
+                <div className={styles.containerSaideBar}>
+                  {isLoggedIn && <SaidBar visible={true} />}
+                </div>
+                {children}
               </div>
-              {children}
-            </div>
-            <Footer currentUser={isLoggedIn} />
+              <Footer currentUser={isLoggedIn} />
+            </Providers>
           </NotificationProvider>
         </AuthProvider>
-        <Script src="/js/anime.js" strategy="lazyOnload" />
       </body>
     </html>
   );
