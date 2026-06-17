@@ -10,7 +10,10 @@ const formatDate = (value?: string | null) =>
 
 export default async function MyEventsPage() {
   const userResponse = await getUser();
-  if (!userResponse?.user) redirect("/auth/login");
+
+  if (!userResponse?.user) {
+    redirect("/auth/login");
+  }
 
   const events = await getEventByUser();
 
@@ -69,7 +72,10 @@ export default async function MyEventsPage() {
                       <Link href={`/events/editEvent/${event.id}`}>
                         Modifier
                       </Link>
-                      <DeleteEventButton eventId={event.id} />
+                      <DeleteEventButton
+                        eventId={event.id}
+                        eventTitle={event.title}
+                      />
                     </div>
                   </div>
                 </article>

@@ -194,12 +194,12 @@ export default function Dashboard() {
             const soldCount = evParts.length;
             const price = parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
-              // 💰 Événement payant
+              
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
-              // 🆓 Événement gratuit
+             
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }

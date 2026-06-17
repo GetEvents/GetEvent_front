@@ -2,42 +2,69 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { delectEvent } from "@/actions/event";
+import type { EventActionState } from "@/actions/types/event";
+import DelectModal from "@/components/DelectModal";
+import { useNotification } from "@/components/Notification/NotificationProvider";
 import styles from "./DeleteEventButton.module.scss";
 
-export default function DeleteEventButton({ eventId }: { eventId: number }) {
+interface DeleteEventButtonProps {
+  eventId: number;
+  eventTitle: string;
+}
+
+export default function DeleteEventButton({
+  eventId,
+  eventTitle,
+}: DeleteEventButtonProps) {
   const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
+  const { notify } = useNotification() as {
+    // eslint-disable-next-line no-unused-vars
+    notify: (message: string, type?: "success" | "error" | "info") => void;
+  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleDelete = async () => {
-    if (!window.confirm("Supprimer définitivement cet événement ?")) return;
+  const deleteMutation = useMutation<EventActionState, Error, number>({
+    mutationFn: delectEvent,
+    onSuccess: (result) => {
+      if (result.error) {
+        notify(result.message, "error");
+        return;
+      }
 
-    setPending(true);
-    setError("");
-    const result = await delectEvent(eventId);
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      notify(result.message, "success");
+      setIsModalOpen(false);
+      router.refresh();
+    },
+    onError: () => {
+      notify("Impossible de supprimer l'événement.", "error");
+    },
+  });
 
-    if (result.error) {
-      setError(result.message);
-      setPending(false);
-      return;
-    }
-
-    router.push(result.redirect || "/events/my-events");
-    router.refresh();
+  const handleDelete = () => {
+    deleteMutation.mutate(eventId);
   };
 
   return (
-    <div>
+    <>
       <button
         type="button"
         className={styles.button}
-        onClick={handleDelete}
-        disabled={pending}
+        onClick={() => setIsModalOpen(true)}
+        disabled={deleteMutation.isPending}
       >
-        {pending ? "Suppression..." : "Supprimer"}
+        {deleteMutation.isPending ? "Suppression..." : "Supprimer"}
       </button>
-      {error && <p className={styles.error}>{error}</p>}
-    </div>
+      <DelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleDelete}
+        eventTitle={eventTitle}
+        isLoading={deleteMutation.isPending}
+      />
+    </>
   );
 }
