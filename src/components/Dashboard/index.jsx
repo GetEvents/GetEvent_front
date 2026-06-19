@@ -4,10 +4,10 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Chart from "chart.js/auto";
-
 import { getEventByUser } from "@/actions/event";
 
 import { getParticipantByEventId } from "@/actions/participant";
+import { useAuth } from "@/hooks/useAuth";
 import Loading from "@/components/ui/Loading";
 
 // --- STYLES/ICONS ---
@@ -121,9 +121,11 @@ const COLORS = ["#0b5ed7", "#17a2b8", "#28a745", "#ffc107", "#dc3545"];
 // ==========================================
 // COMPOSANT PRINCIPAL
 // ==========================================
-export default function Dashboard() {
+export default function Dashboard({ count = null }) {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const chartRefBar = useRef(null);
   const chartRefDoughnut = useRef(null);
 
@@ -148,12 +150,40 @@ export default function Dashboard() {
   });
 
   const fetchDashboardData = useCallback(async () => {
+    if (authLoading) return;
+
+    if (!isAuthenticated || !user) {
+      setEventsList([]);
+      setParticipants([]);
+      setErrorMessage("Vous devez être connecté pour accéder au dashboard.");
+      setLoading(false);
+      return;
+    }
+
+    if (user.role !== "ORGANISATEUR" && user.role !== "ADMIN") {
+      setEventsList([]);
+      setParticipants([]);
+      setErrorMessage("Cet espace est réservé aux organisateurs.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setErrorMessage("");
     try {
       const eventsRes = await getEventByUser();
       // On s'assure que c'est bien la liste (selon l'API)
-      const list = Array.isArray(eventsRes) ? eventsRes : [];
+      const list = Array.isArray(eventsRes)
+        ? eventsRes
+        : Array.isArray(eventsRes?.events)
+          ? eventsRes.events
+          : [];
       setEventsList(list);
+
+      // Met à jour le compteur global du parent si la prop existe
+      if (typeof count === "function") {
+        count(list.length);
+      }
 
       // Calcul des KPIs
       let tEvents = list.length;
@@ -175,7 +205,7 @@ export default function Dashboard() {
         else aEvents++; // Note: ajouter condition brouillon si API le gère.
 
         // Capacity
-        tCapacity += parseInt(ev.capacity || 0);
+        tCapacity += Number.parseInt(ev.capacity || 0, 10);
 
         let eventRevenue = 0;
         let eventParticipants = 0;
@@ -192,14 +222,14 @@ export default function Dashboard() {
             eventParticipants = evParts.length;
 
             const soldCount = evParts.length;
-            const price = parseFloat(ev.paymentPrice) || 0;
+            const price = Number.parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
-              
+              // 💰 Événement payant
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
-             
+              // 🆓 Événement gratuit
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }
@@ -213,9 +243,8 @@ export default function Dashboard() {
               })),
             ];
           }
-        } catch (e) {
-          console.error("Erreur fetch participants pour event " + ev.id, e);
-          const price = parseFloat(ev.paymentPrice) || 0;
+        } catch {
+          const price = Number.parseFloat(ev.paymentPrice) || 0;
           if (price > 0 && ev.participantsCount) {
             tTickets += ev.participantsCount;
             tRevenue += ev.participantsCount * price;
@@ -239,9 +268,6 @@ export default function Dashboard() {
         revenues: pSalesByEvent.map((s) => s.revenue),
         participantsCounts: pSalesByEvent.map((s) => s.participants),
       });
-      console.log("tcapacity", tCapacity);
-      console.log("tTickets", tTickets);
-
       setKpis({
         totalEvents: tEvents,
         activeEvents: aEvents,
@@ -253,96 +279,94 @@ export default function Dashboard() {
           allParticipants.length > 0 ? allParticipants.length : tTickets,
         averageFillRate:
           tCapacity > 0 ? Math.round((tTickets / tCapacity) * 100) : 0,
-        freeRegistrations: freeRegistrations,
+        freeRegistrations,
       });
-    } catch (error) {
-      console.error("Dashboard init error: ", error);
+    } catch {
+      setErrorMessage("Impossible de charger les données du dashboard.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authLoading, count, isAuthenticated, user]);
 
   useEffect(() => {
-    fetchDashboardData();
+    void fetchDashboardData();
   }, [fetchDashboardData]);
 
-  useEffect(() => {
-    if (activeTab !== "overview") return;
+  const OverviewSection = ({ chartData }) => {
+    useEffect(() => {
+      if (
+        !chartRefBar.current ||
+        !chartRefDoughnut.current ||
+        chartData.labels.length === 0
+      )
+        return;
 
-    if (
-      !chartRefBar.current ||
-      !chartRefDoughnut.current ||
-      chartData.labels.length === 0
-    )
-      return;
+      const ctxBar = chartRefBar.current.getContext("2d");
+      const ctxPie = chartRefDoughnut.current.getContext("2d");
 
-    const ctxBar = chartRefBar.current.getContext("2d");
-    const ctxPie = chartRefDoughnut.current.getContext("2d");
-
-    const barChart = new Chart(ctxBar, {
-      type: "bar",
-      data: {
-        labels: chartData.labels,
-        datasets: [
-          {
-            label: "Revenus par événement (€)",
-            data: chartData.revenues,
-            backgroundColor: "rgba(11, 94, 215, 0.6)",
-            borderColor: "rgb(11, 94, 215)",
-            borderWidth: 1,
-            borderRadius: 8,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { backgroundColor: "#1a1a2e" },
+      const barChart = new Chart(ctxBar, {
+        type: "bar",
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: "Revenus par événement (€)",
+              data: chartData.revenues,
+              backgroundColor: "rgba(11, 94, 215, 0.6)",
+              borderColor: "rgb(11, 94, 215)",
+              borderWidth: 1,
+              borderRadius: 8,
+            },
+          ],
         },
-        scales: {
-          y: { beginAtZero: true, grid: { color: "#f1f3f5" } },
-          x: { grid: { display: false } },
-        },
-      },
-    });
-
-    const pieChart = new Chart(ctxPie, {
-      type: "doughnut",
-      data: {
-        labels: chartData.labels,
-        datasets: [
-          {
-            label: "Nombre de participants",
-            data: chartData.participantsCounts,
-            backgroundColor: COLORS,
-            borderWidth: 2,
-            borderColor: "#ffffff",
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: "#1a1a2e" },
           },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: { boxWidth: 12, padding: 15 },
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#f1f3f5" } },
+            x: { grid: { display: false } },
           },
-          tooltip: { backgroundColor: "#1a1a2e" },
         },
-        cutout: "70%",
-      },
-    });
+      });
 
-    return () => {
-      barChart.destroy();
-      pieChart.destroy();
-    };
-  }, [activeTab, chartData]);
+      const pieChart = new Chart(ctxPie, {
+        type: "doughnut",
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: "Nombre de participants",
+              data: chartData.participantsCounts,
+              backgroundColor: COLORS,
+              borderWidth: 2,
+              borderColor: "#ffffff",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 12, padding: 15 },
+            },
+            tooltip: { backgroundColor: "#1a1a2e" },
+          },
+          cutout: "70%",
+        },
+      });
 
-  const OverviewSection = () => {
+      return () => {
+        barChart.destroy();
+        pieChart.destroy();
+      };
+    }, [chartData]);
+
     return (
       <>
         <div className={styles.kpi_grid}>
@@ -646,8 +670,19 @@ export default function Dashboard() {
     );
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return <Loading message="Chargement de l'événement..." />;
+  }
+
+  if (errorMessage) {
+    return (
+      <div className={styles.dashboard_container}>
+        <div className={styles.dashboard_header}>
+          <h1>Dashboard Organisateur</h1>
+          <p>{errorMessage}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -673,7 +708,7 @@ export default function Dashboard() {
       </div>
 
       <div className={styles.tab_content}>
-        {activeTab === "overview" && <OverviewSection />}
+        {activeTab === "overview" && <OverviewSection chartData={chartData} />}
         {activeTab === "participants" && <ParticipantsSection />}
       </div>
     </div>

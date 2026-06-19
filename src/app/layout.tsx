@@ -57,7 +57,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
+        <AuthProvider initialUser={currentUser}>
           <NotificationProvider>
             <Providers>
               <NavbarWrapper currentUser={isLoggedIn} />
