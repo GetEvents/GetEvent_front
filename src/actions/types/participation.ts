@@ -14,6 +14,10 @@ export type Participant = {
   paymentMethod?: "card" | "paypal" | string;
 };
 
+export type MyParticipationsApiPayload = {
+  data: Participant[];
+};
+
 export type ParticipantsApiResponse = {
   error?: boolean;
   message?: string;

@@ -1,13 +1,18 @@
 "use server";
 import { cookies } from "next/headers";
 import { participations, paymentsFedapay } from "../../services/api";
+import { refreshAccessToken } from "@/actions/auth/authActions";
 import { ParticipantsApiResponse } from "../types/participation";
+
+const getToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("token")?.value || (await refreshAccessToken());
+};
 
 export async function getParticipantByEventId(
   id: number,
 ): Promise<ParticipantsApiResponse | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getToken();
 
   if (!token) {
     return null;
@@ -28,14 +33,12 @@ export async function getParticipantByEventId(
       message: response.message,
       participant: response.data,
     };
-  } catch (error) {
-    console.error("Error fetching participant by event ID:", error);
+  } catch {
     return null!;
   }
 }
 export async function getAllParticipantByUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getToken();
   if (!token) {
     return null;
   }
@@ -58,8 +61,7 @@ export async function getAllParticipantByUser() {
 export async function addParticipantWithPayment(
   sessionId: string,
 ): Promise<{ error: boolean; message: string }> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getToken();
 
   if (!token) {
     return {
@@ -80,7 +82,6 @@ export async function addParticipantWithPayment(
       sessionId,
       token,
     });
-    console.log("response25", response);
 
     if (!response.success) {
       return {
@@ -110,8 +111,7 @@ export async function addParticipantWithPayment(
 }
 
 export async function getParticipantId(id: number) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getToken();
 
   if (!token) {
     return null;
@@ -138,14 +138,13 @@ export async function getParticipantId(id: number) {
 }
 
 export async function delectParticipant(id: number) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token");
+  const token = await getToken();
   if (!token) {
     return null;
   }
 
   try {
-    let response = await participations.delete({ id: id, token: token.value });
+    let response = await participations.delete({ id: id, token });
 
     if (!response.success) {
       return null;
@@ -161,16 +160,75 @@ export async function delectParticipant(id: number) {
   }
 }
 
+type UnsubscribeParticipantInput = {
+  participantId: number;
+  eventId: number;
+  reason: string;
+};
+
+export async function unsubscribeParticipant({
+  participantId,
+  eventId,
+  reason,
+}: UnsubscribeParticipantInput): Promise<{
+  error: boolean;
+  message: string;
+}> {
+  const token = await getToken();
+  const normalizedReason = reason.trim();
+
+  if (!token) {
+    return {
+      error: true,
+      message: "Vous devez être connecté pour retirer un participant.",
+    };
+  }
+
+  if (!participantId || !eventId) {
+    return {
+      error: true,
+      message: "Le participant, l'événement et la raison sont obligatoires.",
+    };
+  }
+
+  try {
+    const response = await participations.delete({
+      id: participantId,
+      eventId,
+      reason: normalizedReason,
+      token,
+    });
+
+    if (!response.success) {
+      return {
+        error: true,
+        message: response.error || "Impossible de désinscrire ce participant.",
+      };
+    }
+
+    const payload = response.data as { message?: string };
+
+    return {
+      error: false,
+      message: payload.message || "Le participant a bien été désinscrit.",
+    };
+  } catch {
+    return {
+      error: true,
+      message: "Une erreur est survenue pendant la désinscription.",
+    };
+  }
+}
+
 export async function isRegistered(eventId: number) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token");
+  const token = await getToken();
   if (!token) {
     return null;
   }
 
   try {
     let response = await participations.isRegistered({
-      token: token.value,
+      token,
       eventId: eventId,
     });
 

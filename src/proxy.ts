@@ -1,57 +1,92 @@
+import { decodeJwt } from "jose";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 
 const PROTECTED_ROUTES = [
   "/events/my-events",
   "/events/createvent",
-  "/events/edit",
-  "/events/:path*",
+  "/events/editEvent",
   "/participations",
   "/settings",
+  "/dashboard",
 ];
 
 const AUTH_ROUTES = ["/auth/login", "/auth/register"];
+const REFRESH_SKEW_SECONDS = 60;
 
-async function isTokenValid(token: string): Promise<boolean> {
+type SessionTokens = {
+  token: string;
+  refreshToken: string;
+};
+
+const getApiBaseUrl = () =>
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  process.env.NEXT_PUBLIC_API_ENDPOINT ||
+  "http://localhost:3001";
+
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+});
+
+function isAccessTokenUsable(token: string): boolean {
   try {
-    const secret = new TextEncoder().encode(process.env.SECRET_KEY || "");
-    const { payload } = await jwtVerify(token, secret);
-    return !payload.type || payload.type === "access";
-  } catch (error) {
-    console.log(
-      "[MIDDLEWARE] Token invalid or expired:",
-      error instanceof Error ? error.message : error,
-    );
+    const payload = decodeJwt(token);
+
+    if (payload.type && payload.type !== "access") {
+      return false;
+    }
+
+    if (!payload.exp) {
+      return false;
+    }
+
+    const expiresAt = payload.exp * 1000;
+    const refreshBefore = Date.now() + REFRESH_SKEW_SECONDS * 1000;
+    return expiresAt > refreshBefore;
+  } catch {
     return false;
   }
 }
 
+function getTokensFromPayload(payload: unknown): SessionTokens | null {
+  const data = payload as {
+    token?: unknown;
+    refreshToken?: unknown;
+    data?: {
+      token?: unknown;
+      refreshToken?: unknown;
+    };
+  };
+
+  const token = data.token || data.data?.token;
+  const refreshToken = data.refreshToken || data.data?.refreshToken;
+
+  if (typeof token !== "string" || typeof refreshToken !== "string") {
+    return null;
+  }
+
+  return { token, refreshToken };
+}
+
 async function refreshSession(
   refreshToken: string,
-): Promise<{ token: string; refreshToken: string } | null> {
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_SOCKET_URL ||
-    process.env.NEXT_PUBLIC_API_ENDPOINT ||
-    "http://localhost:3001";
-
+): Promise<SessionTokens | null> {
   try {
-    const response = await fetch(`${apiBaseUrl}/api/auth/refresh`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
       cache: "no-store",
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return null;
+    }
 
-    const data = await response.json();
-    if (!data.token || !data.refreshToken) return null;
-
-    return {
-      token: data.token,
-      refreshToken: data.refreshToken,
-    };
+    return getTokensFromPayload(await response.json());
   } catch {
     return null;
   }
@@ -59,9 +94,8 @@ async function refreshSession(
 
 function continueWithSession(
   request: NextRequest,
-  tokens: { token: string; refreshToken: string },
+  tokens: SessionTokens,
 ): NextResponse {
-  const secure = process.env.NODE_ENV === "production";
   const requestHeaders = new Headers(request.headers);
   const cookies = request.cookies
     .getAll()
@@ -77,27 +111,59 @@ function continueWithSession(
   });
 
   response.cookies.set("token", tokens.token, {
-    httpOnly: true,
-    secure,
-    sameSite: "lax",
-    path: "/",
+    ...getCookieOptions(),
     maxAge: 15 * 60,
   });
   response.cookies.set("refreshToken", tokens.refreshToken, {
-    httpOnly: true,
-    secure,
-    sameSite: "lax",
-    path: "/",
+    ...getCookieOptions(),
     maxAge: 30 * 24 * 60 * 60,
   });
 
   return response;
 }
 
+function clearSession(response: NextResponse): NextResponse {
+  response.cookies.set("token", "", {
+    ...getCookieOptions(),
+    maxAge: 0,
+  });
+  response.cookies.set("refreshToken", "", {
+    ...getCookieOptions(),
+    maxAge: 0,
+  });
+  return response;
+}
+
+function redirectWithSession(
+  request: NextRequest,
+  pathname: string,
+  tokens: SessionTokens,
+): NextResponse {
+  const response = NextResponse.redirect(
+    new URL(pathname, request.nextUrl.origin),
+  );
+
+  response.cookies.set("token", tokens.token, {
+    ...getCookieOptions(),
+    maxAge: 15 * 60,
+  });
+  response.cookies.set("refreshToken", tokens.refreshToken, {
+    ...getCookieOptions(),
+    maxAge: 30 * 24 * 60 * 60,
+  });
+
+  return response;
+}
+
+function redirectToLogin(request: NextRequest): NextResponse {
+  const loginUrl = new URL("/auth/login", request.nextUrl.origin);
+  loginUrl.searchParams.set("from", request.nextUrl.pathname);
+  return clearSession(NextResponse.redirect(loginUrl));
+}
+
 function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some(
-    (route) =>
-      pathname === route || pathname.startsWith(route.replace(":path*", "")),
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 }
 
@@ -106,82 +172,51 @@ function isAuthRoute(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  console.log("🔍 [MIDDLEWARE] EXECUTED");
+  const { nextUrl, cookies } = request;
+  const pathname = nextUrl.pathname;
+  const token = cookies.get("token")?.value;
+  const refreshToken = cookies.get("refreshToken")?.value;
+  const isProtected = isProtectedRoute(pathname);
 
-  try {
-    const { nextUrl, cookies } = request;
-    const token = cookies.get("token")?.value;
-    const refreshToken = cookies.get("refreshToken")?.value;
-    const pathname = nextUrl.pathname;
-
-    console.log("[MIDDLEWARE] pathname:", pathname, "token:", !!token);
-
-    const isProtected = isProtectedRoute(pathname);
-
-    if (isProtected) {
-      if (!token) {
-        const refreshedTokens = refreshToken
-          ? await refreshSession(refreshToken)
-          : null;
-
-        if (refreshedTokens) {
-          return continueWithSession(request, refreshedTokens);
-        }
-
-        console.log("[MIDDLEWARE] No token, redirecting to login");
-        const loginUrl = new URL("/auth/login", nextUrl.origin);
-        loginUrl.searchParams.set("from", pathname);
-        return NextResponse.redirect(loginUrl);
-      }
-
-      const tokenValid = await isTokenValid(token);
-      if (!tokenValid) {
-        const refreshedTokens = refreshToken
-          ? await refreshSession(refreshToken)
-          : null;
-
-        if (refreshedTokens) {
-          return continueWithSession(request, refreshedTokens);
-        }
-
-        console.log("[MIDDLEWARE] Session expired, clearing and redirecting");
-        const loginUrl = new URL("/auth/login", nextUrl.origin);
-        loginUrl.searchParams.set("from", pathname);
-        const response = NextResponse.redirect(loginUrl);
-        response.cookies.set("token", "", { maxAge: 0, path: "/" });
-        response.cookies.set("refreshToken", "", { maxAge: 0, path: "/" });
-        return response;
-      }
-
-      console.log("[MIDDLEWARE] Token valid, granting access");
+  if (isProtected) {
+    if (token && isAccessTokenUsable(token)) {
       return NextResponse.next();
     }
 
-    if (isAuthRoute(pathname) && token) {
-      const tokenValid = await isTokenValid(token);
-      if (tokenValid) {
-        console.log(
-          "[MIDDLEWARE] User already logged in, redirecting to /events",
-        );
-        return NextResponse.redirect(new URL("/events", nextUrl.origin));
+    if (refreshToken) {
+      const refreshedTokens = await refreshSession(refreshToken);
+      if (refreshedTokens) {
+        return continueWithSession(request, refreshedTokens);
       }
     }
 
-    return NextResponse.next();
-  } catch (error) {
-    console.error(
-      "[MIDDLEWARE ERROR]:",
-      error instanceof Error ? error.message : error,
-    );
-    return NextResponse.next();
+    return redirectToLogin(request);
   }
+
+  if (isAuthRoute(pathname)) {
+    if (token && isAccessTokenUsable(token)) {
+      return NextResponse.redirect(new URL("/events", nextUrl.origin));
+    }
+
+    if (refreshToken) {
+      const refreshedTokens = await refreshSession(refreshToken);
+      if (refreshedTokens) {
+        return redirectWithSession(request, "/events", refreshedTokens);
+      }
+    }
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/events/:path*",
+    "/events/my-events/:path*",
+    "/events/createvent/:path*",
+    "/events/editEvent/:path*",
     "/participations/:path*",
     "/settings/:path*",
+    "/dashboard/:path*",
     "/auth/login",
     "/auth/register",
   ],

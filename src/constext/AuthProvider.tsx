@@ -6,10 +6,11 @@ import { User } from "@/actions/types/auth";
 
 interface Props {
   children: React.ReactNode;
+  initialUser?: User | null;
 }
 
-export default function AuthProvider({ children }: Props) {
-  const [user, setUser] = useState<User | null>(null);
+export default function AuthProvider({ children, initialUser = null }: Props) {
+  const [user, setUser] = useState<User | null>(initialUser);
   const [token, setToken] = useState<string | null>(null);
   const logout = () => {
     setUser(null);

@@ -1,13 +1,23 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Chart from "chart.js/auto";
+import { delectEvent, getEventByUser } from "@/actions/event";
 
-import { getEventByUser } from "@/actions/event";
-
-import { getParticipantByEventId } from "@/actions/participant";
+import {
+  getParticipantByEventId,
+  unsubscribeParticipant,
+} from "@/actions/participant";
+import { useAuth } from "@/hooks/useAuth";
+import DelectModal from "@/components/DelectModal";
 import Loading from "@/components/ui/Loading";
 
 // --- STYLES/ICONS ---
@@ -118,12 +128,433 @@ const ICONS = {
 
 const COLORS = ["#0b5ed7", "#17a2b8", "#28a745", "#ffc107", "#dc3545"];
 
+const normalizeSearchValue = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const visibleEventsList = useMemo(() => {
+    const normalizedSearchTerm = normalizeSearchValue(searchTerm.trim());
+
+    if (!normalizedSearchTerm) return eventsList;
+
+    return eventsList.filter((event) => {
+      const searchableValue = normalizeSearchValue(
+        [
+          event.title,
+          event.description,
+          event.location,
+          event.category,
+          event.startDate,
+          event.endDate,
+        ].join(" "),
+      );
+
+      return searchableValue.includes(normalizedSearchTerm);
+    });
+  }, [eventsList, searchTerm]);
+
+  const getStatus = (event) => {
+    if (new Date(event.endDate || event.startDate) < new Date()) {
+      return "terminé";
+    }
+
+    return "publié";
+  };
+
+  return (
+    <div className={styles.table_card}>
+      <div className={styles.table_header_actions}>
+        <h3>Gérer les événements</h3>
+        <div className={styles.filters}>
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Rechercher un événement..."
+            aria-label="Rechercher un événement"
+          />
+          <Link
+            href="/events/createvent"
+            className="btn btn-primary"
+            style={{
+              backgroundColor: "#0b5ed7",
+              color: "white",
+              padding: "0.4rem 1rem",
+              borderRadius: "8px",
+              textDecoration: "none",
+            }}
+          >
+            + Créer
+          </Link>
+        </div>
+      </div>
+
+      <div style={{ overflowX: "auto" }}>
+        <table className={styles.modern_table}>
+          <thead>
+            <tr>
+              <th>Titre de l&apos;événement</th>
+              <th>Date &amp; lieu</th>
+              <th>Capacité</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleEventsList.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ textAlign: "center" }}>
+                  Aucun événement trouvé
+                </td>
+              </tr>
+            ) : (
+              visibleEventsList.map((event) => {
+                const status = getStatus(event);
+
+                return (
+                  <tr key={event.id}>
+                    <td style={{ fontWeight: 600, color: "#1a1a2e" }}>
+                      {event.title}
+                    </td>
+                    <td>
+                      <div>
+                        {new Date(event.startDate).toLocaleDateString("fr-FR")}
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
+                        {event.location}
+                      </div>
+                    </td>
+                    <td>{event.capacity || "N/A"}</td>
+                    <td>
+                      <span
+                        className={`${styles.badge} ${
+                          status === "terminé"
+                            ? styles.status_finished
+                            : styles.status_published
+                        }`}
+                      >
+                        {status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <Link
+                          href={`/events/${event.id}`}
+                          className={styles.view}
+                          title="Voir"
+                        >
+                          {ICONS.view}
+                        </Link>
+                        <Link
+                          href={`/events/editEvent/${event.id}`}
+                          className={styles.edit}
+                          title="Modifier"
+                        >
+                          {ICONS.edit}
+                        </Link>
+                        <button
+                          type="button"
+                          className={styles.delete}
+                          title="Supprimer"
+                          onClick={() => onDelete(event)}
+                          disabled={isDeleting}
+                        >
+                          {ICONS.delete}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function UnsubscribeParticipantModal({
+  participant,
+  reason,
+  isLoading,
+  errorMessage,
+  onReasonChange,
+  onClose,
+  onConfirm,
+}) {
+  if (!participant) return null;
+
+  const participantName =
+    [participant.user?.prenom, participant.user?.nom]
+      .filter(Boolean)
+      .join(" ") ||
+    participant.user?.email ||
+    "Participant";
+
+  return (
+    <div
+      className={styles.unsubscribe_overlay}
+      onClick={isLoading ? undefined : onClose}
+    >
+      <div
+        className={styles.unsubscribe_modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="unsubscribe-modal-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h3 id="unsubscribe-modal-title">Retirer le participant</h3>
+
+        <dl className={styles.unsubscribe_details}>
+          <div>
+            <dt>Participant</dt>
+            <dd>{participantName}</dd>
+          </div>
+          <div>
+            <dt>Événement</dt>
+            <dd>{participant.eventTitle || "Événement"}</dd>
+          </div>
+        </dl>
+
+        <label
+          className={styles.unsubscribe_label}
+          htmlFor="unsubscribe-reason"
+        >
+          Raison de la désinscription
+        </label>
+        <textarea
+          id="unsubscribe-reason"
+          value={reason}
+          onChange={(event) => onReasonChange(event.target.value)}
+          placeholder="Expliquez la raison du retrait..."
+          rows={4}
+          required
+          disabled={isLoading}
+          autoFocus
+        />
+
+        {errorMessage && (
+          <p className={styles.unsubscribe_error} role="alert">
+            {errorMessage}
+          </p>
+        )}
+
+        <div className={styles.unsubscribe_actions}>
+          <button type="button" onClick={onClose} disabled={isLoading}>
+            Annuler
+          </button>
+          <button
+            type="button"
+            className={styles.unsubscribe_confirm}
+            onClick={onConfirm}
+            disabled={isLoading || !reason.trim()}
+          >
+            {isLoading ? "Désinscription..." : "Confirmer"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ParticipantsSection = React.memo(function ParticipantsSection({
+  participants,
+  eventsList,
+  participantActionMessage,
+  isUnsubscribing,
+  setSelectedParticipantToRemove,
+}) {
+  const [participantSearch, setParticipantSearch] = useState("");
+  const [selectedEventId, setSelectedEventId] = useState("all");
+
+  const filteredParticipants = useMemo(() => {
+    const normalizedSearch = normalizeSearchValue(participantSearch.trim());
+
+    return participants.filter((participant) => {
+      const matchesEvent =
+        selectedEventId === "all" ||
+        String(participant.eventId) === selectedEventId;
+
+      if (!matchesEvent) return false;
+      if (!normalizedSearch) return true;
+
+      const firstName = participant.user?.prenom;
+      const lastName = participant.user?.nom;
+      const fullName = [firstName, lastName].filter(Boolean).join(" ");
+      const reverseFullName = [lastName, firstName].filter(Boolean).join(" ");
+      const phoneNumber =
+        participant.user?.telephone ||
+        participant.user?.phone ||
+        participant.user?.phoneNumber ||
+        participant.user?.numeroTelephone ||
+        participant.user?.tel ||
+        participant.telephone;
+      const ticketType =
+        participant.ticketType ||
+        participant.ticket?.type ||
+        participant.paymentMethod ||
+        "Standard";
+      const status =
+        participant.status || participant.paymentStatus || "Validé";
+
+      const searchableValue = normalizeSearchValue(
+        [
+          firstName,
+          lastName,
+          fullName,
+          reverseFullName,
+          participant.user?.email,
+          phoneNumber,
+          participant.eventTitle,
+          ticketType,
+          status,
+        ].join(" "),
+      );
+
+      return searchableValue.includes(normalizedSearch);
+    });
+  }, [participantSearch, participants, selectedEventId]);
+
+  return (
+    <div className={styles.table_card}>
+      <div className={styles.table_header_actions}>
+        <h3>Gérer les participants</h3>
+        <div className={styles.filters}>
+          <input
+            type="search"
+            value={participantSearch}
+            onChange={(event) => setParticipantSearch(event.target.value)}
+            placeholder="Rechercher un participant..."
+            aria-label="Rechercher un participant"
+          />
+          <select
+            value={selectedEventId}
+            onChange={(event) => setSelectedEventId(event.target.value)}
+            aria-label="Filtrer par événement"
+          >
+            <option value="all">Tous les événements</option>
+            {eventsList.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {participantActionMessage?.type === "success" && (
+        <p className={styles.participant_success} role="status">
+          {participantActionMessage.message}
+        </p>
+      )}
+
+      <div style={{ overflowX: "auto" }}>
+        <table className={styles.modern_table}>
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>Événement</th>
+              <th>Type de billet</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredParticipants.length === 0 ? (
+              <tr>
+                <td colSpan="5" style={{ textAlign: "center" }}>
+                  Aucun participant trouvé
+                </td>
+              </tr>
+            ) : (
+              filteredParticipants.map((participant) => {
+                const ticketType =
+                  participant.ticketType ||
+                  participant.ticket?.type ||
+                  participant.paymentMethod ||
+                  "Standard";
+                const status =
+                  participant.status || participant.paymentStatus || "Validé";
+
+                return (
+                  <tr key={participant.id}>
+                    <td>
+                      <div className={styles.participant_info}>
+                        <div className={styles.avatar}>
+                          {(
+                            participant.user?.prenom?.[0] ||
+                            participant.user?.nom?.[0] ||
+                            "?"
+                          ).toUpperCase()}
+                        </div>
+                        <div className={styles.details}>
+                          <span className={styles.name}>
+                            {participant.user?.prenom} {participant.user?.nom}
+                          </span>
+                          <span className={styles.email}>
+                            {participant.user?.email || "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{participant.eventTitle}</td>
+                    <td>{ticketType}</td>
+                    <td>
+                      <span className={`${styles.badge} ${styles.status_paid}`}>
+                        {status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <button
+                          type="button"
+                          className={styles.delete}
+                          title="Retirer"
+                          aria-label={`Retirer ${
+                            participant.user?.prenom || "ce participant"
+                          }`}
+                          onClick={() =>
+                            setSelectedParticipantToRemove(participant)
+                          }
+                          disabled={isUnsubscribing}
+                        >
+                          {ICONS.delete}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+});
+
 // ==========================================
 // COMPOSANT PRINCIPAL
 // ==========================================
-export default function Dashboard() {
+export default function Dashboard({ count = null }) {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedParticipantToRemove, setSelectedParticipantToRemove] =
+    useState(null);
+  const [unsubscribeReason, setUnsubscribeReason] = useState("");
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+  const [participantActionMessage, setParticipantActionMessage] =
+    useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const chartRefBar = useRef(null);
   const chartRefDoughnut = useRef(null);
 
@@ -148,12 +579,40 @@ export default function Dashboard() {
   });
 
   const fetchDashboardData = useCallback(async () => {
+    if (authLoading) return;
+
+    if (!isAuthenticated || !user) {
+      setEventsList([]);
+      setParticipants([]);
+      setErrorMessage("Vous devez être connecté pour accéder au dashboard.");
+      setLoading(false);
+      return;
+    }
+
+    if (user.role !== "ORGANISATEUR" && user.role !== "ADMIN") {
+      setEventsList([]);
+      setParticipants([]);
+      setErrorMessage("Cet espace est réservé aux organisateurs.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setErrorMessage("");
     try {
       const eventsRes = await getEventByUser();
       // On s'assure que c'est bien la liste (selon l'API)
-      const list = Array.isArray(eventsRes) ? eventsRes : [];
+      const list = Array.isArray(eventsRes)
+        ? eventsRes
+        : Array.isArray(eventsRes?.events)
+          ? eventsRes.events
+          : [];
       setEventsList(list);
+
+      // Met à jour le compteur global du parent si la prop existe
+      if (typeof count === "function") {
+        count(list.length);
+      }
 
       // Calcul des KPIs
       let tEvents = list.length;
@@ -175,7 +634,7 @@ export default function Dashboard() {
         else aEvents++; // Note: ajouter condition brouillon si API le gère.
 
         // Capacity
-        tCapacity += parseInt(ev.capacity || 0);
+        tCapacity += Number.parseInt(ev.capacity || 0, 10);
 
         let eventRevenue = 0;
         let eventParticipants = 0;
@@ -192,12 +651,14 @@ export default function Dashboard() {
             eventParticipants = evParts.length;
 
             const soldCount = evParts.length;
-            const price = parseFloat(ev.paymentPrice) || 0;
+            const price = Number.parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
+              // 💰 Événement payant
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
+              // 🆓 Événement gratuit
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }
@@ -211,8 +672,8 @@ export default function Dashboard() {
               })),
             ];
           }
-        } catch (e) {
-          const price = parseFloat(ev.paymentPrice) || 0;
+        } catch {
+          const price = Number.parseFloat(ev.paymentPrice) || 0;
           if (price > 0 && ev.participantsCount) {
             tTickets += ev.participantsCount;
             tRevenue += ev.participantsCount * price;
@@ -236,7 +697,6 @@ export default function Dashboard() {
         revenues: pSalesByEvent.map((s) => s.revenue),
         participantsCounts: pSalesByEvent.map((s) => s.participants),
       });
-
       setKpis({
         totalEvents: tEvents,
         activeEvents: aEvents,
@@ -248,22 +708,122 @@ export default function Dashboard() {
           allParticipants.length > 0 ? allParticipants.length : tTickets,
         averageFillRate:
           tCapacity > 0 ? Math.round((tTickets / tCapacity) * 100) : 0,
-        freeRegistrations: freeRegistrations,
+        freeRegistrations,
       });
-    } catch (error) {
+    } catch {
+      setErrorMessage("Impossible de charger les données du dashboard.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authLoading, count, isAuthenticated, user]);
 
   useEffect(() => {
-    fetchDashboardData();
+    // The async loader owns the dashboard's initial client-side data lifecycle.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchDashboardData();
   }, [fetchDashboardData]);
 
-  useEffect(() => {
-    if (activeTab !== "overview") return;
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setEventToDelete(null);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete?.id || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await delectEvent(Number(eventToDelete.id));
+
+      if (response.error) {
+        setErrorMessage(
+          response.message || "Impossible de supprimer l'événement.",
+        );
+        return;
+      }
+
+      setEventsList((currentEvents) =>
+        currentEvents.filter((event) => event.id !== eventToDelete.id),
+      );
+      setEventToDelete(null);
+      void fetchDashboardData();
+    } catch {
+      setErrorMessage("Impossible de supprimer l'événement.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const closeUnsubscribeModal = () => {
+    if (isUnsubscribing) return;
+
+    setSelectedParticipantToRemove(null);
+    setUnsubscribeReason("");
+
+    if (participantActionMessage?.type === "error") {
+      setParticipantActionMessage(null);
+    }
+  };
+
+  const handleConfirmUnsubscribe = async () => {
+    const reason = unsubscribeReason.trim();
+
+    if (!selectedParticipantToRemove || isUnsubscribing) return;
+
+    setIsUnsubscribing(true);
+    setParticipantActionMessage(null);
+
+    try {
+      const result = await unsubscribeParticipant({
+        participantId: selectedParticipantToRemove.id,
+        eventId: selectedParticipantToRemove.eventId,
+        reason,
+      });
+
+      if (result.error) {
+        setParticipantActionMessage({
+          type: "error",
+          message:
+            result.message || "Impossible de désinscrire ce participant.",
+        });
+        return;
+      }
+
+      const removedParticipantId = selectedParticipantToRemove.id;
+      const removedEventId = selectedParticipantToRemove.eventId;
+
+      setParticipants((currentParticipants) =>
+        currentParticipants.filter(
+          (participant) =>
+            !(
+              String(participant.id) === String(removedParticipantId) &&
+              String(participant.eventId) === String(removedEventId)
+            ),
+        ),
+      );
+      setKpis((currentKpis) => ({
+        ...currentKpis,
+        totalParticipants: Math.max(0, currentKpis.totalParticipants - 1),
+      }));
+      setSelectedParticipantToRemove(null);
+      setUnsubscribeReason("");
+      setParticipantActionMessage({
+        type: "success",
+        message: result.message || "Le participant a bien été désinscrit.",
+      });
+    } catch {
+      setParticipantActionMessage({
+        type: "error",
+        message: "Une erreur est survenue pendant la désinscription.",
+      });
+    } finally {
+      setIsUnsubscribing(false);
+    }
+  };
+
+  useEffect(() => {
     if (
+      activeTab !== "overview" ||
       !chartRefBar.current ||
       !chartRefDoughnut.current ||
       chartData.labels.length === 0
@@ -301,6 +861,7 @@ export default function Dashboard() {
         },
       },
     });
+    
 
     const pieChart = new Chart(ctxPie, {
       type: "doughnut",
@@ -336,7 +897,7 @@ export default function Dashboard() {
     };
   }, [activeTab, chartData]);
 
-  const OverviewSection = () => {
+  const renderOverviewSection = () => {
     return (
       <>
         <div className={styles.kpi_grid}>
@@ -412,236 +973,29 @@ export default function Dashboard() {
 
         {/* Ajout de la section des événements ici */}
         <div style={{ marginTop: "2rem" }}>
-          <EventsSection />
+          <SearchableEventsSection
+            eventsList={eventsList}
+            isDeleting={isDeleting}
+            onDelete={setEventToDelete}
+          />
         </div>
       </>
     );
   };
 
-  const EventsSection = () => {
-    // Statut simple factice car manque dans getMyCreated
-    const getStatus = (ev) => {
-      if (new Date(ev.endDate || ev.startDate) < new Date()) return "terminé";
-      return "publié"; // ou 'brouillon' si on a l'info
-    };
-
-    return (
-      <div className={styles.table_card}>
-        <div className={styles.table_header_actions}>
-          <h3>Gérer les événements</h3>
-          <div className={styles.filters}>
-            <input type="text" placeholder="Rechercher un événement..." />
-            <Link
-              href="/events/createvent"
-              className="btn btn-primary"
-              style={{
-                backgroundColor: "#0b5ed7",
-                color: "white",
-                padding: "0.4rem 1rem",
-                borderRadius: "8px",
-                textDecoration: "none",
-              }}
-            >
-              + Créer
-            </Link>
-          </div>
-        </div>
-        <div style={{ overflowX: "auto" }}>
-          <table className={styles.modern_table}>
-            <thead>
-              <tr>
-                <th>Titre de l&apos;événement</th>
-                <th>Date & Lieu</th>
-                <th>Capacité</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventsList.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
-                    Aucun événement trouvé
-                  </td>
-                </tr>
-              )}
-              {eventsList.map((ev) => {
-                const status = getStatus(ev);
-                return (
-                  <tr key={ev.id}>
-                    <td style={{ fontWeight: 600, color: "#1a1a2e" }}>
-                      {ev.title}
-                    </td>
-                    <td>
-                      <div>
-                        {new Date(ev.startDate).toLocaleDateString("fr-FR")}
-                      </div>
-                      <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
-                        {ev.location}
-                      </div>
-                    </td>
-                    <td>{ev.capacity || "N/A"}</td>
-                    <td>
-                      <span
-                        className={`${styles.badge} ${status === "terminé" ? styles.status_finished : styles.status_published}`}
-                      >
-                        {status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className={styles.actions}>
-                        <Link
-                          href={`/events/${ev.id}`}
-                          className={styles.view}
-                          title="Voir"
-                        >
-                          {ICONS.view}
-                        </Link>
-                        <Link
-                          href={`/events/editEvent/${ev.id}`}
-                          className={styles.edit}
-                          title="Modifier"
-                        >
-                          {ICONS.edit}
-                        </Link>
-                        <button className={styles.delete} title="Supprimer">
-                          {ICONS.delete}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  const ParticipantsSection = () => {
-    const [selectedEventId, setSelectedEventId] = useState("all");
-
-    // Filtre
-    const filteredParticipants =
-      selectedEventId === "all"
-        ? participants
-        : participants.filter((p) => p.eventId.toString() === selectedEventId);
-
-    return (
-      <div className={styles.table_card}>
-        <div className={styles.table_header_actions}>
-          <h3>Gérer les participants</h3>
-          <div className={styles.filters}>
-            <input type="text" placeholder="Rechercher (Nom, Email...)" />
-            <select
-              value={selectedEventId}
-              onChange={(e) => setSelectedEventId(e.target.value)}
-            >
-              <option value="all">Tous les événements</option>
-              {eventsList.map((ev) => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div style={{ overflowX: "auto" }}>
-          <table className={styles.modern_table}>
-            <thead>
-              <tr>
-                <th>Participant</th>
-                <th>Événement</th>
-                <th>Type de Billet</th>
-                <th>Statut</th>
-                <th>Rôle / Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredParticipants.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
-                    Aucun participant
-                  </td>
-                </tr>
-              )}
-              {filteredParticipants.map((part) => (
-                <tr key={part.id}>
-                  <td>
-                    <div className={styles.participant_info}>
-                      <div className={styles.avatar}>
-                        {(
-                          part.user?.prenom?.[0] ||
-                          part.user?.nom?.[0] ||
-                          "?"
-                        ).toUpperCase()}
-                      </div>
-                      <div className={styles.details}>
-                        <span className={styles.name}>
-                          {part.user?.prenom} {part.user?.nom}
-                        </span>
-                        <span className={styles.email}>
-                          {part.user?.email || "N/A"}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{part.eventTitle}</td>
-                  <td>
-                    Standard{" "}
-                    <small style={{ color: "#6c757d" }}>(Défaut)</small>
-                  </td>
-                  <td>
-                    <span className={`${styles.badge} ${styles.status_paid}`}>
-                      Validé
-                    </span>
-                  </td>
-                  <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "0.5rem",
-                        alignItems: "center",
-                      }}
-                    >
-                      <select
-                        style={{
-                          padding: "0.3rem",
-                          borderRadius: "5px",
-                          border: "1px solid #ced4da",
-                        }}
-                      >
-                        <option value="participant">Participant</option>
-                        <option value="vip">VIP</option>
-                        <option value="staff">Staff</option>
-                      </select>
-                      <button
-                        className={styles.delete}
-                        title="Retirer"
-                        style={{
-                          border: "none",
-                          background: "none",
-                          color: "#dc3545",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {ICONS.delete}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  if (loading) {
+  if (authLoading || loading) {
     return <Loading message="Chargement de l'événement..." />;
+  }
+
+  if (errorMessage) {
+    return (
+      <div className={styles.dashboard_container}>
+        <div className={styles.dashboard_header}>
+          <h1>Dashboard Organisateur</h1>
+          <p>{errorMessage}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -667,9 +1021,39 @@ export default function Dashboard() {
       </div>
 
       <div className={styles.tab_content}>
-        {activeTab === "overview" && <OverviewSection />}
-        {activeTab === "participants" && <ParticipantsSection />}
+        {activeTab === "overview" && renderOverviewSection()}
+        {activeTab === "participants" && (
+          <ParticipantsSection
+            participants={participants}
+            eventsList={eventsList}
+            participantActionMessage={participantActionMessage}
+            isUnsubscribing={isUnsubscribing}
+            setSelectedParticipantToRemove={setSelectedParticipantToRemove}
+          />
+        )}
       </div>
+
+      <DelectModal
+        isOpen={Boolean(eventToDelete)}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        eventTitle={eventToDelete?.title}
+        isLoading={isDeleting}
+      />
+
+      <UnsubscribeParticipantModal
+        participant={selectedParticipantToRemove}
+        reason={unsubscribeReason}
+        isLoading={isUnsubscribing}
+        errorMessage={
+          participantActionMessage?.type === "error"
+            ? participantActionMessage.message
+            : ""
+        }
+        onReasonChange={setUnsubscribeReason}
+        onClose={closeUnsubscribeModal}
+        onConfirm={handleConfirmUnsubscribe}
+      />
     </div>
   );
 }
