@@ -46,6 +46,11 @@ interface IdTokenParam {
   token: string;
 }
 
+interface UnsubscribeParticipantParam extends IdTokenParam {
+  eventId?: number;
+  reason?: string;
+}
+
 interface EventTokenParam {
   eventId: number;
   token: string;
@@ -619,8 +624,20 @@ export const participations = {
    * Se désinscrire
    * @param {number} id
    */
-  delete: async ({ id, token }: IdTokenParam) => {
+  delete: async ({
+    id,
+    token,
+    eventId,
+    reason,
+  }: UnsubscribeParticipantParam) => {
     return apiRequest("DELETE", `/participations/id?id=${id}`, {
+      body:
+        eventId !== undefined || reason
+          ? {
+              eventId,
+              reason,
+            }
+          : undefined,
       headers: {
         Authorization: `Bearer ${token}`,
       },

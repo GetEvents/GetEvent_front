@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { events, participations } from "@/services/api";
+import { refreshAccessToken } from "@/actions/auth/authActions";
 import type {
   Event,
   EventActionState,
@@ -11,7 +12,7 @@ import type {
 
 const getToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
-  return cookieStore.get("token")?.value || null;
+  return cookieStore.get("token")?.value || (await refreshAccessToken());
 };
 
 const requireToken = async (): Promise<string> => {
@@ -98,7 +99,6 @@ const validateEvent = (
   }
 
   const photo = formData.get("photo");
-  console.log("Photo validation:", { photo, requireImage });
   if (requireImage && (!(photo instanceof File) || photo.size === 0)) {
     return "Une image de couverture est obligatoire.";
   }
@@ -134,7 +134,6 @@ export async function addEvent(
   _state: EventActionState | null,
   formData: FormData,
 ): Promise<EventActionState> {
-  console.log("addEvent called with formData:", formData);
   const error = validateEvent(formData, true);
   if (error) return { error: true, message: error };
 

@@ -2,11 +2,12 @@
 
 import { cookies } from "next/headers";
 import { notifications } from "@/services/api";
+import { refreshAccessToken } from "@/actions/auth/authActions";
 import type { Notification } from "@/actions/types/notification";
 
 const getToken = async () => {
   const cookieStore = await cookies();
-  return cookieStore.get("token")?.value;
+  return cookieStore.get("token")?.value || (await refreshAccessToken());
 };
 
 export async function fetchGetNotifications(limit = 20, skip = 0) {
