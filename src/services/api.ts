@@ -8,6 +8,7 @@ import type {
   ProfileApiResponse,
   UsersApiResponse,
 } from "@/actions/types/auth";
+import type { MyParticipationsApiPayload } from "@/actions/types/participation";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_SOCKET_URL ||
@@ -25,11 +26,15 @@ interface ApiRequestOptions {
 type ApiResponse<T = unknown> =
   | {
       success: true;
+      message?: string;
       data: T;
+      error?: string;
     }
   | {
       success: false;
+      message?: string;
       error: string;
+      data?: T;
     };
 
 // interface string {
@@ -667,7 +672,7 @@ export const participations = {
    * @param {number} eventId
    */
   getMyParticipationsId: async (token: string) => {
-    return apiRequest("GET", `/participations/my`, {
+    return apiRequest<MyParticipationsApiPayload>("GET", `/participations/my`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -887,6 +892,32 @@ export const paymentsStripe = {
    */
   getStripeOnboardingStatus: async (token: string) => {
     return apiRequest("GET", "/payments/stripeOnboardingStatus", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+};
+export const paymentsFedapay = {
+  /**
+   * Créer une session de paiement pour la création d'événement
+   */
+  createPaymentSection: async ({ eventid, token }: PaymentParam) => {
+    return apiRequest("POST", "/payments/fedapay/session", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: { eventid },
+    });
+  },
+
+  /**
+   * Récupérer une session de paiement
+   */
+  retrieveCheckoutSession: async ({
+    sessionId,
+    token,
+  }: {
+    sessionId: string;
+    token: string;
+  }) => {
+    return apiRequest("GET", `/payments/fedapay/call?session_id=${sessionId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   },
