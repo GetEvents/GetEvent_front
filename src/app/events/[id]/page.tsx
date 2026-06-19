@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, Check, Info, MapPin, Tag, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Info,
+  MapPin,
+  MessageCircle,
+  Tag,
+  Users,
+} from "lucide-react";
 import { getEventById } from "@/actions/event";
-import { getUser } from "@/actions/auth/authActions";
+import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
+import MessageClient from "@/app/message/MessageClient";
 import EventMap from "@/utils/map";
 import EventActions from "./EventActions";
 import styles from "./style.module.scss";
@@ -37,9 +46,10 @@ export default async function EventDetailPage({
   params,
 }: EventDetailPageProps) {
   const { id } = await params;
-  const [event, userResponse] = await Promise.all([
+  const [event, userResponse, tokenAuth] = await Promise.all([
     getEventById(id),
     getUser(),
+    getTokenFromCookie(),
   ]);
 
   if (!event) notFound();
@@ -49,6 +59,9 @@ export default async function EventDetailPage({
   const isOwner = currentUser?.id === event.organisateurId;
   const currentTicket = tickets.find(
     (ticket) => ticket.userId === currentUser?.id,
+  );
+  const canAccessMessages = Boolean(
+    currentUser && tokenAuth && (currentTicket || isOwner),
   );
   const remainingPlaces = Math.max(0, event.capacity - tickets.length);
   const eventEnd = getEventEnd(event.endDate, event.endTime);
@@ -185,6 +198,27 @@ export default async function EventDetailPage({
                       <p>Aucun participant inscrit pour cet événement.</p>
                     </div>
                   )}
+                </div>
+              </section>
+            )}
+            {canAccessMessages && currentUser && tokenAuth && (
+              <section className={styles.card}>
+                <header className={styles.cardHeader}>
+                  <h2>
+                    <MessageCircle />
+                    Messagerie
+                  </h2>
+                </header>
+
+                <div className={styles.cardBody}>
+                  <MessageClient
+                    key={event.id}
+                    eventId={event.id}
+                    token={tokenAuth}
+                    currentUserId={currentUser.id}
+                    organizerId={event.organisateurId}
+                    initialMessages={event.messages || []}
+                  />
                 </div>
               </section>
             )}
