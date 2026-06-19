@@ -861,7 +861,6 @@ export default function Dashboard({ count = null }) {
         },
       },
     });
-    
 
     const pieChart = new Chart(ctxPie, {
       type: "doughnut",
