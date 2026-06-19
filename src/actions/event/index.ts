@@ -219,7 +219,7 @@ export async function joinEvent(
 
   return {
     error: false,
-    message: payload.message || "Inscription réussie.",
+    message: payload.message || "Redirection...",
     paymentUrl: payload.data?.paymentUrl,
   };
 }

@@ -194,12 +194,10 @@ export default function Dashboard() {
             const soldCount = evParts.length;
             const price = parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
-              
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
-             
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }
@@ -214,7 +212,6 @@ export default function Dashboard() {
             ];
           }
         } catch (e) {
-          console.error("Erreur fetch participants pour event " + ev.id, e);
           const price = parseFloat(ev.paymentPrice) || 0;
           if (price > 0 && ev.participantsCount) {
             tTickets += ev.participantsCount;
@@ -239,8 +236,6 @@ export default function Dashboard() {
         revenues: pSalesByEvent.map((s) => s.revenue),
         participantsCounts: pSalesByEvent.map((s) => s.participants),
       });
-      console.log("tcapacity", tCapacity);
-      console.log("tTickets", tTickets);
 
       setKpis({
         totalEvents: tEvents,
@@ -256,7 +251,6 @@ export default function Dashboard() {
         freeRegistrations: freeRegistrations,
       });
     } catch (error) {
-      console.error("Dashboard init error: ", error);
     } finally {
       setLoading(false);
     }
