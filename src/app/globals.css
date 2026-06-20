@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 @import "../styles/variables.css";
 
@@ -16,6 +16,6 @@ body {
 /* Mobile responsive: add padding bottom when sidebar is at bottom */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 64px;
+    padding-bottom: 96px;
   }
 }

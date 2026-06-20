@@ -138,6 +138,22 @@ const Sidebar = ({ visible }) => {
       </nav>
 
       <div className={styles.sidebarFooter}>
+        <div className={styles.mobileNav}>
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.mobileNavItem} ${isActive ? styles.active : ""}`}
+                title={item.title}
+              >
+                {item.icon}
+              </Link>
+            );
+          })}
+        </div>
+
         <div className={styles.profileBox}>
           <div className={styles.avatarPlaceholder}>
             {profile.prenom?.charAt(0) || profile.nom?.charAt(0) || "U"}
