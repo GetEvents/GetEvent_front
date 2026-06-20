@@ -603,6 +603,72 @@
     font-size: 1.2rem;
     color: #0b5ed7;
   }
+
+  .scanner_section {
+    width: min(640px, 100%);
+    margin: 0 auto;
+    padding: 1.5rem;
+    border: 1px solid var(--app-color-border);
+    border-radius: 16px;
+    background: var(--app-color-white);
+    box-shadow: var(--app-shadow-md);
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+    }
+  }
+
+  .scanner_header {
+    margin-bottom: 1.25rem;
+    text-align: center;
+
+    h2 {
+      margin: 0 0 0.5rem;
+      color: var(--app-color-text);
+      font-size: 1.4rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--app-color-text-muted);
+      line-height: 1.5;
+    }
+  }
+
+  .scanner_event_select {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+
+    span {
+      color: var(--app-color-text);
+      font-weight: 600;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--app-color-border);
+      border-radius: var(--app-radius-md);
+      background: var(--app-color-white);
+      color: var(--app-color-text);
+      font: inherit;
+
+      &:focus {
+        border-color: var(--app-color-primary);
+        outline: 3px solid rgb(59 130 246 / 15%);
+      }
+    }
+  }
+
+  .scanner_empty {
+    margin: 0;
+    padding: 1rem;
+    border-radius: var(--app-radius-md);
+    background: var(--app-color-surface-muted);
+    color: var(--app-color-text-muted);
+    text-align: center;
+  }
 }
 
 .participant_success {

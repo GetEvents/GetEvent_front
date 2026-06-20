@@ -9,6 +9,11 @@ const nextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/dpkph2ucq/image/upload/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
   turbopack: {

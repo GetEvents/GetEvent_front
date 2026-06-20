@@ -22,7 +22,9 @@ const Register = ({ id }) => {
   const { notify } = useNotification();
 
   const formatDate = (dateString) => {
+    if (!dateString) return "";
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
     return date.toISOString().split("T")[0];
   };
 
@@ -39,7 +41,6 @@ const Register = ({ id }) => {
       const fetchData = async () => {
         try {
           const response = await getUser();
-          console.log("la reponse", response.user);
 
           if (response?.user) {
             setDefaultForm({
@@ -280,8 +281,8 @@ const Register = ({ id }) => {
                         value={defaultForm.role}
                         handleChange={handleChange}
                         options={[
-                          { value: "organisateur", label: "Organisateur" },
-                          { value: "user", label: "Participant" },
+                          { value: "ORGANISATEUR", label: "Organisateur" },
+                          { value: "PARTICIPANT", label: "Participant" },
                         ]}
                       />
                     </div>
@@ -359,8 +360,8 @@ const Register = ({ id }) => {
                     handleChange={handleChange}
                     required
                     options={[
-                      { value: "organisateur", label: "Organisateur" },
-                      { value: "user", label: "Participant" },
+                      { value: "ORGANISATEUR", label: "Organisateur" },
+                      { value: "PARTICIPANT", label: "Participant" },
                     ]}
                   />
                 </div>

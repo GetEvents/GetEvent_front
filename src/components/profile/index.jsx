@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import { getUser } from "@/actions/auth/authAction";
+import { getUser } from "@/actions/auth/authActions";
 import styles from "./style.module.scss";
 
 export default function Profil() {

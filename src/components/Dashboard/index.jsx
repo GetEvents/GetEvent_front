@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import DelectModal from "@/components/DelectModal";
 import Loading from "@/components/ui/Loading";
+import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
 // --- STYLES/ICONS ---
 const ICONS = {
@@ -545,6 +546,7 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
 export default function Dashboard({ count = null }) {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [scannerEventId, setScannerEventId] = useState("");
   const [selectedParticipantToRemove, setSelectedParticipantToRemove] =
     useState(null);
   const [unsubscribeReason, setUnsubscribeReason] = useState("");
@@ -608,6 +610,11 @@ export default function Dashboard({ count = null }) {
           ? eventsRes.events
           : [];
       setEventsList(list);
+      setScannerEventId((currentEventId) =>
+        list.some((event) => String(event.id) === currentEventId)
+          ? currentEventId
+          : String(list[0]?.id || ""),
+      );
 
       // Met à jour le compteur global du parent si la prop existe
       if (typeof count === "function") {
@@ -1017,6 +1024,12 @@ export default function Dashboard({ count = null }) {
         >
           Participants
         </button>
+        <button
+          className={`${styles.tab_btn} ${activeTab === "scanner" ? styles.active : ""}`}
+          onClick={() => setActiveTab("scanner")}
+        >
+          Contrôle des billets
+        </button>
       </div>
 
       <div className={styles.tab_content}>
@@ -1029,6 +1042,45 @@ export default function Dashboard({ count = null }) {
             isUnsubscribing={isUnsubscribing}
             setSelectedParticipantToRemove={setSelectedParticipantToRemove}
           />
+        )}
+        {activeTab === "scanner" && (
+          <section className={styles.scanner_section}>
+            <header className={styles.scanner_header}>
+              <h2>Scanner un billet</h2>
+              <p>
+                Présentez le QR code du participant devant la caméra pour
+                valider son entrée.
+              </p>
+            </header>
+            {eventsList.length > 0 ? (
+              <>
+                <label className={styles.scanner_event_select}>
+                  <span>Événement contrôlé</span>
+                  <select
+                    value={scannerEventId}
+                    onChange={(event) => setScannerEventId(event.target.value)}
+                  >
+                    {eventsList.map((event) => (
+                      <option key={event.id} value={event.id}>
+                        {event.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {scannerEventId && (
+                  <TicketQRCodeLecteur
+                    key={scannerEventId}
+                    eventId={Number(scannerEventId)}
+                  />
+                )}
+              </>
+            ) : (
+              <p className={styles.scanner_empty}>
+                Créez d’abord un événement pour pouvoir contrôler ses billets.
+              </p>
+            )}
+          </section>
         )}
       </div>
 

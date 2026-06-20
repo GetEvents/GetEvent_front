@@ -14,6 +14,7 @@ import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
 import MessageClient from "@/app/message/MessageClient";
 import EventMap from "@/utils/map";
 import EventActions from "./EventActions";
+import TicketQRCode from "./TicketQRCode";
 import styles from "./style.module.scss";
 
 const formatDate = (value?: string | null) => {
@@ -230,23 +231,29 @@ export default async function EventDetailPage({
                 <h3>Billetterie</h3>
               </header>
               <div className={styles.sidebarBody}>
-                <div
-                  className={`${styles.priceSection} ${
-                    event.paymentRequired ? "" : styles.free
-                  }`}
-                >
-                  <p className={styles.priceLabel}>Pass standard</p>
-                  <h2 className={styles.priceAmount}>
-                    {event.paymentRequired
-                      ? `${event.paymentPrice || 0} €`
-                      : "Gratuit"}
-                  </h2>
-                  <p className={styles.priceNote}>
-                    {event.paymentRequired
-                      ? "Prix par participant"
-                      : "Inscription libre"}
-                  </p>
-                </div>
+                {!currentTicket?.qrCode && (
+                  <div
+                    className={`${styles.priceSection} ${
+                      event.paymentRequired ? "" : styles.free
+                    }`}
+                  >
+                    <p className={styles.priceLabel}>Pass standard</p>
+                    <h2 className={styles.priceAmount}>
+                      {event.paymentRequired
+                        ? `${event.paymentPrice || 0} €`
+                        : "Gratuit"}
+                    </h2>
+                    <p className={styles.priceNote}>
+                      {event.paymentRequired
+                        ? "Prix par participant"
+                        : "Inscription libre"}
+                    </p>
+                  </div>
+                )}
+
+                {currentTicket?.qrCode && (
+                  <TicketQRCode value={currentTicket.qrCode} />
+                )}
 
                 <div className={styles.features}>
                   <span className={styles.feature}>

@@ -56,6 +56,12 @@ interface EventTokenParam {
   token: string;
 }
 
+interface QrCodeTokenParam {
+  qrCode: string;
+  eventId: number;
+  token: string;
+}
+
 interface FormTokenParam {
   formData: FormData;
   token: string;
@@ -726,6 +732,15 @@ export const participations = {
         },
       },
     );
+  },
+
+  validateQrCode: async ({ token, qrCode, eventId }: QrCodeTokenParam) => {
+    return apiRequest("POST", "/participations/qr-code/validate", {
+      body: { qrCode, eventId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
 };
 
