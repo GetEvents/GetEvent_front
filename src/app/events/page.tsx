@@ -198,7 +198,17 @@ export default function Welcome() {
                   onClick={() => setShowNotifications(true)}
                   aria-label="Ouvrir les notifications"
                 >
-                  <span aria-hidden="true">!</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
                   {notificationCount > 0 && (
                     <span className={style.notificationDot}>
                       {notificationCount}
@@ -224,7 +234,17 @@ export default function Welcome() {
             <div className={style.searchContainer}>
               <div className={style.searchGroup}>
                 <div className={style.searchInput}>
-                  <span aria-hidden="true">⌕</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                  </svg>
                   <input
                     type="search"
                     placeholder="Rechercher des événements..."
@@ -236,7 +256,17 @@ export default function Welcome() {
                   />
                 </div>
                 <div className={style.locationInput}>
-                  <span aria-hidden="true">⌖</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
                   <input
                     type="text"
                     id="pac_input"

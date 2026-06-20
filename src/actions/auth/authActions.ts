@@ -247,6 +247,72 @@ export async function resetPassword(
   };
 }
 
+export async function changeCurrentPassword(
+  password: string,
+): Promise<ActionResponse> {
+  if (password.length < 8) {
+    return {
+      error: true,
+      message: "Le mot de passe doit contenir au moins 8 caractères.",
+    };
+  }
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value || (await refreshAccessToken());
+
+  if (!token) {
+    return {
+      error: true,
+      message: "Votre session a expiré. Veuillez vous reconnecter.",
+    };
+  }
+
+  const response = await auth.resetPassword(password, token);
+
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error || "Impossible de modifier le mot de passe.",
+    };
+  }
+
+  return {
+    error: false,
+    message:
+      (response.data as { message?: string }).message ||
+      "Votre mot de passe a été modifié.",
+  };
+}
+
+export async function deleteCurrentAccount(): Promise<ActionResponse> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value || (await refreshAccessToken());
+
+  if (!token) {
+    return {
+      error: true,
+      message: "Votre session a expiré. Veuillez vous reconnecter.",
+    };
+  }
+
+  const response = await auth.deleteAccount(token);
+
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error || "Impossible de supprimer votre compte.",
+    };
+  }
+
+  cookieStore.delete("token");
+  cookieStore.delete("refreshToken");
+
+  return {
+    error: false,
+    message: "Votre compte a été supprimé.",
+  };
+}
+
 export async function editProfil(
   _state: ServerActionState,
   formData: FormData,

@@ -245,3 +245,40 @@ export async function isRegistered(eventId: number) {
     return null;
   }
 }
+
+export async function validateTicketQrCode(
+  qrCode: string,
+  eventId: number,
+): Promise<{ error: boolean; message: string }> {
+  const normalizedQrCode = qrCode.trim();
+
+  if (!normalizedQrCode || !Number.isInteger(eventId) || eventId <= 0) {
+    return { error: true, message: "QR code ou événement invalide." };
+  }
+
+  const token = await getToken();
+
+  if (!token) {
+    return {
+      error: true,
+      message: "Vous devez être connecté pour valider un billet.",
+    };
+  }
+
+  const response = await participations.validateQrCode({
+    qrCode: normalizedQrCode,
+    eventId,
+    token,
+  });
+
+  if (!response.success) {
+    return { error: true, message: response.error };
+  }
+
+  const payload = response.data as { message?: string };
+
+  return {
+    error: false,
+    message: payload.message || "Entrée validée.",
+  };
+}

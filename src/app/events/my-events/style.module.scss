@@ -20,7 +20,7 @@
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -50%;
     right: -10%;
@@ -31,7 +31,7 @@
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -30%;
     left: -5%;
@@ -105,7 +105,6 @@
 }
 
 @media (max-width: 768px) {
- 
   .header_section {
     padding: 2rem 1rem;
     margin-bottom: 2rem;
@@ -144,8 +143,6 @@
 }
 
 @media (max-width: 1024px) {
-
-
   .header_section {
     padding: 2rem 1.5rem;
     margin-bottom: 2rem;
