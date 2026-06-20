@@ -194,6 +194,10 @@ $border-color: #e2e8f0;
 }
 
 /* FOOTER */
+.mobileNav {
+  display: none;
+}
+
 .sidebarFooter {
   padding: 1rem;
   border-top: 1px solid rgba(226, 232, 240, 0.5);
@@ -283,50 +287,113 @@ $border-color: #e2e8f0;
 @media (max-width: 768px) {
   .sidebar {
     width: 100% !important;
-    height: auto;
-    position: fixed;
-    bottom: 0;
-    top: auto;
-    left: 0;
-    right: 0;
-    border-right: none;
-    border-top: 1px solid $border-color;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    z-index: 10005;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
+    height: 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
+    z-index: 10005 !important;
 
     .sidebarHeader,
-    .sidebarFooter {
+    .sidebarNav {
       display: none !important;
     }
 
-    .sidebarNav {
-      padding: 0;
-      overflow: visible;
-      width: 100%;
+    .sidebarFooter {
+      position: fixed !important;
+      bottom: 1.5rem !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      z-index: 10006 !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      padding: 0.4rem 0.8rem !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+      border-radius: 9999px !important;
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(12px) saturate(180%) !important;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
 
-      ul {
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
+      .mobileNav {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.25rem !important;
+
+        .mobileNavItem {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 36px !important;
+          height: 36px !important;
+          border-radius: 50% !important;
+          color: $text-muted !important;
+          transition: all 0.2s ease !important;
+
+          svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+
+          &:hover,
+          &.active {
+            background: $bg-active !important;
+            color: $primary !important;
+          }
+        }
       }
-    }
 
-    .navItem {
-      flex-direction: column;
-      gap: 0.25rem;
-      padding: 0.5rem;
+      .profileBox {
+        border-left: 1px solid rgba(226, 232, 240, 0.8) !important;
+        padding-left: 0.5rem !important;
+        margin-left: 0.25rem !important;
+        background: transparent !important;
+        border-top: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        border-radius: 0 !important;
+        width: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
 
-      .navIcon {
-        width: 24px;
+        .avatarPlaceholder {
+          width: 36px !important;
+          height: 36px !important;
+        }
       }
 
+      .logoutBtn {
+        width: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        border: 1px solid transparent !important;
+        background: transparent !important;
+        color: $text-muted !important;
+        padding: 0 !important;
+
+        &:hover {
+          background: #fef2f2 !important;
+          color: #dc3545 !important;
+          border-color: #fca5a5 !important;
+        }
+      }
+
+      .profileDetails,
       .navText {
-        font-size: 0.7rem;
+        display: none !important;
       }
     }
   }
