@@ -3,10 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CirclePlus, LogOut, Pencil, Trash2 } from "lucide-react";
-import { delectEvent, joinEvent, leaveEvent } from "@/actions/event";
-import type { EventActionState } from "@/actions/types/event";
+import { useDeleteEvent, useJoinEvent, useLeaveEvent } from "@/hooks/useEvents";
 import DelectModal from "@/components/DelectModal";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 import styles from "./style.module.scss";
@@ -31,104 +29,65 @@ export default function EventActions({
   isFull,
 }: EventActionsProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { notify } = useNotification() as {
     // eslint-disable-next-line no-unused-vars
     notify: (message: string, type?: "success" | "error" | "info") => void;
   };
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const joinMutation = useMutation<
-    EventActionState & { paymentUrl?: string },
-    Error,
-    number
-  >({
-    mutationFn: joinEvent,
-    onSuccess: (result) => {
-      if (result.error) {
-        notify(result.message, "error");
-        return;
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-      notify(result.message, "success");
-      if (result.paymentUrl) {
-        window.location.assign(result.paymentUrl);
-        return;
-      }
-      router.refresh();
-    },
-    onError: () => {
-      notify("Impossible de vous inscrire.", "error");
-    },
-  });
-
-  const leaveMutation = useMutation<EventActionState, Error, number>({
-    mutationFn: leaveEvent,
-    onSuccess: (result) => {
-      notify(result.message, result.error ? "error" : "success");
-      if (!result.error) {
-        queryClient.invalidateQueries({ queryKey: ["events"] });
-        router.refresh();
-      }
-    },
-    onError: () => {
-      notify("Impossible de vous désinscrire.", "error");
-    },
-  });
-
-  const deleteMutation = useMutation<EventActionState, Error, number>({
-    mutationFn: delectEvent,
-    onSuccess: (result) => {
-      if (result.error) {
-        notify(result.message, "error");
-        return;
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["events"] });
-      notify(result.message, "success");
-      router.push(result.redirect || "/events/my-events");
-    },
-    onError: () => {
-      notify("Impossible de supprimer l'événement.", "error");
-    },
-  });
-
+  const joinMutation = useJoinEvent();
+  const leaveMutation = useLeaveEvent();
+  const deleteMutation = useDeleteEvent();
   const isPending =
     joinMutation.isPending ||
     leaveMutation.isPending ||
     deleteMutation.isPending;
 
-  const handleJoin = () => {
-    joinMutation.mutate(eventId);
-  };
+  const handleJoin = () =>
+    joinMutation.mutate(eventId, {
+      onSuccess: (result) => {
+        if (result.error) return notify(result.message, "error");
+        notify(result.message, "success");
+        if (result.paymentUrl) return window.location.assign(result.paymentUrl);
+        router.refresh();
+      },
+      onError: () => notify("Impossible de vous inscrire.", "error"),
+    });
 
   const handleLeave = () => {
     if (!ticketId) return;
-    leaveMutation.mutate(ticketId);
+    leaveMutation.mutate(ticketId, {
+      onSuccess: (result) => {
+        notify(result.message, result.error ? "error" : "success");
+        if (!result.error) router.refresh();
+      },
+      onError: () => notify("Impossible de vous désinscrire.", "error"),
+    });
   };
 
-  const handleDelete = () => {
-    deleteMutation.mutate(eventId);
-    setIsDeleteModalOpen(false);
-  };
+  const handleDelete = () =>
+    deleteMutation.mutate(eventId, {
+      onSuccess: (result) => {
+        if (result.error) return notify(result.message, "error");
+        notify(result.message, "success");
+        setIsDeleteModalOpen(false);
+        router.push(result.redirect || "/events/my-events");
+      },
+      onError: () => notify("Impossible de supprimer l'événement.", "error"),
+    });
 
-  if (isOwner) {
+  if (isOwner)
     return (
       <>
         <div className={styles.actionButtons}>
           <Link
             href={isExpired ? "#" : `/events/editEvent/${eventId}`}
-            className={`${styles.button} ${styles.primary} ${
-              isExpired ? styles.disabled : ""
-            }`}
+            className={`${styles.button} ${styles.primary} ${isExpired ? styles.disabled : ""}`}
             aria-disabled={isExpired}
             onClick={(event) => {
               if (isExpired) event.preventDefault();
             }}
           >
-            <Pencil />
-            Modifier l&apos;événement
+            <Pencil /> Modifier l&apos;événement
           </Link>
           <button
             type="button"
@@ -136,8 +95,7 @@ export default function EventActions({
             onClick={() => setIsDeleteModalOpen(true)}
             disabled={isPending}
           >
-            <Trash2 />
-            Supprimer l&apos;événement
+            <Trash2 /> Supprimer l&apos;événement
           </button>
         </div>
         <DelectModal
@@ -149,9 +107,8 @@ export default function EventActions({
         />
       </>
     );
-  }
 
-  if (isRegistered) {
+  if (isRegistered)
     return (
       <button
         type="button"
@@ -159,11 +116,10 @@ export default function EventActions({
         onClick={handleLeave}
         disabled={isPending}
       >
-        <LogOut />
+        <LogOut />{" "}
         {isPending ? "Désinscription..." : "Se désinscrire de l'événement"}
       </button>
     );
-  }
 
   return (
     <button

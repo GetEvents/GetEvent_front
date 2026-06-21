@@ -100,7 +100,7 @@ export default function Welcome() {
   }, [setToken, setUser]);
 
   const isSearching = isFetching || isLoadingMore;
-  const loading = isLoading && !isLoadingMore;
+  const loading = (isLoading || isFetching) && !isLoadingMore;
 
   useEffect(() => {
     loadGoogleMapsScript(() => {

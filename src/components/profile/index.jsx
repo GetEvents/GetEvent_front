@@ -1,40 +1,11 @@
 "use client";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
-import { getUser } from "@/actions/auth/authActions";
+import React from "react";
+import { useAuth } from "@/hooks/useAuth";
 import styles from "./style.module.scss";
 
 export default function Profil() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    getUser()
-      .then((response) => {
-        if (isMounted) {
-          if (response?.user) {
-            setCurrentUser(response.user);
-          } else {
-            setError("Impossible de récupérer les informations de profil");
-          }
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching user data:", err);
-        if (isMounted) {
-          setError("Erreur réseau");
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { user: currentUser, loading, error } = useAuth();
 
   if (loading) {
     return (

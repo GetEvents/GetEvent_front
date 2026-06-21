@@ -7,6 +7,25 @@
   border: 1px solid var(--app-color-border);
   border-radius: var(--app-radius-lg);
   background: var(--app-color-white);
+
+  video {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+    object-fit: cover;
+  }
+}
+
+.qrReader {
+  width: 100%;
+}
+
+.loading {
+  margin: 0;
+  padding: var(--app-space-6);
+  color: var(--app-color-text-muted);
+  text-align: center;
 }
 
 .result {
@@ -24,20 +43,11 @@
     margin: 0;
     font-weight: var(--app-font-weight-semibold);
   }
+}
 
-  button {
-    padding: var(--app-space-2) var(--app-space-4);
-    border: 0;
-    border-radius: var(--app-radius-md);
-    background: var(--app-color-primary);
-    color: var(--app-color-white);
-    cursor: pointer;
-    font-weight: var(--app-font-weight-semibold);
-
-    &:hover {
-      background: var(--app-color-primary-hover);
-    }
-  }
+.scanHint {
+  color: var(--app-color-text-muted);
+  font-size: var(--app-font-size-sm);
 }
 
 .success {

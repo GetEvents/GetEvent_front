@@ -1,18 +1,17 @@
 "use client";
 
-import { useActionState } from "react";
 import Link from "next/link";
 import Input from "@/components/ui/Input/input";
-import { forgotPassword } from "@/actions/auth/authActions";
+import { useForgotPassword } from "@/hooks/useAuthMutations";
 import styles from "./style.module.scss";
 
-const initialState = null;
-
 export default function ForgotPasswordForm() {
-  const [state, formAction, pending] = useActionState(
-    forgotPassword,
-    initialState,
-  );
+  const mutation = useForgotPassword();
+  const state = mutation.data;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    mutation.mutate(new FormData(event.currentTarget));
+  };
 
   return (
     <div className={styles.container}>
@@ -28,7 +27,7 @@ export default function ForgotPasswordForm() {
         </p>
       </div>
 
-      <form action={formAction} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <Input
           name="email"
           label="Adresse e-mail"
@@ -51,9 +50,9 @@ export default function ForgotPasswordForm() {
         <button
           type="submit"
           className={styles.submitButton}
-          disabled={pending}
+          disabled={mutation.isPending}
         >
-          {pending ? "Envoi..." : "Envoyer le lien"}
+          {mutation.isPending ? "Envoi..." : "Envoyer le lien"}
         </button>
       </form>
     </div>

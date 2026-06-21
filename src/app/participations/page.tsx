@@ -1,122 +1,72 @@
 "use client";
-import style from "./style.module.scss";
-import React, { useEffect, useMemo, useState } from "react";
-import EventCard from "@/components/ui/EventCart";
-import { getAllParticipantByUser } from "@/actions/participant/index";
-import type { Event } from "@/actions/types/event";
+
+import { QrCode } from "lucide-react";
+import Ticket, { TicketSkeleton } from "@/components/ui/Ticket";
 import { useAuth } from "@/hooks/useAuth";
+import { useTicketsByUser } from "@/hooks/useParticipants";
+import style from "./style.module.scss";
 
-type ParticipationEvent = Event & {
-  _participationId?: number | string;
-};
-
-type ParticipationItem =
-  | (Partial<ParticipationEvent> & {
-      id?: number | string;
-      event?: Event;
-    })
-  | null
-  | undefined;
-
-const mapParticipationToEvent = (
-  participation: ParticipationItem,
-): ParticipationEvent | null => {
-  if (!participation) return null;
-
-  if (participation.event) {
-    return {
-      ...participation.event,
-      _participationId: participation.id,
-    };
-  }
-
-  return participation as ParticipationEvent;
-};
-
-export default function Welcome() {
+export default function ParticipationsPage() {
   const { user, loading: authLoading } = useAuth();
-  const [eventList, setEventList] = useState<ParticipationEvent[]>([]);
-  const [isLoadingParticipations, setIsLoadingParticipations] = useState(true);
-  const [feedback, setFeedback] = useState<{
-    error: boolean;
-    message: string;
-  } | null>(null);
-
-  const loading = authLoading || isLoadingParticipations;
-  const eventCountLabel = useMemo(
-    () => `Événement${eventList.length > 1 ? "s" : ""}`,
-    [eventList.length],
+  const ticketsQuery = useTicketsByUser(
+    user?.id,
+    !authLoading && Boolean(user),
   );
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadParticipations = async () => {
-      setIsLoadingParticipations(true);
-      setFeedback(null);
-
-      try {
-        const response = await getAllParticipantByUser();
-
-        if (!isMounted) return;
-
-        const rawList = Array.isArray(response?.participant)
-          ? response.participant
-          : [];
-
-        const mappedEvents = rawList
-          .map(mapParticipationToEvent)
-          .filter((event): event is ParticipationEvent => Boolean(event));
-        setEventList(mappedEvents);
-      } catch {
-        if (!isMounted) return;
-
-        setFeedback({
-          error: true,
-          message: "Impossible de charger vos participations.",
-        });
-      } finally {
-        if (isMounted) {
-          setIsLoadingParticipations(false);
-        }
-      }
-    };
-
-    void loadParticipations();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const tickets = ticketsQuery.data || [];
+  const loading = authLoading || ticketsQuery.isPending;
 
   return (
-    <div className={style.parent_container}>
-      <div className={style.header_section}>
+    <main className={style.parent_container}>
+      <header className={style.header_section}>
         <div className={style.header_content}>
           <div>
-            <h1 className={style.main_title}>Mes Participations</h1>
+            <p className={style.eyebrow}>Votre portefeuille</p>
+            <h1 className={style.main_title}>Mes billets</h1>
             <p className={style.description}>
-              Découvrez et gérez les événements auxquels vous participez
+              Retrouvez vos accès et présentez leur QR code à l’entrée.
             </p>
           </div>
-          <div className={style.event_badge}>
-            <span className={style.badge_number}>{eventList.length}</span>
-            <span className={style.badge_text}>{eventCountLabel}</span>
+          <div
+            className={style.event_badge}
+            aria-label={`${tickets.length} billets`}
+          >
+            <span className={style.badge_number}>{tickets.length}</span>
+            <span className={style.badge_text}>
+              Billet{tickets.length > 1 ? "s" : ""}
+            </span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className={style.content_section}>
-        <EventCard
-          message={feedback}
-          eventList={eventList}
-          loading={loading}
-          current_user={user}
-          state={feedback}
-          show={Boolean(feedback)}
-          handleClose={() => setFeedback(null)}
-        />
-      </div>
-    </div>
+      <section className={style.content_section} aria-live="polite">
+        {loading ? (
+          <div
+            className={style.ticket_grid}
+            aria-busy="true"
+            aria-label="Chargement de vos billets"
+          >
+            {Array.from({ length: 4 }, (_, index) => (
+              <TicketSkeleton key={index} />
+            ))}
+          </div>
+        ) : ticketsQuery.isError ? (
+          <div className={`${style.state} ${style.error}`}>
+            Impossible de charger vos billets.
+          </div>
+        ) : tickets.length === 0 ? (
+          <div className={style.state}>
+            <QrCode aria-hidden="true" />
+            <h2>Aucun billet pour le moment</h2>
+            <p>Vos prochaines inscriptions apparaîtront ici.</p>
+          </div>
+        ) : (
+          <div className={style.ticket_grid}>
+            {tickets.map((ticket) => (
+              <Ticket key={ticket.id} ticket={ticket} />
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   );
 }

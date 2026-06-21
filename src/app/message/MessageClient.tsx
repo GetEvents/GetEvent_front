@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { Send } from "lucide-react";
-import { isRegistered } from "@/actions/participant";
+import { useParticipantRegistration } from "@/hooks/useParticipants";
 import type { EventMessage } from "@/actions/types/event";
 import type { User } from "@/actions/types/auth";
 import {
@@ -67,8 +67,19 @@ export default function MessageClient({
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     mapInitialMessages(initialMessages, currentUserId),
   );
-  const [canChat, setCanChat] = useState(isOrganizer);
-  const [accessChecked, setAccessChecked] = useState(isOrganizer);
+  const registrationQuery = useParticipantRegistration(eventId, !isOrganizer);
+  const registrationValue = registrationQuery.data?.isRegistered;
+  const isRegistered =
+    !registrationQuery.isError &&
+    (typeof registrationValue === "object" && registrationValue !== null
+      ? Boolean(
+          "isRegistered" in registrationValue
+            ? registrationValue.isRegistered
+            : registrationValue,
+        )
+      : Boolean(registrationValue));
+  const canChat = isOrganizer || isRegistered;
+  const accessChecked = isOrganizer || !registrationQuery.isPending;
   const chatRef = useRef<HTMLDivElement>(null);
   const announcedJoinedUsersRef = useRef<Set<string>>(new Set());
 
@@ -78,45 +89,14 @@ export default function MessageClient({
   }, [token]);
 
   useEffect(() => {
-    let cancelled = false;
+    if (!accessChecked || !canChat) return;
 
-    if (isOrganizer) {
-      joinEvent(eventId);
-      return () => {
-        leaveEvent(eventId);
-      };
-    }
-
-    void isRegistered(eventId)
-      .then((response) => {
-        if (cancelled) return;
-
-        const registrationValue = response?.isRegistered;
-        const registered =
-          typeof registrationValue === "object" && registrationValue !== null
-            ? Boolean(
-                "isRegistered" in registrationValue
-                  ? registrationValue.isRegistered
-                  : registrationValue,
-              )
-            : Boolean(registrationValue);
-
-        setCanChat(registered);
-        setAccessChecked(true);
-        if (registered) joinEvent(eventId);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setCanChat(false);
-          setAccessChecked(true);
-        }
-      });
+    joinEvent(eventId);
 
     return () => {
-      cancelled = true;
       leaveEvent(eventId);
     };
-  }, [eventId, isOrganizer]);
+  }, [accessChecked, canChat, eventId]);
 
   useEffect(() => {
     if (!canChat) return;

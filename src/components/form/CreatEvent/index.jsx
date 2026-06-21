@@ -3,25 +3,19 @@
 import style from "./style.module.scss";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/Input/input";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { addEvent, getEventById, editeEvent } from "@/actions/event/index";
+import { useEffect, useRef, useState } from "react";
+import { useCreateEvent, useEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
 import { loadGoogleMapsScript } from "@/utils/loadGoogleMap";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
-const initialState = {
-  message: "",
-};
-
 const CreatEvent = ({ id }) => {
-  const action = id ? editeEvent : addEvent;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const createMutation = useCreateEvent();
+  const updateMutation = useUpdateEvent();
+  const mutation = id ? updateMutation : createMutation;
+  const state = mutation.data;
+  const pending = mutation.isPending;
+  const eventQuery = useEvent(id ? Number(id) : 0);
   const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -110,26 +104,25 @@ const CreatEvent = ({ id }) => {
 
   // Charger les détails de l'événement en mode édition (une seule fois)
   useEffect(() => {
-    if (id) {
-      getEventById(id).then((response) => {
-        console.log("Event details:", response.event);
-        setEvent(response.event);
-        setForm({
-          title: response.event?.title ?? "",
-          category: response.event?.category ?? "",
-          description: response.event?.description ?? "",
-          photo: response.event?.image ?? null,
-          startDate: response.event?.startDate ?? "",
-          startTime: response.event?.startTime ?? "",
-          endDate: response.event?.endDate ?? "",
-          endTime: response.event?.endTime ?? "",
-          location: response.event?.location ?? "",
-          isOnline: response.event?.isOnline ?? false,
-          capacity: response.event?.capacity ?? 0,
-        });
+    if (id && eventQuery.data) {
+      const response = eventQuery.data;
+      console.log("Event details:", response.event);
+      setEvent(response.event);
+      setForm({
+        title: response.event?.title ?? "",
+        category: response.event?.category ?? "",
+        description: response.event?.description ?? "",
+        photo: response.event?.image ?? null,
+        startDate: response.event?.startDate ?? "",
+        startTime: response.event?.startTime ?? "",
+        endDate: response.event?.endDate ?? "",
+        endTime: response.event?.endTime ?? "",
+        location: response.event?.location ?? "",
+        isOnline: response.event?.isOnline ?? false,
+        capacity: response.event?.capacity ?? 0,
       });
     }
-  }, [id]);
+  }, [eventQuery.data, id]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -212,9 +205,7 @@ const CreatEvent = ({ id }) => {
     if (event?.id) formData.append("id", event.id);
     if (eventImage) formData.append("photo", eventImage);
 
-    startTransition(() => {
-      formAction(formData);
-    });
+    mutation.mutate(formData);
   };
   return (
     <div className={`${style.fullPageForm}`}>

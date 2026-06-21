@@ -4,12 +4,46 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 
-import Loading from "../Loading";
 import DelectModal from "../../DelectModal";
-import { delectEvent } from "@/actions/event";
+import { useDeleteEvent } from "@/hooks/useEvents";
 import React from "react";
 
 import { useRouter } from "next/navigation";
+
+export function EventCardSkeleton({ count = 6 }) {
+  return (
+    <div
+      className={styles.events_schowdiv}
+      aria-busy="true"
+      aria-label="Chargement des événements"
+    >
+      {Array.from({ length: count }, (_, index) => (
+        <div
+          className={`${styles.events_schowdi} ${styles.skeletonCard}`}
+          key={index}
+          aria-hidden="true"
+        >
+          <div className={styles.skeletonImage} />
+          <div className={styles.skeletonContent}>
+            <span className={styles.skeletonTitle} />
+            <div className={styles.skeletonMeta}>
+              <span />
+              <span />
+            </div>
+            <span className={styles.skeletonLocation} />
+            <span className={styles.skeletonText} />
+            <span className={styles.skeletonTextShort} />
+            <div className={styles.skeletonActions}>
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function EventCard({
   message,
   eventList,
@@ -20,6 +54,7 @@ export default function EventCard({
   handleClose,
 }) {
   const router = useRouter();
+  const deleteEventMutation = useDeleteEvent();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -86,7 +121,7 @@ export default function EventCard({
 
     setIsDeleting(true);
     try {
-      const response = await delectEvent(eventToDelete.id);
+      const response = await deleteEventMutation.mutateAsync(eventToDelete.id);
       console.log("response", response);
 
       if (response.redirect) {
@@ -123,7 +158,7 @@ export default function EventCard({
       )}
 
       {loading ? (
-        <Loading message="Chargement des événements..." />
+        <EventCardSkeleton />
       ) : eventList != null && eventList.length > 0 ? (
         <div className={styles.events_schowdiv}>
           {eventList.map((event) => {

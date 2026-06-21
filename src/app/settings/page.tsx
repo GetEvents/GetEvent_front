@@ -1,11 +1,8 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check, CreditCard, ShieldCheck, Trash2 } from "lucide-react";
-import {
-  changeCurrentPassword,
-  deleteCurrentAccount,
-} from "@/actions/auth/authActions";
 import {
   createSellerAccountLink,
   getStripeOnboardingStatus,
@@ -13,6 +10,7 @@ import {
 import Profil from "@/components/profile";
 import ProfilForm from "@/components/form/RegisterForm";
 import { useAuth } from "@/hooks/useAuth";
+import { useChangePassword, useDeleteAccount } from "@/hooks/useAuthMutations";
 import styles from "./style.module.scss";
 
 type PasswordState = {
@@ -23,8 +21,6 @@ type PasswordState = {
   loading: boolean;
 };
 
-type StripeStatus = "checking" | "onboarded" | "not_onboarded";
-
 const initialPasswordState: PasswordState = {
   newPassword: "",
   confirmPassword: "",
@@ -33,47 +29,71 @@ const initialPasswordState: PasswordState = {
   loading: false,
 };
 
+function SettingsSkeleton() {
+  return (
+    <main
+      className={styles.page}
+      aria-busy="true"
+      aria-label="Chargement des paramètres"
+    >
+      <div className={styles.container}>
+        <div className={styles.skeletonHeader} />
+        <div className={styles.content}>
+          <aside className={styles.profileColumn}>
+            <div className={`${styles.card} ${styles.skeletonProfile}`} />
+          </aside>
+          <div className={styles.settingsColumn}>
+            {[240, 180, 220].map((height) => (
+              <div
+                className={`${styles.card} ${styles.skeletonCard}`}
+                style={{ minHeight: height }}
+                key={height}
+              >
+                <span className={styles.skeletonTitle} />
+                <span className={styles.skeletonLine} />
+                <span className={styles.skeletonLineShort} />
+                <span className={styles.skeletonControl} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [passwordState, setPasswordState] =
     useState<PasswordState>(initialPasswordState);
-  const [stripeStatus, setStripeStatus] = useState<StripeStatus>("checking");
   const [stripeLoading, setStripeLoading] = useState(false);
-  const [stripeError, setStripeError] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [stripeActionError, setStripeActionError] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const changePasswordMutation = useChangePassword();
+  const deleteAccountMutation = useDeleteAccount();
 
   const canConfigurePayments =
     user?.role === "ORGANISATEUR" || user?.role === "ADMIN";
 
-  useEffect(() => {
-    if (!canConfigurePayments) return;
+  const stripeQuery = useQuery({
+    queryKey: ["payments", "stripe-onboarding", user?.id],
+    queryFn: getStripeOnboardingStatus,
+    enabled: canConfigurePayments,
+    staleTime: 5 * 60 * 1000,
+  });
+  const stripeStatus = stripeQuery.isPending
+    ? "checking"
+    : stripeQuery.data?.success && stripeQuery.data.isComplete
+      ? "onboarded"
+      : "not_onboarded";
+  const stripeError =
+    stripeActionError ||
+    (stripeQuery.data && !stripeQuery.data.success
+      ? stripeQuery.data.message
+      : "") ||
+    (stripeQuery.isError ? "Impossible de vérifier le statut Stripe." : "");
 
-    let cancelled = false;
-
-    void getStripeOnboardingStatus()
-      .then((result) => {
-        if (cancelled) return;
-
-        if (!result.success) {
-          setStripeError(result.message);
-          setStripeStatus("not_onboarded");
-          return;
-        }
-
-        setStripeStatus(result.isComplete ? "onboarded" : "not_onboarded");
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStripeError("Impossible de vérifier le statut Stripe.");
-          setStripeStatus("not_onboarded");
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [canConfigurePayments]);
+  if (authLoading) return <SettingsSkeleton />;
 
   const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -97,7 +117,7 @@ export default function SettingsPage() {
     }));
 
     try {
-      const result = await changeCurrentPassword(newPassword);
+      const result = await changePasswordMutation.mutateAsync(newPassword);
 
       if (result.error) {
         setPasswordState((currentState) => ({
@@ -125,19 +145,19 @@ export default function SettingsPage() {
     if (stripeStatus === "onboarded" || stripeLoading) return;
 
     setStripeLoading(true);
-    setStripeError("");
+    setStripeActionError("");
 
     try {
       const result = await createSellerAccountLink();
 
       if (!result.success || !result.accountLinkUrl) {
-        setStripeError(result.message);
+        setStripeActionError(result.message);
         return;
       }
 
       window.location.assign(result.accountLinkUrl);
     } catch {
-      setStripeError("Impossible d'ouvrir la configuration Stripe.");
+      setStripeActionError("Impossible d'ouvrir la configuration Stripe.");
     } finally {
       setStripeLoading(false);
     }
@@ -148,13 +168,12 @@ export default function SettingsPage() {
       "Supprimer définitivement votre compte et toutes vos données ?",
     );
 
-    if (!confirmed || deleteLoading) return;
+    if (!confirmed || deleteAccountMutation.isPending) return;
 
-    setDeleteLoading(true);
     setDeleteError("");
 
     try {
-      const result = await deleteCurrentAccount();
+      const result = await deleteAccountMutation.mutateAsync();
 
       if (result.error) {
         setDeleteError(result.message);
@@ -165,7 +184,7 @@ export default function SettingsPage() {
     } catch {
       setDeleteError("Impossible de supprimer votre compte.");
     } finally {
-      setDeleteLoading(false);
+      // L'état de chargement est géré par TanStack Query.
     }
   };
 
@@ -210,37 +229,45 @@ export default function SettingsPage() {
                   </p>
                 )}
 
-                <div className={styles.paymentRow}>
-                  <div>
-                    <h3>Compte de réception</h3>
-                    <p>Associez votre compte bancaire à votre espace.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleStripeConnect}
-                    className={
-                      stripeStatus === "onboarded"
-                        ? styles.btn_success
-                        : styles.btn_primary
-                    }
-                    disabled={
-                      stripeLoading ||
-                      stripeStatus === "checking" ||
-                      stripeStatus === "onboarded"
-                    }
+                {stripeStatus === "checking" ? (
+                  <div
+                    className={`${styles.paymentRow} ${styles.paymentSkeleton}`}
+                    aria-busy="true"
+                    aria-label="Vérification du compte Stripe"
                   >
-                    {stripeStatus === "onboarded" && (
-                      <Check aria-hidden="true" />
-                    )}
-                    {stripeStatus === "checking"
-                      ? "Vérification..."
-                      : stripeStatus === "onboarded"
+                    <div>
+                      <span className={styles.skeletonTitle} />
+                      <span className={styles.skeletonLineShort} />
+                    </div>
+                    <span className={styles.skeletonControl} />
+                  </div>
+                ) : (
+                  <div className={styles.paymentRow}>
+                    <div>
+                      <h3>Compte de réception</h3>
+                      <p>Associez votre compte bancaire à votre espace.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStripeConnect}
+                      className={
+                        stripeStatus === "onboarded"
+                          ? styles.btn_success
+                          : styles.btn_primary
+                      }
+                      disabled={stripeLoading || stripeStatus === "onboarded"}
+                    >
+                      {stripeStatus === "onboarded" && (
+                        <Check aria-hidden="true" />
+                      )}
+                      {stripeStatus === "onboarded"
                         ? "Compte configuré"
                         : stripeLoading
                           ? "Connexion..."
                           : "Configurer Stripe"}
-                  </button>
-                </div>
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 
@@ -335,10 +362,12 @@ export default function SettingsPage() {
                 type="button"
                 className={styles.btn_danger}
                 onClick={handleDeleteAccount}
-                disabled={deleteLoading}
+                disabled={deleteAccountMutation.isPending}
               >
                 <Trash2 aria-hidden="true" />
-                {deleteLoading ? "Suppression..." : "Supprimer mon compte"}
+                {deleteAccountMutation.isPending
+                  ? "Suppression..."
+                  : "Supprimer mon compte"}
               </button>
             </section>
           </div>

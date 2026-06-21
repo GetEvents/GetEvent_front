@@ -1,28 +1,26 @@
 "use client";
 import Input from "@/components/ui/Input/input";
-import { login } from "@/actions/auth/authActions";
-import { useActionState, useEffect, React } from "react";
+import React from "react";
 import style from "./style.module.scss";
 import Link from "next/link";
 import { useNotification } from "@/components/Notification/NotificationProvider";
-
-const initialState = {
-  message: "",
-};
+import { useLogin } from "@/hooks/useAuthMutations";
 
 const Login = () => {
-  const [state, formAction, pending] = useActionState(login, initialState);
+  const loginMutation = useLogin();
   const { notify } = useNotification();
 
-  useEffect(() => {
-    if (state?.message) {
-      notify(state.message, state?.error ? "error" : "success");
-    }
-
-    if (!state?.error && state.redirect) {
-      window.location.href = state.redirect;
-    }
-  }, [notify, state]);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    loginMutation.mutate(new FormData(event.currentTarget), {
+      onSuccess: (result) => {
+        notify(result.message, result.error ? "error" : "success");
+        if (!result.error && result.redirect)
+          window.location.href = result.redirect;
+      },
+      onError: () => notify("Impossible de vous connecter.", "error"),
+    });
+  };
 
   return (
     <div className={style.forminscription}>
@@ -94,7 +92,7 @@ const Login = () => {
           <div className={style.separatorLine}></div>
         </div>
 
-        <form className={style.form} action={formAction}>
+        <form className={style.form} onSubmit={handleSubmit}>
           {/* Email */}
           <div className={style.inputFull}>
             <Input name="email" label="Adresse mail" type="email" required />
@@ -118,9 +116,9 @@ const Login = () => {
           <button
             type="submit"
             className={style.submitButton}
-            disabled={pending}
+            disabled={loginMutation.isPending}
           >
-            {pending ? "Connexion..." : "Se connecter"}
+            {loginMutation.isPending ? "Connexion..." : "Se connecter"}
           </button>
 
           <p className={style.registerLink}>

@@ -1,63 +1,53 @@
 "use client";
 import Input from "@/components/ui/Input/input";
 import Button from "@/components/ui/button/button";
-import { editProfil, getUser, register } from "@/actions/auth/authActions";
-import { useActionState, useEffect, useState, React } from "react";
+import { useState, React } from "react";
 import style from "./style.module.scss";
 import Link from "next/link";
 import { useNotification } from "@/components/Notification/NotificationProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { useRegister, useUpdateProfile } from "@/hooks/useAuthMutations";
 
-const initialState = {
-  message: "",
-  error: false,
-  redirect: null,
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
 };
 
+const getProfileForm = (user) => ({
+  nom: user?.nom || "",
+  prenom: user?.prenom || "",
+  email: user?.email || "",
+  role: user?.role || "",
+  date_naissance: formatDate(user?.date_naissance),
+});
+
 const Register = ({ id }) => {
-  const action = id ? editProfil : register;
-  const [state, formAction, pending] = useActionState(action, initialState);
-  const [defaultForm, setDefaultForm] = useState({});
+  const { user } = useAuth();
+  const registerMutation = useRegister();
+  const updateProfileMutation = useUpdateProfile();
+  const mutation = id ? updateProfileMutation : registerMutation;
+  const [defaultForm, setDefaultForm] = useState(() =>
+    id ? getProfileForm(user) : {},
+  );
   const [photoPreview, setPhotoPreview] = useState(null);
   const [step, setStep] = useState(1);
   const { notify } = useNotification();
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return "";
-    return date.toISOString().split("T")[0];
-  };
-
-  useEffect(() => {
-    if (state?.message) {
-      notify(state.message, state?.error ? "error" : "success");
-    }
-
-    if (!state?.error && state?.redirect) {
-      window.location.href = state.redirect;
-    }
-
-    if (id) {
-      const fetchData = async () => {
-        try {
-          const response = await getUser();
-
-          if (response?.user) {
-            setDefaultForm({
-              nom: response.user.nom || "",
-              prenom: response.user.prenom || "",
-              email: response.user.email || "",
-              role: response.user.role || "",
-              date_naissance: formatDate(response.user.date_naissance),
-            });
-          }
-        } catch (err) {
-          console.error("Erreur chargement user", err);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    mutation.mutate(new FormData(event.currentTarget), {
+      onSuccess: (result) => {
+        notify(result.message, result.error ? "error" : "success");
+        if (!id && !result.error && result.redirect) {
+          window.location.href = result.redirect;
         }
-      };
-      fetchData();
-    }
-  }, [id, notify, state]);
+      },
+      onError: () =>
+        notify("Impossible d'enregistrer les informations.", "error"),
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -176,7 +166,7 @@ const Register = ({ id }) => {
           </div>
         )}
 
-        <form className={style.form} action={formAction}>
+        <form className={style.form} onSubmit={handleSubmit}>
           <div className={`${id ? style.formStyel : ""}`}>
             {!id ? (
               <>
@@ -315,9 +305,9 @@ const Register = ({ id }) => {
                       <button
                         type="submit"
                         className={style.submitButton}
-                        disabled={pending}
+                        disabled={mutation.isPending}
                       >
-                        {pending ? "Inscription..." : "S'inscrire"}
+                        {mutation.isPending ? "Inscription..." : "S'inscrire"}
                       </button>
                     </div>
                   </div>
@@ -389,7 +379,7 @@ const Register = ({ id }) => {
 
           {id && (
             <Button
-              label={pending ? "Enregistrement..." : "Modifier"}
+              label={mutation.isPending ? "Enregistrement..." : "Modifier"}
               type="submit"
             />
           )}

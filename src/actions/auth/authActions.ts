@@ -13,6 +13,7 @@ import type {
   LoginDto,
   EditUserDto,
   Role,
+  User,
 } from "@/actions/types/auth";
 
 const getFormString = (formData: FormData, key: string): string => {
@@ -357,10 +358,12 @@ export async function editProfil(
       };
     }
 
+    const payload = response.data as { data?: User };
+
     return {
       error: false,
       message: "Profil mis à jour avec succès.",
-      redirect: "/settings",
+      user: payload.data,
     };
   } catch (error) {
     const message =

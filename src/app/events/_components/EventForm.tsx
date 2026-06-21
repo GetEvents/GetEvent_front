@@ -1,30 +1,33 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addEvent, editeEvent } from "@/actions/event";
 import type { Event } from "@/actions/types/event";
+import { useCreateEvent, useUpdateEvent } from "@/hooks/useEvents";
 import styles from "./EventForm.module.scss";
-
-const initialState = null;
 
 const toDateInput = (value?: string | null) =>
   value ? new Date(value).toISOString().slice(0, 10) : "";
 
 export default function EventForm({ event }: { event?: Event }) {
   const router = useRouter();
-  const action = event ? editeEvent : addEvent;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const createMutation = useCreateEvent();
+  const updateMutation = useUpdateEvent();
+  const mutation = event ? updateMutation : createMutation;
+  const state = mutation.data;
   const [isFree, setIsFree] = useState(event ? !event.paymentRequired : true);
 
-  useEffect(() => {
-    if (!state?.error && state?.redirect) {
-      router.push(state.redirect);
-    }
-  }, [router, state]);
+  const handleSubmit = (submitEvent: FormEvent<HTMLFormElement>) => {
+    submitEvent.preventDefault();
+    mutation.mutate(new FormData(submitEvent.currentTarget), {
+      onSuccess: (result) => {
+        if (!result.error && result.redirect) router.push(result.redirect);
+      },
+    });
+  };
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form onSubmit={handleSubmit} className={styles.form}>
       {event && <input type="hidden" name="id" value={event.id} />}
 
       <div className={styles.header}>
@@ -192,8 +195,8 @@ export default function EventForm({ event }: { event?: Event }) {
         <button type="button" onClick={() => router.back()}>
           Annuler
         </button>
-        <button type="submit" disabled={pending}>
-          {pending
+        <button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending
             ? "Enregistrement..."
             : event
               ? "Enregistrer les modifications"
