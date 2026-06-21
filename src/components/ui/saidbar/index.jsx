@@ -31,8 +31,6 @@ const Sidebar = ({ visible }) => {
     email: user?.email || "",
   };
 
-
-
   const menuItems = useMemo(() => {
     const items = [
       {
