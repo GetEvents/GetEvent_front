@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addParticipantWithPayment } from "@/actions/participant";
+import { useFinalizeParticipantPayment } from "@/hooks/useParticipants";
 import Loading from "@/components/ui/Loading";
 import styles from "./style.module.scss";
 
@@ -15,10 +15,15 @@ export default function ParticipationCallbackClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finalizationPromiseRef = useRef<Promise<{
+    error: boolean;
+    message: string;
+  }> | null>(null);
   const [status, setStatus] = useState<CallbackStatus>("loading");
   const [message, setMessage] = useState(
     "Finalisation de votre inscription...",
   );
+  const { mutateAsync: finalizePayment } = useFinalizeParticipantPayment();
 
   useEffect(() => {
     let isActive = true;
@@ -31,7 +36,8 @@ export default function ParticipationCallbackClient() {
         return;
       }
 
-      const result = await addParticipantWithPayment(sessionId);
+      finalizationPromiseRef.current ??= finalizePayment(sessionId);
+      const result = await finalizationPromiseRef.current;
 
       if (!isActive) return;
 
@@ -54,7 +60,7 @@ export default function ParticipationCallbackClient() {
       isActive = false;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [router, searchParams]);
+  }, [finalizePayment, router, searchParams]);
 
   return (
     <main className={styles.callbackPage}>

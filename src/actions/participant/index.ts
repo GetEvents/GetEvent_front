@@ -160,7 +160,7 @@ export async function delectParticipant(id: number) {
   }
 }
 
-type UnsubscribeParticipantInput = {
+export type UnsubscribeParticipantInput = {
   participantId: number;
   eventId: number;
   reason: string;

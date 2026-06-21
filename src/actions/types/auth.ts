@@ -45,6 +45,7 @@ export interface ActionResponse {
   error: boolean;
   message: string;
   redirect?: string;
+  user?: User;
 }
 
 export type ServerActionState = ActionResponse | null;

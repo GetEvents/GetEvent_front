@@ -1,18 +1,18 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import Input from "@/components/ui/Input/input";
-import { resetPassword } from "@/actions/auth/authActions";
+import { useResetPassword } from "@/hooks/useAuthMutations";
 import styles from "./style.module.scss";
 
-const initialState = null;
-
 export default function ResetPasswordForm({ token }) {
-  const [state, formAction, pending] = useActionState(
-    resetPassword,
-    initialState,
-  );
+  const mutation = useResetPassword();
+  const state = mutation.data;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    mutation.mutate(new FormData(event.currentTarget));
+  };
 
   useEffect(() => {
     if (!state?.error && state?.redirect) {
@@ -35,7 +35,7 @@ export default function ResetPasswordForm({ token }) {
         <p>Choisissez un mot de passe d’au moins 8 caractères.</p>
       </div>
 
-      <form action={formAction} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <input type="hidden" name="token" value={token} />
 
         <Input
@@ -69,9 +69,9 @@ export default function ResetPasswordForm({ token }) {
         <button
           type="submit"
           className={styles.submitButton}
-          disabled={pending || !token}
+          disabled={mutation.isPending || !token}
         >
-          {pending ? "Modification..." : "Modifier le mot de passe"}
+          {mutation.isPending ? "Modification..." : "Modifier le mot de passe"}
         </button>
       </form>
     </div>
