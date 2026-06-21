@@ -2,6 +2,7 @@ import Script from "next/script";
 import styles from "./style.module.scss";
 
 const MapComponent = () => {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   return (
     <>
       {/* <Script src="/js/autocomplet.js" strategy="afterInteractive" /> */}
@@ -15,7 +16,12 @@ const MapComponent = () => {
         src="https://code.jquery.com/jquery-3.6.0.min.js"
         strategy="afterInteractive"
       />
-      <Script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7F40ScgF_mzivb6E4itBxANpz3qdju2k&callback=initMap&v=weekly&libraries=marker" />
+      {apiKey && (
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap&v=weekly&libraries=marker`}
+          strategy="afterInteractive"
+        />
+      )}
 
       {/* Votre composant de carte ici */}
       <div id="map" style={{ height: "500px" }} className={styles.map}></div>
