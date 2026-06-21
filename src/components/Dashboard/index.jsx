@@ -7,15 +7,17 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Chart from "chart.js/auto";
-import { delectEvent, getEventByUser } from "@/actions/event";
+import { eventQueries, useDeleteEvent } from "@/hooks/useEvents";
 
 import {
-  getParticipantByEventId,
-  unsubscribeParticipant,
-} from "@/actions/participant";
+  participantKeys,
+  participantQueries,
+  useUnsubscribeParticipant,
+} from "@/hooks/useParticipants";
 import { useAuth } from "@/hooks/useAuth";
 import DelectModal from "@/components/DelectModal";
 import Loading from "@/components/ui/Loading";
@@ -544,6 +546,8 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
 // COMPOSANT PRINCIPAL
 // ==========================================
 export default function Dashboard({ count = null }) {
+  const deleteEventMutation = useDeleteEvent();
+  const queryClient = useQueryClient();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [scannerEventId, setScannerEventId] = useState("");
@@ -579,6 +583,7 @@ export default function Dashboard({ count = null }) {
     revenues: [],
     participantsCounts: [],
   });
+  const unsubscribeMutation = useUnsubscribeParticipant();
 
   const fetchDashboardData = useCallback(async () => {
     if (authLoading) return;
@@ -602,7 +607,7 @@ export default function Dashboard({ count = null }) {
     setLoading(true);
     setErrorMessage("");
     try {
-      const eventsRes = await getEventByUser();
+      const eventsRes = await queryClient.fetchQuery(eventQueries.mine());
       // On s'assure que c'est bien la liste (selon l'API)
       const list = Array.isArray(eventsRes)
         ? eventsRes
@@ -647,7 +652,9 @@ export default function Dashboard({ count = null }) {
         let eventParticipants = 0;
 
         try {
-          const partRes = await getParticipantByEventId(ev.id);
+          const partRes = await queryClient.fetchQuery(
+            participantQueries.byEvent(Number(ev.id)),
+          );
           if (
             partRes &&
             !partRes.error &&
@@ -722,7 +729,7 @@ export default function Dashboard({ count = null }) {
     } finally {
       setLoading(false);
     }
-  }, [authLoading, count, isAuthenticated, user]);
+  }, [authLoading, count, isAuthenticated, queryClient, user]);
 
   useEffect(() => {
     // The async loader owns the dashboard's initial client-side data lifecycle.
@@ -740,7 +747,9 @@ export default function Dashboard({ count = null }) {
 
     setIsDeleting(true);
     try {
-      const response = await delectEvent(Number(eventToDelete.id));
+      const response = await deleteEventMutation.mutateAsync(
+        Number(eventToDelete.id),
+      );
 
       if (response.error) {
         setErrorMessage(
@@ -781,7 +790,7 @@ export default function Dashboard({ count = null }) {
     setParticipantActionMessage(null);
 
     try {
-      const result = await unsubscribeParticipant({
+      const result = await unsubscribeMutation.mutateAsync({
         participantId: selectedParticipantToRemove.id,
         eventId: selectedParticipantToRemove.eventId,
         reason,
@@ -817,6 +826,12 @@ export default function Dashboard({ count = null }) {
       setParticipantActionMessage({
         type: "success",
         message: result.message || "Le participant a bien été désinscrit.",
+      });
+      void queryClient.invalidateQueries({
+        queryKey: participantKeys.byEvent(Number(removedEventId)),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: participantKeys.byUser(),
       });
     } catch {
       setParticipantActionMessage({
