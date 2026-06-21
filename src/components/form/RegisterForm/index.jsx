@@ -1,7 +1,15 @@
 "use client";
 import Input from "@/components/ui/Input/input";
 import Button from "@/components/ui/button/button";
-import { useState, React } from "react";
+import { useMemo, useState, React } from "react";
+import countryList from "react-select-country-list";
+import PhoneInput, {
+  getCountryCallingCode,
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from "react-phone-number-input";
+import Image from "next/image";
+import { TriangleAlert } from "lucide-react";
 import style from "./style.module.scss";
 import Link from "next/link";
 import { useNotification } from "@/components/Notification/NotificationProvider";
@@ -19,9 +27,49 @@ const getProfileForm = (user) => ({
   nom: user?.nom || "",
   prenom: user?.prenom || "",
   email: user?.email || "",
+  numero: user?.numero || "",
+  pays: user?.pays || "",
   role: user?.role || "",
   date_naissance: formatDate(user?.date_naissance),
 });
+
+const emptyForm = {
+  ...getProfileForm(null),
+  password: "",
+  passwordConfime: "",
+  photo: null,
+};
+
+const getPhoneCountry = (phoneNumber) => {
+  if (!phoneNumber) return undefined;
+
+  try {
+    return parsePhoneNumber(phoneNumber)?.country;
+  } catch {
+    return undefined;
+  }
+};
+
+const PhoneNumberField = ({ value, country, onChange, required = false }) => (
+  <div className={style.phoneField}>
+    <label htmlFor="numero">Numéro de téléphone</label>
+    <PhoneInput
+      key={country || "international"}
+      id="numero"
+      name="numero"
+      country={country || undefined}
+      international={Boolean(country)}
+      withCountryCallingCode={Boolean(country)}
+      countryCallingCodeEditable={false}
+      value={value || undefined}
+      onChange={(phoneNumber) => onChange(phoneNumber || "")}
+      useNationalFormatForDefaultCountryValue={false}
+      placeholder="Votre numéro de téléphone"
+      autoComplete="tel"
+      required={required}
+    />
+  </div>
+);
 
 const Register = ({ id }) => {
   const { user } = useAuth();
@@ -29,15 +77,80 @@ const Register = ({ id }) => {
   const updateProfileMutation = useUpdateProfile();
   const mutation = id ? updateProfileMutation : registerMutation;
   const [defaultForm, setDefaultForm] = useState(() =>
-    id ? getProfileForm(user) : {},
+    id ? getProfileForm(user) : emptyForm,
   );
   const [photoPreview, setPhotoPreview] = useState(null);
   const [step, setStep] = useState(1);
   const { notify } = useNotification();
+  const countryOptions = useMemo(() => {
+    const regionNames = new Intl.DisplayNames(["fr"], { type: "region" });
+
+    return countryList()
+      .getData()
+      .map((country) => ({
+        value: country.value,
+        label: regionNames.of(country.value) || country.label,
+      }))
+      .sort((firstCountry, secondCountry) =>
+        firstCountry.label.localeCompare(secondCountry.label, "fr"),
+      );
+  }, []);
+  const organizerPaymentUnavailable =
+    !id &&
+    defaultForm.role === "ORGANISATEUR" &&
+    Boolean(defaultForm.pays) &&
+    defaultForm.pays !== "BJ";
+  const organizerContactMissing =
+    !id &&
+    defaultForm.role === "ORGANISATEUR" &&
+    (!defaultForm.pays || !defaultForm.numero);
+  const phoneCountry = getPhoneCountry(defaultForm.numero);
+  const organizerPhoneCountryMismatch =
+    !id &&
+    defaultForm.role === "ORGANISATEUR" &&
+    Boolean(defaultForm.pays) &&
+    Boolean(defaultForm.numero) &&
+    Boolean(phoneCountry) &&
+    phoneCountry !== defaultForm.pays;
+  const expectedCallingCode = defaultForm.pays
+    ? `+${getCountryCallingCode(defaultForm.pays)}`
+    : "";
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    mutation.mutate(new FormData(event.currentTarget), {
+
+    if (organizerContactMissing) {
+      notify(
+        "Le pays et le numéro de téléphone sont obligatoires pour un organisateur.",
+        "error",
+      );
+      return;
+    }
+
+    if (defaultForm.numero && !isValidPhoneNumber(defaultForm.numero)) {
+      notify("Veuillez saisir un numéro de téléphone valide.", "error");
+      return;
+    }
+
+    if (organizerPhoneCountryMismatch) {
+      notify(
+        `L'indicatif du numéro doit correspondre au pays sélectionné (${expectedCallingCode}).`,
+        "error",
+      );
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+
+    Object.entries(defaultForm).forEach(([name, value]) => {
+      if (value instanceof File) {
+        formData.set(name, value);
+      } else if (typeof value === "string") {
+        formData.set(name, value);
+      }
+    });
+
+    mutation.mutate(formData, {
       onSuccess: (result) => {
         notify(result.message, result.error ? "error" : "success");
         if (!id && !result.error && result.redirect) {
@@ -51,6 +164,16 @@ const Register = ({ id }) => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
+    if (name === "pays") {
+      setDefaultForm((currentForm) => ({
+        ...currentForm,
+        pays: value,
+        numero: currentForm.pays === value ? currentForm.numero : "",
+      }));
+      return;
+    }
+
     if (files && name === "photo") {
       setDefaultForm((prev) => ({
         ...prev,
@@ -69,7 +192,34 @@ const Register = ({ id }) => {
     }
   };
 
-  const nextStep = () => setStep(2);
+  const nextStep = () => {
+    const requiredProfileFields = [
+      defaultForm.prenom,
+      defaultForm.nom,
+      defaultForm.email,
+      defaultForm.date_naissance,
+      defaultForm.password,
+      defaultForm.passwordConfime,
+      defaultForm.photo,
+    ];
+
+    if (requiredProfileFields.some((value) => !value)) {
+      notify("Veuillez remplir tous les champs de cette étape.", "error");
+      return;
+    }
+
+    if (defaultForm.password.length < 8) {
+      notify("Le mot de passe doit contenir au moins 8 caractères.", "error");
+      return;
+    }
+
+    if (defaultForm.password !== defaultForm.passwordConfime) {
+      notify("Les mots de passe ne correspondent pas.", "error");
+      return;
+    }
+
+    setStep(2);
+  };
   const prevStep = () => setStep(1);
 
   return (
@@ -115,10 +265,12 @@ const Register = ({ id }) => {
                   className={`${style.stepDot} ${step >= 2 ? style.active : ""}`}
                 ></span>
               </div>
-              <h2>{step === 1 ? "Commençons" : "Sécurité"}</h2>
+              <h2>{step === 1 ? "Commençons" : "Finalisation"}</h2>
               <p>
                 Étape {step} sur 2 :{" "}
-                {step === 1 ? "Parlez-nous de vous" : "Configurez vos accès"}
+                {step === 1
+                  ? "Identité et accès"
+                  : "Choisissez votre type de compte"}
               </p>
             </div>
 
@@ -176,9 +328,12 @@ const Register = ({ id }) => {
                     <div className={style.photoUploadSection}>
                       <div className={style.photoPreviewContainer}>
                         {photoPreview ? (
-                          <img
+                          <Image
                             src={photoPreview}
                             alt="Aperçu"
+                            width={160}
+                            height={160}
+                            unoptimized
                             className={style.photoPreview}
                           />
                         ) : (
@@ -223,6 +378,7 @@ const Register = ({ id }) => {
                           type="text"
                           handleChange={handleChange}
                           value={defaultForm.prenom}
+                          required
                         />
                       </div>
                       <div className={style.inputHalf}>
@@ -232,8 +388,20 @@ const Register = ({ id }) => {
                           type="text"
                           handleChange={handleChange}
                           value={defaultForm.nom}
+                          required
                         />
                       </div>
+                    </div>
+                    <div className={style.inputFull}>
+                      <Input
+                        name="email"
+                        label="Adresse mail"
+                        type="email"
+                        value={defaultForm.email}
+                        handleChange={handleChange}
+                        autoComplete="email"
+                        required
+                      />
                     </div>
                     <div className={style.inputFull}>
                       <Input
@@ -242,7 +410,34 @@ const Register = ({ id }) => {
                         type="date"
                         handleChange={handleChange}
                         value={defaultForm.date_naissance}
+                        required
                       />
+                    </div>
+                    <div className={style.passwordRow}>
+                      <div className={style.inputHalf}>
+                        <Input
+                          name="password"
+                          label="Mot de passe"
+                          type="password"
+                          value={defaultForm.password}
+                          handleChange={handleChange}
+                          autoComplete="new-password"
+                          minLength={8}
+                          required
+                        />
+                      </div>
+                      <div className={style.inputHalf}>
+                        <Input
+                          name="passwordConfime"
+                          label="Confirmer le mot de passe"
+                          type="password"
+                          value={defaultForm.passwordConfime}
+                          handleChange={handleChange}
+                          autoComplete="new-password"
+                          minLength={8}
+                          required
+                        />
+                      </div>
                     </div>
                     <button
                       type="button"
@@ -256,15 +451,6 @@ const Register = ({ id }) => {
                   <div className={style.stepContent}>
                     <div className={style.inputFull}>
                       <Input
-                        name="email"
-                        label="Adresse mail"
-                        type="email"
-                        value={defaultForm.email}
-                        handleChange={handleChange}
-                      />
-                    </div>
-                    <div className={style.inputFull}>
-                      <Input
                         name="role"
                         label="Rôle"
                         type="select"
@@ -274,26 +460,70 @@ const Register = ({ id }) => {
                           { value: "ORGANISATEUR", label: "Organisateur" },
                           { value: "PARTICIPANT", label: "Participant" },
                         ]}
+                        required
                       />
                     </div>
-                    <div className={style.passwordRow}>
+                    <div className={style.nameRow}>
                       <div className={style.inputHalf}>
                         <Input
-                          name="password"
-                          label="Mot de passe"
+                          name="pays"
+                          label="Pays"
+                          type="select"
                           handleChange={handleChange}
-                          type="password"
+                          value={defaultForm.pays}
+                          options={countryOptions}
+                          autoComplete="country"
+                          required={defaultForm.role === "ORGANISATEUR"}
                         />
                       </div>
                       <div className={style.inputHalf}>
-                        <Input
-                          name="passwordConfime"
-                          label="Confirmer"
-                          handleChange={handleChange}
-                          type="password"
+                        <PhoneNumberField
+                          value={defaultForm.numero}
+                          country={defaultForm.pays}
+                          required={defaultForm.role === "ORGANISATEUR"}
+                          onChange={(phoneNumber) =>
+                            setDefaultForm((currentForm) => ({
+                              ...currentForm,
+                              numero: phoneNumber,
+                            }))
+                          }
                         />
                       </div>
                     </div>
+                    {organizerPaymentUnavailable && (
+                      <div className={style.paymentCountryWarning} role="alert">
+                        <TriangleAlert aria-hidden="true" />
+                        <p>
+                          Les paiements ne sont pas encore disponibles dans ce
+                          pays. Vous pourrez créer des événements gratuits, mais
+                          pas vendre de billets pour le moment.
+                        </p>
+                      </div>
+                    )}
+                    {organizerContactMissing && (
+                      <div
+                        className={style.organizerContactWarning}
+                        role="alert"
+                      >
+                        <TriangleAlert aria-hidden="true" />
+                        <p>
+                          Le pays et le numéro de téléphone sont obligatoires
+                          pour créer un compte organisateur.
+                        </p>
+                      </div>
+                    )}
+                    {organizerPhoneCountryMismatch && (
+                      <div
+                        className={style.organizerContactWarning}
+                        role="alert"
+                      >
+                        <TriangleAlert aria-hidden="true" />
+                        <p>
+                          L&apos;indicatif du numéro doit correspondre au pays
+                          sélectionné ({expectedCallingCode}).
+                        </p>
+                      </div>
+                    )}
                     <div className={style.stepActions}>
                       <button
                         type="button"
@@ -341,6 +571,28 @@ const Register = ({ id }) => {
                     handleChange={handleChange}
                     value={defaultForm.date_naissance}
                     required
+                  />
+                  <Input
+                    name="pays"
+                    label="Pays"
+                    type="select"
+                    value={defaultForm.pays}
+                    handleChange={handleChange}
+                    options={countryOptions}
+                    required={defaultForm.role === "ORGANISATEUR"}
+                  />
+                </div>
+                <div>
+                  <PhoneNumberField
+                    value={defaultForm.numero}
+                    country={defaultForm.pays}
+                    required={defaultForm.role === "ORGANISATEUR"}
+                    onChange={(phoneNumber) =>
+                      setDefaultForm((currentForm) => ({
+                        ...currentForm,
+                        numero: phoneNumber,
+                      }))
+                    }
                   />
                   <Input
                     name="role"

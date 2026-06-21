@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "react-phone-number-input/style.css";
 import Footer from "@/components/ui/Footer/Bar_page";
 import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import SaidBar from "@/components/ui/saidbar";

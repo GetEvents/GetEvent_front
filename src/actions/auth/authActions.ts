@@ -64,6 +64,8 @@ export async function register(
     nom: getFormString(formData, "nom"),
     prenom: getFormString(formData, "prenom"),
     email: getFormString(formData, "email"),
+    numero: getFormString(formData, "numero"),
+    pays: getFormString(formData, "pays"),
     password: getFormString(formData, "password"),
     passwordConfime: getFormString(formData, "passwordConfime"),
     role: isRole(role) ? role : "PARTICIPANT",
@@ -87,6 +89,14 @@ export async function register(
     };
   }
 
+  if (user.role === "ORGANISATEUR" && (!user.numero || !user.pays)) {
+    return {
+      error: true,
+      message:
+        "Le pays et le numéro de téléphone sont obligatoires pour un organisateur.",
+    };
+  }
+
   if (user.password !== user.passwordConfime) {
     return {
       error: true,
@@ -98,6 +108,8 @@ export async function register(
   sendData.append("nom", user.nom);
   sendData.append("prenom", user.prenom);
   sendData.append("email", user.email);
+  if (user.numero) sendData.append("numero", user.numero);
+  if (user.pays) sendData.append("pays", user.pays);
   sendData.append("password", user.password);
   sendData.append("role", user.role);
   sendData.append("photo", photo);
@@ -333,14 +345,29 @@ export async function editProfil(
   const editUser: EditUserDto = {
     nom: getFormString(formData, "nom"),
     prenom: getFormString(formData, "prenom"),
+    numero: getFormString(formData, "numero"),
+    pays: getFormString(formData, "pays"),
     role: isRole(role) ? role : undefined,
     date_naissance: getFormString(formData, "date_naissance"),
     photo: isImageFile(photo) ? photo : undefined,
   };
 
+  if (
+    editUser.role === "ORGANISATEUR" &&
+    (!editUser.numero || !editUser.pays)
+  ) {
+    return {
+      error: true,
+      message:
+        "Le pays et le numéro de téléphone sont obligatoires pour un organisateur.",
+    };
+  }
+
   const sendData = new FormData();
   sendData.append("nom", editUser.nom || "");
   sendData.append("prenom", editUser.prenom || "");
+  sendData.append("numero", editUser.numero || "");
+  sendData.append("pays", editUser.pays || "");
   sendData.append("role", editUser.role || "");
   sendData.append("date_naissance", editUser.date_naissance || "");
 
