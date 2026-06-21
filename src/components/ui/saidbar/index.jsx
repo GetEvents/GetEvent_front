@@ -12,10 +12,9 @@ import {
   Settings,
   TicketCheck,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useAuthMutations";
-import { initMenuToggle } from "@/utils/menu";
 import styles from "./style.module.scss";
 
 const Sidebar = ({ visible }) => {
@@ -32,9 +31,7 @@ const Sidebar = ({ visible }) => {
     email: user?.email || "",
   };
 
-  useEffect(() => {
-    initMenuToggle();
-  }, []);
+
 
   const menuItems = useMemo(() => {
     const items = [
