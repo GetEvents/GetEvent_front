@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Footer.module.scss";
 
@@ -22,7 +21,7 @@ export default function Footer({ currentUser }: FooterProps) {
     <footer className={styles.footer}>
       <div className={styles.maxContainer}>
         {/* Top CTA Section */}
-        <div className={styles.ctaSection}>
+        {/* <div className={styles.ctaSection}>
           <div className={styles.logoWrap}>
             <Image
               alt="GetEvent"
@@ -51,7 +50,7 @@ export default function Footer({ currentUser }: FooterProps) {
           </div>
         </div>
 
-        <div className={styles.divider}></div>
+        <div className={styles.divider}></div> */}
 
         {/* Links Grid */}
         <div className={styles.footerGrid}>

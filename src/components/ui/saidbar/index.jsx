@@ -13,8 +13,8 @@ import {
   TicketCheck,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { logout } from "@/actions/auth/authActions";
 import { useAuth } from "@/hooks/useAuth";
+import { useLogout } from "@/hooks/useAuthMutations";
 import { initMenuToggle } from "@/utils/menu";
 import styles from "./style.module.scss";
 
@@ -23,6 +23,7 @@ const Sidebar = ({ visible }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const logoutMutation = useLogout();
 
   const isOrganizer = user?.role === "ORGANISATEUR" || user?.role === "ADMIN";
   const profile = {
@@ -76,7 +77,7 @@ const Sidebar = ({ visible }) => {
 
   const handleLogOut = async () => {
     try {
-      await logout();
+      await logoutMutation.mutateAsync();
     } finally {
       router.push("/auth/login");
     }

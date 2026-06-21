@@ -11,7 +11,7 @@ const PROTECTED_ROUTES = [
   "/dashboard",
 ];
 
-const AUTH_ROUTES = ["/auth/login", "/auth/register"];
+const GUEST_ONLY_ROUTES = ["/", "/auth/login", "/auth/register"];
 const REFRESH_SKEW_SECONDS = 60;
 
 type SessionTokens = {
@@ -167,8 +167,8 @@ function isProtectedRoute(pathname: string): boolean {
   );
 }
 
-function isAuthRoute(pathname: string): boolean {
-  return AUTH_ROUTES.includes(pathname);
+function isGuestOnlyRoute(pathname: string): boolean {
+  return GUEST_ONLY_ROUTES.includes(pathname);
 }
 
 export async function proxy(request: NextRequest) {
@@ -193,7 +193,7 @@ export async function proxy(request: NextRequest) {
     return redirectToLogin(request);
   }
 
-  if (isAuthRoute(pathname)) {
+  if (isGuestOnlyRoute(pathname)) {
     if (token && isAccessTokenUsable(token)) {
       return NextResponse.redirect(new URL("/events", nextUrl.origin));
     }
@@ -211,6 +211,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/events/my-events/:path*",
     "/events/createvent/:path*",
     "/events/editEvent/:path*",
