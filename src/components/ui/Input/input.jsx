@@ -19,11 +19,7 @@ export default function Input({
 
   const handleInputChange = (e) => {
     if (handleChange) {
-      if (type === "file") {
-        handleChange(e.target.files[0]);
-      } else {
-        handleChange(e); // ← On passe l'événement pour que Register.js puisse accéder à e.target.name
-      }
+      handleChange(e);
     }
   };
 

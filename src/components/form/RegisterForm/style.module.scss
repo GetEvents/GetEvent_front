@@ -380,6 +380,81 @@
     }
   }
 
+  .phoneField {
+    width: 100%;
+
+    > label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #374151;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    :global(.PhoneInput) {
+      width: 100%;
+      min-height: 46px;
+      margin: 0.35rem 0 0.75rem;
+      padding: 0 0.75rem;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      background: #ffffff;
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+
+      &:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+    }
+
+    :global(.PhoneInputCountry) {
+      margin-right: 0.65rem;
+      padding-right: 0.65rem;
+      border-right: 1px solid #cbd5e1;
+    }
+
+    :global(.PhoneInputInput) {
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: 0.75rem 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #111827;
+      font: inherit;
+      box-shadow: none;
+    }
+  }
+
+  .paymentCountryWarning,
+  .organizerContactWarning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin: 0 0 1rem;
+    padding: 0.8rem;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    background: #fffbeb;
+    color: #92400e;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+  }
+
   .passwordWrapper {
     position: relative;
     width: 100%;

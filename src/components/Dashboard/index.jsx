@@ -20,7 +20,6 @@ import {
 } from "@/hooks/useParticipants";
 import { useAuth } from "@/hooks/useAuth";
 import DelectModal from "@/components/DelectModal";
-import Loading from "@/components/ui/Loading";
 import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
 // --- STYLES/ICONS ---
@@ -545,6 +544,47 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
 // ==========================================
 // COMPOSANT PRINCIPAL
 // ==========================================
+function DashboardSkeleton() {
+  return (
+    <div
+      className={`${styles.dashboard_container} ${styles.dashboard_skeleton}`}
+      aria-busy="true"
+      aria-label="Chargement du tableau de bord"
+    >
+      <div className={styles.skeleton_header}>
+        <span className={styles.skeleton_heading} />
+        <span className={styles.skeleton_subheading} />
+      </div>
+      <div className={styles.skeleton_tabs} />
+      <div className={styles.kpi_grid}>
+        {Array.from({ length: 5 }, (_, index) => (
+          <div className={styles.kpi_card} key={index} aria-hidden="true">
+            <span className={styles.skeleton_icon} />
+            <div className={styles.skeleton_kpi_text}>
+              <span className={styles.skeleton_label} />
+              <span className={styles.skeleton_value} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={styles.charts_section}>
+        {Array.from({ length: 2 }, (_, index) => (
+          <div className={styles.chart_card} key={index} aria-hidden="true">
+            <span className={styles.skeleton_chart_title} />
+            <span className={styles.skeleton_chart} />
+          </div>
+        ))}
+      </div>
+      <div className={`${styles.table_card} ${styles.skeleton_table}`}>
+        <span className={styles.skeleton_chart_title} />
+        {Array.from({ length: 5 }, (_, index) => (
+          <span className={styles.skeleton_row} key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard({ count = null }) {
   const deleteEventMutation = useDeleteEvent();
   const queryClient = useQueryClient();
@@ -1005,7 +1045,7 @@ export default function Dashboard({ count = null }) {
   };
 
   if (authLoading || loading) {
-    return <Loading message="Chargement de l'événement..." />;
+    return <DashboardSkeleton />;
   }
 
   if (errorMessage) {

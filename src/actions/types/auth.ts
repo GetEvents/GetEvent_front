@@ -26,6 +26,8 @@ export interface RegisterDto {
   nom: string;
   prenom: string;
   email: string;
+  numero?: string;
+  pays?: string;
   password: string;
   passwordConfime: string;
   role: Role;
@@ -36,6 +38,8 @@ export interface RegisterDto {
 export interface EditUserDto {
   nom?: string;
   prenom?: string;
+  numero?: string;
+  pays?: string;
   role?: Role;
   date_naissance?: string;
   photo?: File;
