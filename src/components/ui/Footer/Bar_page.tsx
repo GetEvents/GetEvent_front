@@ -20,39 +20,6 @@ export default function Footer({ currentUser }: FooterProps) {
   return (
     <footer className={styles.footer}>
       <div className={styles.maxContainer}>
-        {/* Top CTA Section */}
-        {/* <div className={styles.ctaSection}>
-          <div className={styles.logoWrap}>
-            <Image
-              alt="GetEvent"
-              src="/logoIIIII.png"
-              width={140}
-              height={140}
-              className="rounded-full"
-              style={{ width: "140px", height: "auto" }}
-              priority
-            />
-          </div>
-          <h2 className={styles.ctaTitle}>
-            Prêt à transformer la gestion <br />
-            de vos événements ?
-          </h2>
-          <p
-            className={styles.brandText}
-            style={{ textAlign: "center", marginBottom: "2.5rem" }}
-          >
-            Commencez dès maintenant et découvrez la puissance de GetEvent.
-          </p>
-          <div className={styles.ctaActions}>
-            <Link href="/events" className={styles.ctaButton}>
-              Ça se passe juste ici
-            </Link>
-          </div>
-        </div>
-
-        <div className={styles.divider}></div> */}
-
-        {/* Links Grid */}
         <div className={styles.footerGrid}>
           <div className={styles.brandInfo}>
             <h3 className={styles.brandTitle}>GetEvent</h3>
