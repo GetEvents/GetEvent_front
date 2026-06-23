@@ -123,6 +123,64 @@
   color: #a31515;
 }
 
+.refunds_section {
+  margin-top: 3rem;
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+  }
+}
+
+.refunds_list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.refund_card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #d7d7d2;
+  border-radius: 14px;
+  background: #ffffff;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  p {
+    margin-top: 0.25rem;
+    color: #666;
+  }
+
+  span {
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+}
+
+.refund_pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.refund_completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.refund_failed,
+.refund_rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 @media (max-width: 800px) {
   .ticket_grid {
     grid-template-columns: 1fr;
@@ -146,5 +204,9 @@
 
   .event_badge {
     min-width: 90px;
+  }
+
+  .refund_card {
+    grid-template-columns: 1fr;
   }
 }

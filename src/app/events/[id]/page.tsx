@@ -243,7 +243,7 @@ export default async function EventDetailPage({
                     <p className={styles.priceLabel}>Pass standard</p>
                     <h2 className={styles.priceAmount}>
                       {event.paymentRequired
-                        ? `${event.paymentPrice || 0} €`
+                        ? `${event.paymentPrice || 0} FCFA`
                         : "Gratuit"}
                     </h2>
                     <p className={styles.priceNote}>

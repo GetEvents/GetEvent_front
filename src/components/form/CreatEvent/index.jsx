@@ -328,7 +328,7 @@ const CreatEvent = ({ id }) => {
                 {!id && !form.isFree && (
                   <div className="mb-3">
                     <Input
-                      label="Prix du billet (EUR)"
+                      label="Prix du billet (FCFA)"
                       type="number"
                       name="paymentPrice"
                       required
@@ -640,7 +640,7 @@ const CreatEvent = ({ id }) => {
                         <p className={style.value}>
                           {form.isFree
                             ? "Gratuit"
-                            : `${form.paymentPrice || "0"} €`}
+                            : `${form.paymentPrice || "0"} FCFA`}
                         </p>
                       </div>
                     )}

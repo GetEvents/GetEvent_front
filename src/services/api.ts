@@ -301,7 +301,7 @@ export const auth = {
   },
 
   /**
-   * Récupérer tous les utilisateurs (admin)
+   * Récupérer tous les utilisateurs (ADMIN)
    */
   getAllUsers: async (token: string) => {
     return apiRequest<UsersApiResponse>("GET", "/auth/all", {
@@ -590,7 +590,7 @@ export const messages = {
   },
 
   /**
-   * Supprimer tous les messages d'un événement (admin)
+   * Supprimer tous les messages d'un événement (ADMIN)
    * @param {number} eventId
    */
   deleteEventMessages: async (eventId: number) => {
@@ -926,6 +926,36 @@ export const paymentsFedapay = {
   getOrganizerBalance: async (token: string) => {
     return apiRequest("GET", "/payments/fedapay/balance", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+
+  getRefunds: async (token: string, status?: string) => {
+    const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    return apiRequest("GET", `/payments/refunds${query}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+
+  getMyRefunds: async (token: string) => {
+    return apiRequest("GET", "/payments/refunds/my", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+
+  updateRefundStatus: async ({
+    id,
+    status,
+    providerRefundId,
+    token,
+  }: {
+    id: string;
+    status: string;
+    providerRefundId?: string;
+    token: string;
+  }) => {
+    return apiRequest("PATCH", `/payments/refunds/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: { status, providerRefundId },
     });
   },
 

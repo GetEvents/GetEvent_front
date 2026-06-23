@@ -821,6 +821,50 @@
   font-size: 0.9rem;
 }
 
+.refund_admin_error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.refund_admin_actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  min-width: 280px;
+
+  input {
+    flex: 1 1 150px;
+    min-width: 0;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+  }
+
+  button {
+    padding: 0.45rem 0.65rem;
+    border: 0;
+    border-radius: 7px;
+    background: #0b5ed7;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:last-child {
+      background: #dc2626;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+}
+
 .unsubscribe_overlay {
   position: fixed;
   inset: 0;
