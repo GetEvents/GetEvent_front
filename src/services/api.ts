@@ -923,6 +923,12 @@ export const paymentsStripe = {
   },
 };
 export const paymentsFedapay = {
+  getOrganizerBalance: async (token: string) => {
+    return apiRequest("GET", "/payments/fedapay/balance", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
+
   /**
    * Créer une session de paiement pour la création d'événement
    */

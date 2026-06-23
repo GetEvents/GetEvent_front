@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { refreshAccessToken } from "@/actions/auth/authActions";
-import { paymentsStripe } from "@/services/api";
+import { paymentsFedapay, paymentsStripe } from "@/services/api";
 
 type StripeStatusResult = {
   success: boolean;
@@ -14,6 +14,14 @@ type StripeAccountLinkResult = {
   success: boolean;
   message: string;
   accountLinkUrl?: string;
+};
+
+type OrganizerBalanceResult = {
+  success: boolean;
+  message: string;
+  balance?: number;
+  currency?: string;
+  updatedAt?: string | null;
 };
 
 const getToken = async (): Promise<string | null> => {
@@ -95,5 +103,42 @@ export async function createSellerAccountLink(): Promise<StripeAccountLinkResult
     success: true,
     message: payload.message || "Lien Stripe créé.",
     accountLinkUrl: payload.data.accountLinkUrl,
+  };
+}
+
+export async function getOrganizerBalance(): Promise<OrganizerBalanceResult> {
+  const token = await getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      message: "Votre session a expiré.",
+    };
+  }
+
+  const response = await paymentsFedapay.getOrganizerBalance(token);
+
+  if (!response.success) {
+    return {
+      success: false,
+      message: response.error || "Impossible de récupérer votre solde.",
+    };
+  }
+
+  const payload = response.data as {
+    message?: string;
+    data?: {
+      balance?: number;
+      currency?: string;
+      updatedAt?: string | null;
+    };
+  };
+
+  return {
+    success: true,
+    message: payload.message || "Solde récupéré.",
+    balance: Number(payload.data?.balance ?? 0),
+    currency: payload.data?.currency || "XOF",
+    updatedAt: payload.data?.updatedAt ?? null,
   };
 }

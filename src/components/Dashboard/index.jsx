@@ -19,6 +19,7 @@ import {
   useUnsubscribeParticipant,
 } from "@/hooks/useParticipants";
 import { useAuth } from "@/hooks/useAuth";
+import { getOrganizerBalance } from "@/actions/payment";
 import DelectModal from "@/components/DelectModal";
 import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
@@ -557,7 +558,7 @@ function DashboardSkeleton() {
       </div>
       <div className={styles.skeleton_tabs} />
       <div className={styles.kpi_grid}>
-        {Array.from({ length: 5 }, (_, index) => (
+        {Array.from({ length: 6 }, (_, index) => (
           <div className={styles.kpi_card} key={index} aria-hidden="true">
             <span className={styles.skeleton_icon} />
             <div className={styles.skeleton_kpi_text}>
@@ -607,6 +608,7 @@ export default function Dashboard({ count = null }) {
   // Data
   const [eventsList, setEventsList] = useState([]);
   const [participants, setParticipants] = useState([]);
+  const [organizerBalance, setOrganizerBalance] = useState(null);
   const [kpis, setKpis] = useState({
     totalEvents: 0,
     activeEvents: 0,
@@ -631,6 +633,7 @@ export default function Dashboard({ count = null }) {
     if (!isAuthenticated || !user) {
       setEventsList([]);
       setParticipants([]);
+      setOrganizerBalance(null);
       setErrorMessage("Vous devez être connecté pour accéder au dashboard.");
       setLoading(false);
       return;
@@ -639,6 +642,7 @@ export default function Dashboard({ count = null }) {
     if (user.role !== "ORGANISATEUR" && user.role !== "ADMIN") {
       setEventsList([]);
       setParticipants([]);
+      setOrganizerBalance(null);
       setErrorMessage("Cet espace est réservé aux organisateurs.");
       setLoading(false);
       return;
@@ -647,7 +651,18 @@ export default function Dashboard({ count = null }) {
     setLoading(true);
     setErrorMessage("");
     try {
-      const eventsRes = await queryClient.fetchQuery(eventQueries.mine());
+      const [eventsRes, balanceResult] = await Promise.all([
+        queryClient.fetchQuery(eventQueries.mine()),
+        getOrganizerBalance(),
+      ]);
+      setOrganizerBalance(
+        balanceResult.success
+          ? {
+              balance: balanceResult.balance ?? 0,
+              currency: balanceResult.currency || "XOF",
+            }
+          : null,
+      );
       // On s'assure que c'est bien la liste (selon l'API)
       const list = Array.isArray(eventsRes)
         ? eventsRes
@@ -765,6 +780,7 @@ export default function Dashboard({ count = null }) {
         freeRegistrations,
       });
     } catch {
+      setOrganizerBalance(null);
       setErrorMessage("Impossible de charger les données du dashboard.");
     } finally {
       setLoading(false);
@@ -997,6 +1013,22 @@ export default function Dashboard({ count = null }) {
                   style: "currency",
                   currency: "EUR",
                 }).format(kpis.totalRevenue)}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.kpi_card}>
+            <div className={styles.kpi_icon}>{ICONS.money}</div>
+            <div className={styles.kpi_info}>
+              <h3>Solde disponible</h3>
+              <div className={styles.kpi_value}>
+                {organizerBalance
+                  ? new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: organizerBalance.currency,
+                      maximumFractionDigits: 0,
+                    }).format(organizerBalance.balance)
+                  : "Indisponible"}
               </div>
             </div>
           </div>
