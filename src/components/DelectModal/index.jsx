@@ -9,11 +9,15 @@ export default function DelectModal({
   onConfirm,
   eventTitle,
   isLoading,
+  title = "Confirmer la suppression",
+  message,
+  confirmLabel = "Confirmer",
+  loadingLabel = "Suppression...",
 }) {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={isLoading ? undefined : onClose}>
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
@@ -21,10 +25,14 @@ export default function DelectModal({
         aria-modal="true"
         aria-labelledby="delete-event-modal-title"
       >
-        <h3 id="delete-event-modal-title">Confirmer la suppression</h3>
+        <h3 id="delete-event-modal-title">{title}</h3>
         <p>
-          Voulez-vous vraiment supprimer l&apos;evenement
-          {eventTitle ? ` "${eventTitle}"` : ""} ?
+          {message || (
+            <>
+              Voulez-vous vraiment supprimer l&apos;evenement
+              {eventTitle ? ` "${eventTitle}"` : ""} ?
+            </>
+          )}
         </p>
 
         <div className={styles.actions}>
@@ -42,7 +50,7 @@ export default function DelectModal({
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading ? "Suppression..." : "Confirmer"}
+            {isLoading ? loadingLabel : confirmLabel}
           </button>
         </div>
       </div>

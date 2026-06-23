@@ -325,6 +325,13 @@ function UnsubscribeParticipantModal({
           </div>
         </dl>
 
+        {participant.eventPaymentRequired && (
+          <p className={styles.unsubscribe_notice} role="status">
+            Cet événement est payant. Le retrait du participant créera une
+            demande de remboursement en attente de traitement.
+          </p>
+        )}
+
         <label
           className={styles.unsubscribe_label}
           htmlFor="unsubscribe-reason"
@@ -451,8 +458,16 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
         </div>
       </div>
 
-      {participantActionMessage?.type === "success" && (
-        <p className={styles.participant_success} role="status">
+      {(participantActionMessage?.type === "success" ||
+        participantActionMessage?.type === "refund") && (
+        <p
+          className={
+            participantActionMessage.type === "refund"
+              ? styles.participant_refund
+              : styles.participant_success
+          }
+          role="status"
+        >
           {participantActionMessage.message}
         </p>
       )}
@@ -738,6 +753,8 @@ export default function Dashboard({ count = null }) {
                 ...p,
                 eventTitle: ev.title,
                 eventId: ev.id,
+                eventPaymentRequired: Boolean(ev.paymentRequired),
+                eventPaymentPrice: ev.paymentPrice,
               })),
             ];
           }
@@ -880,8 +897,12 @@ export default function Dashboard({ count = null }) {
       setSelectedParticipantToRemove(null);
       setUnsubscribeReason("");
       setParticipantActionMessage({
-        type: "success",
-        message: result.message || "Le participant a bien été désinscrit.",
+        type: result.refundRequired ? "refund" : "success",
+        message:
+          result.message ||
+          (result.refundRequired
+            ? "Le participant a été retiré. La demande de remboursement est en attente."
+            : "Le participant a bien été désinscrit."),
       });
       void queryClient.invalidateQueries({
         queryKey: participantKeys.byEvent(Number(removedEventId)),

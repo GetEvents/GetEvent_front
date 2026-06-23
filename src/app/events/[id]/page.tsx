@@ -58,13 +58,16 @@ export default async function EventDetailPage({
   const currentUser = userResponse?.user;
   const tickets = event.tickets || [];
   const isOwner = currentUser?.id === event.organisateurId;
-  const currentTicket = tickets.find(
+  const activeTickets = tickets.filter(
+    (ticket) => ticket.status !== "CANCELLED",
+  );
+  const currentTicket = activeTickets.find(
     (ticket) => ticket.userId === currentUser?.id,
   );
   const canAccessMessages = Boolean(
     currentUser && tokenAuth && (currentTicket || isOwner),
   );
-  const remainingPlaces = Math.max(0, event.capacity - tickets.length);
+  const remainingPlaces = Math.max(0, event.capacity - activeTickets.length);
   const eventEnd = getEventEnd(event.endDate, event.endTime);
   // The request-time comparison intentionally decides whether server actions are available.
   // eslint-disable-next-line react-hooks/purity
@@ -273,6 +276,7 @@ export default async function EventDetailPage({
                   isOwner={isOwner}
                   isRegistered={Boolean(currentTicket)}
                   ticketId={currentTicket?.id}
+                  paymentRequired={event.paymentRequired}
                   isExpired={isExpired}
                   isFull={remainingPlaces === 0}
                 />
