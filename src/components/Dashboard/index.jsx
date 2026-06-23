@@ -707,12 +707,12 @@ export default function Dashboard({ count = null }) {
             const soldCount = evParts.length;
             const price = Number.parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
-              // 💰 Événement payant
+              // Événement payant
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
-              // 🆓 Événement gratuit
+              // Événement gratuit
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }

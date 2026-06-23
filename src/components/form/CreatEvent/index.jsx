@@ -76,8 +76,6 @@ const CreatEvent = ({ id }) => {
   }, []);
 
   useEffect(() => {
-    console.log("lkl");
-
     if (currentStep === 2 && typeof window !== "undefined") {
       loadGoogleMapsScript(() => {
         if (window.google && window.google.maps) {
@@ -106,7 +104,6 @@ const CreatEvent = ({ id }) => {
   useEffect(() => {
     if (id && eventQuery.data) {
       const response = eventQuery.data;
-      console.log("Event details:", response.event);
       setEvent(response.event);
       setForm({
         title: response.event?.title ?? "",

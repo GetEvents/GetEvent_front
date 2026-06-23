@@ -5,8 +5,6 @@ import Navbar from "./NavBar";
 import React from "react";
 
 export default function NavbarWrapper({ currentUser }) {
-  console.log("Current user in NavbarWrapper:", currentUser);
-
   const pathname = usePathname();
 
   if (pathname === "/auth/login" || pathname === "/auth/register") {

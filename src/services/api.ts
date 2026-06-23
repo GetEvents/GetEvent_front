@@ -368,8 +368,6 @@ export const events = {
    */
   update: async ({ formData, token }: FormTokenParam) => {
     const url = `${API_BASE_URL}/api/events/editEvent`;
-    console.log("formData", formData);
-
     try {
       const response = await fetch(url, {
         method: "PATCH",
@@ -380,7 +378,6 @@ export const events = {
         credentials: "include",
       });
 
-      console.log("response", response);
       const data = await response.json();
 
       if (!response.ok) {
@@ -611,12 +608,9 @@ export const participations = {
    * @param {number} eventId
    */
   create: async ({ eventId, token }: EventTokenParam) => {
-    console.log(eventId, token);
-
     const body = {
       eventId: eventId,
     };
-    console.log("eventId", body);
 
     return apiRequest("POST", "/participations/", {
       body,

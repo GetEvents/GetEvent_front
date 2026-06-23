@@ -15,9 +15,6 @@ export function initMapAuto<T extends FormWithLocation>(
   const infowindowContent = document.getElementById("infowindow-content");
 
   if (!mapElement || !input || !card || !infowindowContent) {
-    console.log(
-      "Un ou plusieurs éléments requis sont introuvables dans le DOM.",
-    );
     return;
   }
 
@@ -42,10 +39,10 @@ export function initMapAuto<T extends FormWithLocation>(
   autocomplete.addListener("place_changed", () => {
     const place = autocomplete.getPlace();
     if (place && place.formatted_address) {
-      // ✅ mettre à jour visuellement le champ
+      // mettre à jour visuellement le champ
       searchInput.value = place.formatted_address;
 
-      // ✅ mettre à jour React state pour que le champ contrôlé suive
+      // mettre à jour React state pour que le champ contrôlé suive
       setForm((prev) => ({
         ...prev,
         location: place.formatted_address,
