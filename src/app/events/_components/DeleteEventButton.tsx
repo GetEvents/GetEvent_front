@@ -50,6 +50,7 @@ export default function DeleteEventButton({
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleDelete}
         eventTitle={eventTitle}
+        message="Voulez-vous vraiment supprimer cet événement ?"
         isLoading={deleteMutation.isPending}
       />
     </>
