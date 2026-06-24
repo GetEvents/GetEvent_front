@@ -113,6 +113,7 @@ export default function EventActions({
           onConfirm={handleDelete}
           eventTitle={eventTitle}
           isLoading={isPending}
+          message={""}
         />
       </>
     );
@@ -133,6 +134,7 @@ export default function EventActions({
           onClose={() => setIsLeaveModalOpen(false)}
           onConfirm={handleLeave}
           isLoading={leaveMutation.isPending}
+          eventTitle={eventTitle}
           title="Confirmer la désinscription"
           message={
             paymentRequired
