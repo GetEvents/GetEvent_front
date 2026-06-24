@@ -2,7 +2,13 @@
 
 import { type FormEvent, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Check, CreditCard, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  ShieldCheck,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import {
   createSellerAccountLink,
   getStripeOnboardingStatus,
@@ -206,7 +212,13 @@ export default function SettingsPage() {
           <div className={styles.settingsColumn}>
             <section className={styles.card}>
               <div className={styles.sectionTitle}>
-                <h2>Informations personnelles</h2>
+                <UserRound aria-hidden="true" />
+                <div>
+                  <h2>Informations personnelles</h2>
+                  <p>
+                    Mettez à jour les informations visibles sur votre profil.
+                  </p>
+                </div>
               </div>
               <ProfilForm id />
             </section>

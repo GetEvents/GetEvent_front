@@ -783,4 +783,61 @@
     flex: none;
     width: 100%;
   }
+
+  .profileEditForm {
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+
+  .profileFields {
+    display: grid;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .profileRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .profileRowMedia {
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .profileSaveButton {
+    align-self: flex-start;
+    min-width: 150px;
+    min-height: 44px;
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.25rem;
+    border: 0;
+    border-radius: 9px;
+    background: #075fa7;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: #064d87;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .profileRow {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .profileSaveButton {
+      width: 100%;
+    }
+  }
 }

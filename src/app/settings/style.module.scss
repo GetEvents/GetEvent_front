@@ -2,7 +2,9 @@
   width: 100%;
   min-height: calc(100vh - 80px);
   padding: 2rem 1.5rem 4rem;
-  background: #f5f7fa;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(7, 95, 167, 0.1), transparent 28rem),
+    #f5f7fa;
   color: #1e293b;
 }
 
@@ -12,12 +14,16 @@
 }
 
 .header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding: 1.6rem 1.75rem;
+  border: 1px solid rgba(7, 95, 167, 0.13);
+  border-radius: 16px;
+  background: linear-gradient(120deg, #ffffff 20%, #edf7ff 100%);
 
   h1 {
     margin: 0 0 0.3rem;
     color: #172033;
-    font-size: 1.8rem;
+    font-size: clamp(1.55rem, 3vw, 2rem);
     font-weight: 700;
   }
 
@@ -49,9 +55,9 @@
   min-width: 0;
   padding: 1.5rem;
   border: 1px solid #dce3ec;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 4px 16px rgba(30, 41, 59, 0.05);
+  box-shadow: 0 10px 30px rgba(30, 41, 59, 0.06);
 }
 
 .sectionTitle {
@@ -338,6 +344,11 @@
 
   .card {
     padding: 1rem;
+  }
+
+  .header {
+    padding: 1.25rem;
+    border-radius: 12px;
   }
 
   .passwordForm {
