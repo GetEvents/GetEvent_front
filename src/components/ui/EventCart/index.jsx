@@ -76,8 +76,6 @@ export default function EventCard({
   };
 
   const formatDate = (dateString) => {
-    console.log("dateStringdateString", dateString);
-
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -85,10 +83,7 @@ export default function EventCard({
     return `${year}-${month}-${day}`;
   };
   const formatTime = (timeString) => {
-    console.log("timeString", timeString);
-
     if (!timeString) return "00:00";
-    console.log("timeString45", timeString);
 
     // Cas ISO (ex: 2026-02-15T01:01:00.000Z)
     if (timeString.includes("T")) {
@@ -122,11 +117,7 @@ export default function EventCard({
     setIsDeleting(true);
     try {
       const response = await deleteEventMutation.mutateAsync(eventToDelete.id);
-      console.log("response", response);
-
       if (response.redirect) {
-        console.log("redirect", response.redirect);
-
         router.push("/events/my-events");
       }
       closeDeleteModal();

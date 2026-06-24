@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
 import { fetchGetNotifications } from "@/actions/notification";
@@ -28,6 +29,9 @@ const categories = [
   { id: "social", label: "Social", img: "/people.png" },
   { id: "education", label: "Éducation", img: "/stack-of-books.png" },
 ];
+
+const quickCategories = categories.slice(0, 4);
+const advancedCategories = categories.slice(4);
 
 interface SearchOptions {
   category?: string;
@@ -173,7 +177,11 @@ export default function Welcome() {
 
   return (
     <>
-      <div className={style.eventsPage}>
+      <div
+        className={`${style.eventsPage} ${
+          !isAuthenticated ? style.withPublicNavbar : ""
+        }`}
+      >
         {isAuthenticated && (
           <div className={style.topNavBar}>
             <div className={style.navContainer}>
@@ -223,8 +231,8 @@ export default function Welcome() {
         <section className={style.heroSection}>
           <div className={style.heroContent}>
             <h1 className={style.heroTitle}>
-              Découvrez des événements à{" "}
-              <span className={style.highlight}>Paris</span>
+              Trouvez votre prochaine{" "}
+              <span className={style.highlight}>expérience</span>
             </h1>
             <p className={style.heroSubtitle}>
               Vivez de nouvelles expériences aujourd&apos;hui et trouvez votre
@@ -270,7 +278,7 @@ export default function Welcome() {
                   <input
                     type="text"
                     id="pac_input"
-                    placeholder="Paris, France"
+                    placeholder="Ville ou lieu"
                     value={location}
                     onChange={(event) => setLocation(event.target.value)}
                   />
@@ -296,7 +304,7 @@ export default function Welcome() {
             </div>
 
             <div className={style.categoryFilters}>
-              {categories.map((category, index) => (
+              {quickCategories.map((category, index) => (
                 <button
                   type="button"
                   key={category.id}
@@ -321,6 +329,48 @@ export default function Welcome() {
                   {category.label}
                 </button>
               ))}
+
+              <details className={style.advancedFilters}>
+                <summary
+                  className={`${style.advancedFilterButton} ${
+                    advancedCategories.some(
+                      (category) => category.id === activeFilter,
+                    )
+                      ? style.active
+                      : ""
+                  }`}
+                >
+                  <SlidersHorizontal aria-hidden="true" />
+                  <span>Filtres avancés</span>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={style.advancedChevron}
+                  />
+                </summary>
+
+                <div className={style.advancedFilterMenu}>
+                  <p className={style.advancedFilterTitle}>Catégories</p>
+                  {advancedCategories.map((category) => (
+                    <button
+                      type="button"
+                      key={category.id}
+                      className={`${style.advancedFilterOption} ${
+                        activeFilter === category.id ? style.active : ""
+                      }`}
+                      onClick={(event) => {
+                        setActiveFilter(category.id);
+                        void searchEvents({ category: category.id });
+                        event.currentTarget
+                          .closest("details")
+                          ?.removeAttribute("open");
+                      }}
+                    >
+                      <Image src={category.img} alt="" width={20} height={20} />
+                      <span>{category.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </details>
             </div>
           </div>
         </section>
@@ -330,7 +380,9 @@ export default function Welcome() {
             <div>
               <h2 className={style.sectionTitle}>Événements à venir</h2>
               <p className={style.sectionSubtitle}>
-                Des expériences sélectionnées selon votre localisation
+                {loading
+                  ? "Recherche des meilleures expériences..."
+                  : `${eventList.length} événement${eventList.length > 1 ? "s" : ""} trouvé${eventList.length > 1 ? "s" : ""}`}
               </p>
             </div>
             <div className={style.headerActions}>

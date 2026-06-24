@@ -166,14 +166,18 @@ export type UnsubscribeParticipantInput = {
   reason: string;
 };
 
+export type UnsubscribeParticipantResult = {
+  error: boolean;
+  message: string;
+  refundRequired?: boolean;
+  refundStatus?: string | null;
+};
+
 export async function unsubscribeParticipant({
   participantId,
   eventId,
   reason,
-}: UnsubscribeParticipantInput): Promise<{
-  error: boolean;
-  message: string;
-}> {
+}: UnsubscribeParticipantInput): Promise<UnsubscribeParticipantResult> {
   const token = await getToken();
   const normalizedReason = reason.trim();
 
@@ -206,11 +210,23 @@ export async function unsubscribeParticipant({
       };
     }
 
-    const payload = response.data as { message?: string };
+    const payload = response.data as {
+      message?: string;
+      data?: {
+        message?: string;
+        refundRequired?: boolean;
+        refundStatus?: string | null;
+      };
+    };
 
     return {
       error: false,
-      message: payload.message || "Le participant a bien été désinscrit.",
+      message:
+        payload.data?.message ||
+        payload.message ||
+        "Le participant a bien été désinscrit.",
+      refundRequired: Boolean(payload.data?.refundRequired),
+      refundStatus: payload.data?.refundStatus ?? null,
     };
   } catch {
     return {

@@ -15,13 +15,10 @@ btnLayout.addEventListener("click", () => {
   detEvents.forEach((detEvent) => {
     detEvent.classList.toggle("cachspan");
   });
-
-  console.log("Button clicked and class toggled");
 });
 
 // linens.forEach((link) => {
 //     link.addEventListener("click", (event) => {
 //         event.preventDefault(); // Empêche le chargement de la page
-//         console.log("Le chargement de la page a été empêché !");
 //     });
 // });

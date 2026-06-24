@@ -223,14 +223,36 @@ export async function joinEvent(
   };
 }
 
-export async function leaveEvent(ticketId: number): Promise<EventActionState> {
+export async function leaveEvent(ticketId: number): Promise<
+  EventActionState & {
+    refundRequired?: boolean;
+    refundStatus?: string | null;
+  }
+> {
   const token = await requireToken();
   const response = await participations.delete({ id: ticketId, token });
 
-  return response.success
-    ? { error: false, message: "Désinscription effectuée." }
-    : {
-        error: true,
-        message: response.error || "Impossible de vous désinscrire.",
-      };
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error || "Impossible de vous désinscrire.",
+    };
+  }
+
+  const payload = response.data as {
+    message?: string;
+    data?: {
+      message?: string;
+      refundRequired?: boolean;
+      refundStatus?: string | null;
+    };
+  };
+
+  return {
+    error: false,
+    message:
+      payload.data?.message || payload.message || "Désinscription effectuée.",
+    refundRequired: Boolean(payload.data?.refundRequired),
+    refundStatus: payload.data?.refundStatus ?? null,
+  };
 }

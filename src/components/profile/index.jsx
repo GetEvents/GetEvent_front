@@ -29,6 +29,12 @@ export default function Profil() {
 
   // Initiales pour l'avatar par défaut
   const initials = `${(currentUser.prenom?.[0] || "").toUpperCase()}${(currentUser.nom?.[0] || "").toUpperCase()}`;
+  const roleLabel =
+    currentUser.role === "ORGANISATEUR"
+      ? "Organisateur"
+      : currentUser.role === "ADMIN"
+        ? "Administrateur"
+        : "Participant";
 
   return (
     <div className={styles.modifomulair}>
@@ -44,44 +50,16 @@ export default function Profil() {
               priority
             />
           ) : (
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "linear-gradient(135deg, #0b5ed7, #4e92ff)",
-                color: "white",
-                fontSize: "3rem",
-                fontWeight: "bold",
-              }}
-            >
-              {initials}
-            </div>
+            <div className={styles.avatarFallback}>{initials}</div>
           )}
         </div>
         <div className={styles.infouser}>
           <p className={styles.infousername}>
-            {currentUser.nom} <br /> {currentUser.prenom}
+            {currentUser.prenom} {currentUser.nom}
           </p>
           <p className={styles.infousermail}>{currentUser.email}</p>
           {currentUser.role && (
-            <span
-              style={{
-                display: "inline-block",
-                marginTop: "0.5rem",
-                padding: "0.2rem 0.8rem",
-                background: "#e0f2fe",
-                color: "#0284c7",
-                borderRadius: "20px",
-                fontSize: "0.8rem",
-                fontWeight: "600",
-                textTransform: "capitalize",
-              }}
-            >
-              {currentUser.role}
-            </span>
+            <span className={styles.roleBadge}>{roleLabel}</span>
           )}
         </div>
       </div>

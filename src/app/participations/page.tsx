@@ -1,7 +1,9 @@
 "use client";
 
 import { QrCode } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Ticket, { TicketSkeleton } from "@/components/ui/Ticket";
+import { getMyRefunds } from "@/actions/payment";
 import { useAuth } from "@/hooks/useAuth";
 import { useTicketsByUser } from "@/hooks/useParticipants";
 import style from "./style.module.scss";
@@ -13,7 +15,20 @@ export default function ParticipationsPage() {
     !authLoading && Boolean(user),
   );
   const tickets = ticketsQuery.data || [];
+  const refundsQuery = useQuery({
+    queryKey: ["payments", "refunds", "mine", user?.id],
+    queryFn: getMyRefunds,
+    enabled: !authLoading && Boolean(user),
+  });
+  const refunds = refundsQuery.data?.refunds || [];
   const loading = authLoading || ticketsQuery.isPending;
+
+  const refundStatusLabels = {
+    PENDING: "En attente",
+    COMPLETED: "Remboursé",
+    FAILED: "Échec",
+    REJECTED: "Refusé",
+  };
 
   return (
     <main className={style.parent_container}>
@@ -65,6 +80,34 @@ export default function ParticipationsPage() {
               <Ticket key={ticket.id} ticket={ticket} />
             ))}
           </div>
+        )}
+
+        {!refundsQuery.isPending && refunds.length > 0 && (
+          <section className={style.refunds_section}>
+            <h2>Mes remboursements</h2>
+            <div className={style.refunds_list}>
+              {refunds.map((refund) => (
+                <article className={style.refund_card} key={refund.id}>
+                  <div>
+                    <h3>{refund.ticket?.event?.title || "Événement"}</h3>
+                    <p>{refund.reason || "Aucun motif renseigné"}</p>
+                  </div>
+                  <strong>
+                    {new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: refund.currency || "XOF",
+                      maximumFractionDigits: 0,
+                    }).format(refund.amount)}
+                  </strong>
+                  <span
+                    className={style[`refund_${refund.status.toLowerCase()}`]}
+                  >
+                    {refundStatusLabels[refund.status] || refund.status}
+                  </span>
+                </article>
+              ))}
+            </div>
+          </section>
         )}
       </section>
     </main>

@@ -15,6 +15,7 @@ interface EventActionsProps {
   isOwner: boolean;
   isRegistered: boolean;
   ticketId?: number;
+  paymentRequired: boolean;
   isExpired: boolean;
   isFull: boolean;
 }
@@ -25,6 +26,7 @@ export default function EventActions({
   isOwner,
   isRegistered,
   ticketId,
+  paymentRequired,
   isExpired,
   isFull,
 }: EventActionsProps) {
@@ -34,6 +36,7 @@ export default function EventActions({
     notify: (message: string, type?: "success" | "error" | "info") => void;
   };
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const joinMutation = useJoinEvent();
   const leaveMutation = useLeaveEvent();
   const deleteMutation = useDeleteEvent();
@@ -57,8 +60,14 @@ export default function EventActions({
     if (!ticketId) return;
     leaveMutation.mutate(ticketId, {
       onSuccess: (result) => {
-        notify(result.message, result.error ? "error" : "success");
-        if (!result.error) router.refresh();
+        notify(
+          result.message,
+          result.error ? "error" : result.refundRequired ? "info" : "success",
+        );
+        if (!result.error) {
+          setIsLeaveModalOpen(false);
+          router.refresh();
+        }
       },
       onError: () => notify("Impossible de vous désinscrire.", "error"),
     });
@@ -110,15 +119,30 @@ export default function EventActions({
 
   if (isRegistered)
     return (
-      <button
-        type="button"
-        className={`${styles.button} ${styles.secondary}`}
-        onClick={handleLeave}
-        disabled={isPending}
-      >
-        <LogOut />{" "}
-        {isPending ? "Désinscription..." : "Se désinscrire de l'événement"}
-      </button>
+      <>
+        <button
+          type="button"
+          className={`${styles.button} ${styles.secondary}`}
+          onClick={() => setIsLeaveModalOpen(true)}
+          disabled={isPending}
+        >
+          <LogOut /> Se désinscrire de l&apos;événement
+        </button>
+        <DelectModal
+          isOpen={isLeaveModalOpen}
+          onClose={() => setIsLeaveModalOpen(false)}
+          onConfirm={handleLeave}
+          isLoading={leaveMutation.isPending}
+          title="Confirmer la désinscription"
+          message={
+            paymentRequired
+              ? "Cet événement est payant. Votre désinscription créera une demande de remboursement en attente de traitement."
+              : "Voulez-vous vraiment vous désinscrire de cet événement ?"
+          }
+          confirmLabel="Se désinscrire"
+          loadingLabel="Désinscription..."
+        />
+      </>
     );
 
   return (

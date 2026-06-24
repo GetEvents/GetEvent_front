@@ -28,7 +28,6 @@ function fetchEvents() {
   )
     .then((response) => response.json())
     .then((data) => {
-      console.log("Données récupérées:", data.data.location); // Affiche les données dans la console pour vérifier
       displayEvents(data.data); // Passe les données à une fonction pour les afficher
     })
     .catch((error) => console.error("Erreur:", error));
@@ -83,7 +82,6 @@ function geocodeAddress(address, popupText, titre) {
 // Fonction pour afficher les événements sur la carte
 function displayEvents(event) {
   // evenes.forEach(event => {
-  //   console.log('Affichage de l\'événement:', event.location); // Affiche chaque événement pour déboguer
   geocodeAddress(
     event.location,
     `<br>${event.location}`,

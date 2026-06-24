@@ -37,6 +37,7 @@ export interface Event {
   capacity: number;
   organisateurId: number;
   paymentPrice?: number | null;
+  currency: string;
   priceId?: string | null;
   priceProvider?: PaymentProvider | null;
   paymentRequired: boolean;

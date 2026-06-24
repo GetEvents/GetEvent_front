@@ -18,11 +18,8 @@ export default function EventCard({ count }) {
   const [currentTime] = useState(Date.now);
 
   useEffect(() => {
-    console.log("useEffect déclenché"); // ← Vérifiez que c'est affiché
-
     getEventByUser()
       .then((response) => {
-        console.log("event data:", response.events);
         setEventList(response.events || []);
         if (count) {
           count(response.events.length);
@@ -37,7 +34,6 @@ export default function EventCard({ count }) {
 
     getUser()
       .then((response) => {
-        console.log("user data3:", response.user);
         setCurrentUsers(response.user);
       })
       .catch((error) => {
@@ -87,10 +83,7 @@ export default function EventCard({ count }) {
   };
 
   var current_user = currentUser;
-  console.log("l'utilisateur actuel est ", current_user);
   const formatDate = (dateString) => {
-    console.log("dateStringdateString", dateString);
-
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -98,10 +91,7 @@ export default function EventCard({ count }) {
     return `${year}-${month}-${day}`;
   };
   const formatTime = (timeString) => {
-    console.log("timeString", timeString);
-
     if (!timeString) return "00:00";
-    console.log("timeString45", timeString);
 
     // Cas ISO (ex: 2026-02-15T01:01:00.000Z)
     if (timeString.includes("T")) {

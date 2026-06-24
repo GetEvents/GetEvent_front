@@ -318,8 +318,11 @@ const Register = ({ id }) => {
           </div>
         )}
 
-        <form className={style.form} onSubmit={handleSubmit}>
-          <div className={`${id ? style.formStyel : ""}`}>
+        <form
+          className={`${style.form} ${id ? style.profileEditForm : ""}`}
+          onSubmit={handleSubmit}
+        >
+          <div className={`${id ? style.profileFields : ""}`}>
             {!id ? (
               <>
                 {step === 1 ? (
@@ -545,7 +548,7 @@ const Register = ({ id }) => {
               </>
             ) : (
               <>
-                <div>
+                <div className={style.profileRow}>
                   <Input
                     name="nom"
                     label="Nom"
@@ -563,7 +566,7 @@ const Register = ({ id }) => {
                     required
                   />
                 </div>
-                <div>
+                <div className={style.profileRow}>
                   <Input
                     name="date_naissance"
                     label="Anniversaire"
@@ -582,7 +585,7 @@ const Register = ({ id }) => {
                     required={defaultForm.role === "ORGANISATEUR"}
                   />
                 </div>
-                <div>
+                <div className={style.profileRow}>
                   <PhoneNumberField
                     value={defaultForm.numero}
                     country={defaultForm.pays}
@@ -607,7 +610,7 @@ const Register = ({ id }) => {
                     ]}
                   />
                 </div>
-                <div>
+                <div className={`${style.profileRow} ${style.profileRowMedia}`}>
                   <Input
                     label="Photo de profil"
                     type="file"
@@ -633,6 +636,8 @@ const Register = ({ id }) => {
             <Button
               label={mutation.isPending ? "Enregistrement..." : "Modifier"}
               type="submit"
+              className={style.profileSaveButton}
+              disabled={mutation.isPending}
             />
           )}
 

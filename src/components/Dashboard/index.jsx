@@ -19,6 +19,11 @@ import {
   useUnsubscribeParticipant,
 } from "@/hooks/useParticipants";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  getOrganizerBalance,
+  getRefunds,
+  updateRefundStatus,
+} from "@/actions/payment";
 import DelectModal from "@/components/DelectModal";
 import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
@@ -324,6 +329,13 @@ function UnsubscribeParticipantModal({
           </div>
         </dl>
 
+        {participant.eventPaymentRequired && (
+          <p className={styles.unsubscribe_notice} role="status">
+            Cet événement est payant. Le retrait du participant créera une
+            demande de remboursement en attente de traitement.
+          </p>
+        )}
+
         <label
           className={styles.unsubscribe_label}
           htmlFor="unsubscribe-reason"
@@ -450,8 +462,16 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
         </div>
       </div>
 
-      {participantActionMessage?.type === "success" && (
-        <p className={styles.participant_success} role="status">
+      {(participantActionMessage?.type === "success" ||
+        participantActionMessage?.type === "refund") && (
+        <p
+          className={
+            participantActionMessage.type === "refund"
+              ? styles.participant_refund
+              : styles.participant_success
+          }
+          role="status"
+        >
           {participantActionMessage.message}
         </p>
       )}
@@ -541,6 +561,129 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
   );
 });
 
+function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
+  const [providerReferences, setProviderReferences] = useState({});
+
+  return (
+    <section className={styles.table_card}>
+      <div className={styles.table_header_actions}>
+        <h3>Demandes de remboursement</h3>
+      </div>
+
+      {message && (
+        <p
+          className={
+            message.type === "error"
+              ? styles.refund_admin_error
+              : styles.participant_success
+          }
+          role="status"
+        >
+          {message.message}
+        </p>
+      )}
+
+      <div style={{ overflowX: "auto" }}>
+        <table className={styles.modern_table}>
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>Événement</th>
+              <th>Montant</th>
+              <th>Motif</th>
+              <th>Statut</th>
+              <th>Traitement</th>
+            </tr>
+          </thead>
+          <tbody>
+            {refunds.length === 0 ? (
+              <tr>
+                <td colSpan="6">Aucune demande de remboursement.</td>
+              </tr>
+            ) : (
+              refunds.map((refund) => {
+                const participant = refund.ticket?.user;
+                const participantName =
+                  [participant?.prenom, participant?.nom]
+                    .filter(Boolean)
+                    .join(" ") ||
+                  participant?.email ||
+                  "Participant";
+
+                return (
+                  <tr key={refund.id}>
+                    <td>{participantName}</td>
+                    <td>{refund.ticket?.event?.title || "Événement"}</td>
+                    <td>
+                      {new Intl.NumberFormat("fr-FR", {
+                        style: "currency",
+                        currency: refund.currency || "XOF",
+                        maximumFractionDigits: 0,
+                      }).format(refund.amount)}
+                    </td>
+                    <td>{refund.reason || "Aucun motif"}</td>
+                    <td>{refund.status}</td>
+                    <td>
+                      {refund.status === "PENDING" ? (
+                        <div className={styles.refund_admin_actions}>
+                          <input
+                            type="text"
+                            value={providerReferences[refund.id] || ""}
+                            onChange={(event) =>
+                              setProviderReferences((current) => ({
+                                ...current,
+                                [refund.id]: event.target.value,
+                              }))
+                            }
+                            placeholder="Référence FedaPay"
+                            disabled={isUpdating}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onUpdate(
+                                refund.id,
+                                "COMPLETED",
+                                providerReferences[refund.id]?.trim(),
+                              )
+                            }
+                            disabled={
+                              isUpdating ||
+                              !providerReferences[refund.id]?.trim()
+                            }
+                          >
+                            Remboursé
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onUpdate(refund.id, "FAILED")}
+                            disabled={isUpdating}
+                          >
+                            Échec
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onUpdate(refund.id, "REJECTED")}
+                            disabled={isUpdating}
+                          >
+                            Rejeter
+                          </button>
+                        </div>
+                      ) : (
+                        refund.providerRefundId || "Traité"
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 // ==========================================
 // COMPOSANT PRINCIPAL
 // ==========================================
@@ -557,7 +700,7 @@ function DashboardSkeleton() {
       </div>
       <div className={styles.skeleton_tabs} />
       <div className={styles.kpi_grid}>
-        {Array.from({ length: 5 }, (_, index) => (
+        {Array.from({ length: 6 }, (_, index) => (
           <div className={styles.kpi_card} key={index} aria-hidden="true">
             <span className={styles.skeleton_icon} />
             <div className={styles.skeleton_kpi_text}>
@@ -607,6 +750,10 @@ export default function Dashboard({ count = null }) {
   // Data
   const [eventsList, setEventsList] = useState([]);
   const [participants, setParticipants] = useState([]);
+  const [organizerBalance, setOrganizerBalance] = useState(null);
+  const [refunds, setRefunds] = useState([]);
+  const [refundActionMessage, setRefundActionMessage] = useState(null);
+  const [isUpdatingRefund, setIsUpdatingRefund] = useState(false);
   const [kpis, setKpis] = useState({
     totalEvents: 0,
     activeEvents: 0,
@@ -631,6 +778,8 @@ export default function Dashboard({ count = null }) {
     if (!isAuthenticated || !user) {
       setEventsList([]);
       setParticipants([]);
+      setOrganizerBalance(null);
+      setRefunds([]);
       setErrorMessage("Vous devez être connecté pour accéder au dashboard.");
       setLoading(false);
       return;
@@ -639,6 +788,8 @@ export default function Dashboard({ count = null }) {
     if (user.role !== "ORGANISATEUR" && user.role !== "ADMIN") {
       setEventsList([]);
       setParticipants([]);
+      setOrganizerBalance(null);
+      setRefunds([]);
       setErrorMessage("Cet espace est réservé aux organisateurs.");
       setLoading(false);
       return;
@@ -647,7 +798,24 @@ export default function Dashboard({ count = null }) {
     setLoading(true);
     setErrorMessage("");
     try {
-      const eventsRes = await queryClient.fetchQuery(eventQueries.mine());
+      const [eventsRes, balanceResult, refundsResult] = await Promise.all([
+        queryClient.fetchQuery(eventQueries.mine()),
+        getOrganizerBalance(),
+        user.role === "ADMIN"
+          ? getRefunds()
+          : Promise.resolve({ success: true, refunds: [] }),
+      ]);
+      setOrganizerBalance(
+        balanceResult.success
+          ? {
+              balance: balanceResult.balance ?? 0,
+              reservedBalance: balanceResult.reservedBalance ?? 0,
+              availableBalance: balanceResult.availableBalance ?? 0,
+              currency: balanceResult.currency || "XOF",
+            }
+          : null,
+      );
+      setRefunds(refundsResult.success ? refundsResult.refunds : []);
       // On s'assure que c'est bien la liste (selon l'API)
       const list = Array.isArray(eventsRes)
         ? eventsRes
@@ -707,12 +875,12 @@ export default function Dashboard({ count = null }) {
             const soldCount = evParts.length;
             const price = Number.parseFloat(ev.paymentPrice) || 0;
             if (price > 0) {
-              // 💰 Événement payant
+              // Événement payant
               tTickets += soldCount;
               tRevenue += soldCount * price;
               eventRevenue = soldCount * price;
             } else {
-              // 🆓 Événement gratuit
+              // Événement gratuit
               freeRegistrations += soldCount;
               eventRevenue = 0;
             }
@@ -723,6 +891,8 @@ export default function Dashboard({ count = null }) {
                 ...p,
                 eventTitle: ev.title,
                 eventId: ev.id,
+                eventPaymentRequired: Boolean(ev.paymentRequired),
+                eventPaymentPrice: ev.paymentPrice,
               })),
             ];
           }
@@ -765,6 +935,8 @@ export default function Dashboard({ count = null }) {
         freeRegistrations,
       });
     } catch {
+      setOrganizerBalance(null);
+      setRefunds([]);
       setErrorMessage("Impossible de charger les données du dashboard.");
     } finally {
       setLoading(false);
@@ -864,9 +1036,19 @@ export default function Dashboard({ count = null }) {
       setSelectedParticipantToRemove(null);
       setUnsubscribeReason("");
       setParticipantActionMessage({
-        type: "success",
-        message: result.message || "Le participant a bien été désinscrit.",
+        type: result.refundRequired ? "refund" : "success",
+        message:
+          result.message ||
+          (result.refundRequired
+            ? "Le participant a été retiré. La demande de remboursement est en attente."
+            : "Le participant a bien été désinscrit."),
       });
+      if (user.role === "ADMIN" && result.refundRequired) {
+        const refreshedRefunds = await getRefunds();
+        if (refreshedRefunds.success) {
+          setRefunds(refreshedRefunds.refunds);
+        }
+      }
       void queryClient.invalidateQueries({
         queryKey: participantKeys.byEvent(Number(removedEventId)),
       });
@@ -880,6 +1062,40 @@ export default function Dashboard({ count = null }) {
       });
     } finally {
       setIsUnsubscribing(false);
+    }
+  };
+
+  const handleRefundUpdate = async (id, status, providerRefundId) => {
+    if (isUpdatingRefund) return;
+
+    setIsUpdatingRefund(true);
+    setRefundActionMessage(null);
+
+    try {
+      const result = await updateRefundStatus({
+        id,
+        status,
+        providerRefundId,
+      });
+
+      if (!result.success || !result.refund) {
+        setRefundActionMessage({ type: "error", message: result.message });
+        return;
+      }
+
+      setRefunds((currentRefunds) =>
+        currentRefunds.map((refund) =>
+          refund.id === id ? { ...refund, ...result.refund } : refund,
+        ),
+      );
+      setRefundActionMessage({ type: "success", message: result.message });
+    } catch {
+      setRefundActionMessage({
+        type: "error",
+        message: "Impossible de traiter cette demande de remboursement.",
+      });
+    } finally {
+      setIsUpdatingRefund(false);
     }
   };
 
@@ -901,7 +1117,7 @@ export default function Dashboard({ count = null }) {
         labels: chartData.labels,
         datasets: [
           {
-            label: "Revenus par événement (€)",
+            label: "Revenus par événement (FCFA)",
             data: chartData.revenues,
             backgroundColor: "rgba(11, 94, 215, 0.6)",
             borderColor: "rgb(11, 94, 215)",
@@ -995,8 +1211,35 @@ export default function Dashboard({ count = null }) {
               <div className={styles.kpi_value}>
                 {new Intl.NumberFormat("fr-FR", {
                   style: "currency",
-                  currency: "EUR",
+                  currency: "XOF",
+                  maximumFractionDigits: 0,
                 }).format(kpis.totalRevenue)}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.kpi_card}>
+            <div className={styles.kpi_icon}>{ICONS.money}</div>
+            <div className={styles.kpi_info}>
+              <h3>Solde disponible</h3>
+              <div className={styles.kpi_value}>
+                {organizerBalance
+                  ? new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: organizerBalance.currency,
+                      maximumFractionDigits: 0,
+                    }).format(organizerBalance.availableBalance)
+                  : "Indisponible"}
+                {organizerBalance?.reservedBalance > 0 && (
+                  <span className={styles.kpi_status}>
+                    {new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: organizerBalance.currency,
+                      maximumFractionDigits: 0,
+                    }).format(organizerBalance.reservedBalance)}{" "}
+                    réservés
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -1062,7 +1305,11 @@ export default function Dashboard({ count = null }) {
   return (
     <div className={styles.dashboard_container}>
       <div className={styles.dashboard_header}>
-        <h1>Dashboard Organisateur</h1>
+        <h1>
+          {user.role === "ADMIN"
+            ? "Dashboard administrateur"
+            : "Dashboard Organisateur"}
+        </h1>
         <p>Suivez l&apos;activité de vos événements en un coup d&apos;œil.</p>
       </div>
 
@@ -1085,6 +1332,14 @@ export default function Dashboard({ count = null }) {
         >
           Contrôle des billets
         </button>
+        {user.role === "ADMIN" && (
+          <button
+            className={`${styles.tab_btn} ${activeTab === "refunds" ? styles.active : ""}`}
+            onClick={() => setActiveTab("refunds")}
+          >
+            Remboursements
+          </button>
+        )}
       </div>
 
       <div className={styles.tab_content}>
@@ -1136,6 +1391,14 @@ export default function Dashboard({ count = null }) {
               </p>
             )}
           </section>
+        )}
+        {activeTab === "refunds" && user.role === "ADMIN" && (
+          <RefundsSection
+            refunds={refunds}
+            message={refundActionMessage}
+            isUpdating={isUpdatingRefund}
+            onUpdate={handleRefundUpdate}
+          />
         )}
       </div>
 

@@ -1,5 +1,4 @@
 .modifomulair {
-  // background-color:red;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -17,22 +16,36 @@
   .profil {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 1rem;
     align-items: center;
 
     .avatar {
       position: relative;
-      width: 140px;
-      height: 140px;
+      width: 128px;
+      height: 128px;
       border-radius: 9999px;
       overflow: hidden;
-      border: 3px solid #e2e8f0;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      border: 4px solid #ffffff;
+      box-shadow:
+        0 0 0 1px #dce3ec,
+        0 12px 28px rgba(7, 95, 167, 0.16);
       background: #f8fafc;
     }
 
     .avatarImage {
       object-fit: cover;
+    }
+
+    .avatarFallback {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+      background: linear-gradient(135deg, #075fa7, #38a3e5);
+      color: #ffffff;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
     }
 
     .infouser {
@@ -42,14 +55,32 @@
       gap: 4px;
 
       .infousername {
-        margin-bottom: 5px;
-        font-weight: 600;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 750;
         color: #0f172a;
       }
 
       .infousermail {
+        max-width: 220px;
+        margin: 0;
+        overflow: hidden;
         color: #64748b;
         font-size: 0.9rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .roleBadge {
+        align-self: center;
+        margin-top: 0.5rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #bae6fd;
+        border-radius: 999px;
+        background: #f0f9ff;
+        color: #0369a1;
+        font-size: 0.76rem;
+        font-weight: 700;
       }
     }
   }
