@@ -27,6 +27,12 @@ type OrganizerBalanceResult = {
   updatedAt?: string | null;
 };
 
+type PayoutResult = {
+  success: boolean;
+  message: string;
+  amount?: number;
+};
+
 const getToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("token")?.value || (await refreshAccessToken());
@@ -147,6 +153,44 @@ export async function getOrganizerBalance(): Promise<OrganizerBalanceResult> {
     availableBalance: Number(payload.data?.availableBalance ?? 0),
     currency: payload.data?.currency || "XOF",
     updatedAt: payload.data?.updatedAt ?? null,
+  };
+}
+
+export async function requestPayout(amount: number): Promise<PayoutResult> {
+  const token = await getToken();
+
+  if (!token) {
+    return {
+      success: false,
+      message: "Votre session a expiré.",
+    };
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return {
+      success: false,
+      message: "Le montant du retrait doit être supérieur à 0.",
+    };
+  }
+
+  const response = await paymentsFedapay.requestPayout({ amount, token });
+
+  if (!response.success) {
+    return {
+      success: false,
+      message: response.error || "Impossible d'effectuer ce retrait.",
+    };
+  }
+
+  const payload = response.data as {
+    message?: string;
+    data?: { amount?: number };
+  };
+
+  return {
+    success: true,
+    message: payload.message || "Retrait effectué.",
+    amount: Number(payload.data?.amount ?? amount),
   };
 }
 

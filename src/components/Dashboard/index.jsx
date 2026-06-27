@@ -24,6 +24,7 @@ import {
   getRefunds,
   updateRefundStatus,
 } from "@/actions/payment";
+import { usePayout } from "@/hooks/usePayout";
 import DelectModal from "@/components/DelectModal";
 import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
@@ -730,6 +731,7 @@ function DashboardSkeleton() {
 
 export default function Dashboard({ count = null }) {
   const deleteEventMutation = useDeleteEvent();
+  const payoutMutation = usePayout();
   const queryClient = useQueryClient();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
@@ -751,6 +753,8 @@ export default function Dashboard({ count = null }) {
   const [eventsList, setEventsList] = useState([]);
   const [participants, setParticipants] = useState([]);
   const [organizerBalance, setOrganizerBalance] = useState(null);
+  const [payoutAmount, setPayoutAmount] = useState("");
+  const [payoutMessage, setPayoutMessage] = useState(null);
   const [refunds, setRefunds] = useState([]);
   const [refundActionMessage, setRefundActionMessage] = useState(null);
   const [isUpdatingRefund, setIsUpdatingRefund] = useState(false);
@@ -1099,6 +1103,59 @@ export default function Dashboard({ count = null }) {
     }
   };
 
+  const handlePayoutRequest = async (event) => {
+    event.preventDefault();
+    if (payoutMutation.isPending) return;
+
+    const amount = Number(payoutAmount);
+    const availableBalance = Number(organizerBalance?.availableBalance ?? 0);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPayoutMessage({
+        type: "error",
+        message: "Saisissez un montant de retrait valide.",
+      });
+      return;
+    }
+
+    if (amount > availableBalance) {
+      setPayoutMessage({
+        type: "error",
+        message: "Le solde disponible est insuffisant pour ce retrait.",
+      });
+      return;
+    }
+
+    setPayoutMessage(null);
+
+    try {
+      const result = await payoutMutation.mutateAsync(amount);
+
+      if (!result.success) {
+        setPayoutMessage({ type: "error", message: result.message });
+        return;
+      }
+
+      const refreshedBalance = await getOrganizerBalance();
+      if (refreshedBalance.success) {
+        setOrganizerBalance({
+          balance: refreshedBalance.balance ?? 0,
+          reservedBalance: refreshedBalance.reservedBalance ?? 0,
+          availableBalance: refreshedBalance.availableBalance ?? 0,
+          currency: refreshedBalance.currency || "XOF",
+        });
+      }
+
+      setPayoutAmount("");
+      setPayoutMessage({ type: "success", message: result.message });
+    } catch {
+      setPayoutMessage({
+        type: "error",
+        message: "Impossible d'effectuer ce retrait.",
+      });
+    }
+  };
+
   useEffect(() => {
     if (
       activeTab !== "overview" ||
@@ -1241,6 +1298,43 @@ export default function Dashboard({ count = null }) {
                   </span>
                 )}
               </div>
+              {organizerBalance && (
+                <form
+                  className={styles.payout_form}
+                  onSubmit={handlePayoutRequest}
+                >
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={payoutAmount}
+                    onChange={(event) => setPayoutAmount(event.target.value)}
+                    placeholder="Montant à retirer"
+                    disabled={payoutMutation.isPending}
+                  />
+                  <button
+                    type="submit"
+                    disabled={
+                      payoutMutation.isPending ||
+                      Number(organizerBalance.availableBalance ?? 0) <= 0
+                    }
+                  >
+                    {payoutMutation.isPending ? "Retrait..." : "Retirer"}
+                  </button>
+                </form>
+              )}
+              {payoutMessage && (
+                <p
+                  className={`${styles.payout_message} ${
+                    payoutMessage.type === "success"
+                      ? styles.success
+                      : styles.error
+                  }`}
+                >
+                  {payoutMessage.message}
+                </p>
+              )}
             </div>
           </div>
 
