@@ -96,17 +96,14 @@ const Register = ({ id }) => {
       );
   }, []);
   const organizerPaymentUnavailable =
-    !id &&
     defaultForm.role === "ORGANISATEUR" &&
     Boolean(defaultForm.pays) &&
     defaultForm.pays !== "BJ";
   const organizerContactMissing =
-    !id &&
     defaultForm.role === "ORGANISATEUR" &&
     (!defaultForm.pays || !defaultForm.numero);
   const phoneCountry = getPhoneCountry(defaultForm.numero);
   const organizerPhoneCountryMismatch =
-    !id &&
     defaultForm.role === "ORGANISATEUR" &&
     Boolean(defaultForm.pays) &&
     Boolean(defaultForm.numero) &&

@@ -3,7 +3,13 @@
 import { auth } from "../../services/api";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-// import { updateSocketAuth } from "@/socket";
+import {
+  type CountryCode,
+  getCountryCallingCode,
+  isSupportedCountry,
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from "libphonenumber-js";
 import type {
   ActionResponse,
   ServerActionState,
@@ -31,6 +37,19 @@ const isImageFile = (value: FormDataEntryValue | null): value is File => {
 
   return ["image/jpeg", "image/png"].includes(value.type);
 };
+
+const getPhoneCountry = (phoneNumber: string): string | undefined => {
+  if (!phoneNumber) return undefined;
+
+  try {
+    return parsePhoneNumber(phoneNumber)?.country;
+  } catch {
+    return undefined;
+  }
+};
+
+const getSupportedCountry = (country: string): CountryCode | undefined =>
+  isSupportedCountry(country) ? country : undefined;
 
 const setAuthCookies = async (
   token: string,
@@ -360,6 +379,28 @@ export async function editProfil(
       error: true,
       message:
         "Le pays et le numéro de téléphone sont obligatoires pour un organisateur.",
+    };
+  }
+
+  if (editUser.numero && !isValidPhoneNumber(editUser.numero)) {
+    return {
+      error: true,
+      message: "Veuillez saisir un numéro de téléphone valide.",
+    };
+  }
+
+  const phoneCountry = getPhoneCountry(editUser.numero || "");
+  const selectedCountry = getSupportedCountry(editUser.pays || "");
+  if (
+    editUser.role === "ORGANISATEUR" &&
+    selectedCountry &&
+    editUser.numero &&
+    phoneCountry &&
+    phoneCountry !== selectedCountry
+  ) {
+    return {
+      error: true,
+      message: `L'indicatif du numéro doit correspondre au pays sélectionné (+${getCountryCallingCode(selectedCountry)}).`,
     };
   }
 

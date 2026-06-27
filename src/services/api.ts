@@ -929,6 +929,19 @@ export const paymentsFedapay = {
     });
   },
 
+  requestPayout: async ({
+    amount,
+    token,
+  }: {
+    amount: number;
+    token: string;
+  }) => {
+    return apiRequest("POST", "/payments/fedapay/payout", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: { amount },
+    });
+  },
+
   getRefunds: async (token: string, status?: string) => {
     const query = status ? `?status=${encodeURIComponent(status)}` : "";
     return apiRequest("GET", `/payments/refunds${query}`, {
