@@ -1,0 +1,43 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - "develop"
+  pull_request:
+    branches:
+      - "develop"
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Lint and build frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Build Docker image
+        run: docker build -t getevent-front:ci .
