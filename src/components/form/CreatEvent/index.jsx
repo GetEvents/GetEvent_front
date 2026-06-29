@@ -104,6 +104,8 @@ const CreatEvent = ({ id }) => {
   useEffect(() => {
     if (id && eventQuery.data) {
       const response = eventQuery.data;
+      // Hydrate the editable form once the asynchronous event query has resolved.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEvent(response.event);
       setForm({
         title: response.event?.title ?? "",
