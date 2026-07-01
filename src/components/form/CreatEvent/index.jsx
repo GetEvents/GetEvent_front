@@ -103,23 +103,28 @@ const CreatEvent = ({ id }) => {
   // Charger les détails de l'événement en mode édition (une seule fois)
   useEffect(() => {
     if (id && eventQuery.data) {
-      const response = eventQuery.data;
+      const eventData = eventQuery.data?.event ?? eventQuery.data;
+      if (!eventData) return;
+
       // Hydrate the editable form once the asynchronous event query has resolved.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEvent(response.event);
+      setEvent(eventData);
       setForm({
-        title: response.event?.title ?? "",
-        category: response.event?.category ?? "",
-        description: response.event?.description ?? "",
-        photo: response.event?.image ?? null,
-        startDate: response.event?.startDate ?? "",
-        startTime: response.event?.startTime ?? "",
-        endDate: response.event?.endDate ?? "",
-        endTime: response.event?.endTime ?? "",
-        location: response.event?.location ?? "",
-        isOnline: response.event?.isOnline ?? false,
-        capacity: response.event?.capacity ?? 0,
+        title: eventData.title ?? "",
+        category: eventData.category ?? "",
+        description: eventData.description ?? "",
+        image: eventData.image ?? null,
+        startDate: eventData.startDate ?? "",
+        startTime: eventData.startTime ?? "",
+        endDate: eventData.endDate ?? "",
+        endTime: eventData.endTime ?? "",
+        location: eventData.location ?? "",
+        isOnline: eventData.isOnline ?? false,
+        capacity: eventData.capacity ?? 0,
+        isFree: !eventData.paymentRequired,
+        paymentPrice: eventData.paymentPrice ?? "",
       });
+      setImagePreviewUrl(eventData.image ?? null);
     }
   }, [eventQuery.data, id]);
 

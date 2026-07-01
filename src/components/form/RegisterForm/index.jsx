@@ -23,6 +23,19 @@ const formatDate = (dateString) => {
   return date.toISOString().split("T")[0];
 };
 
+const getAge = (dateString) => {
+  if (!dateString) return null;
+  const dob = new Date(dateString);
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 const getProfileForm = (user) => ({
   nom: user?.nom || "",
   prenom: user?.prenom || "",
@@ -81,6 +94,7 @@ const Register = ({ id }) => {
   );
   const [photoPreview, setPhotoPreview] = useState(null);
   const [step, setStep] = useState(1);
+  const [dateError, setDateError] = useState("");
   const { notify } = useNotification();
   const countryOptions = useMemo(() => {
     const regionNames = new Intl.DisplayNames(["fr"], { type: "region" });
@@ -137,6 +151,26 @@ const Register = ({ id }) => {
       return;
     }
 
+    // Vérification d'âges selon rôle sélectionné
+    const age = getAge(defaultForm.date_naissance);
+    if (age === null) {
+      notify("Veuillez fournir une date de naissance valide.", "error");
+      return;
+    }
+
+    if (defaultForm.role === "ORGANISATEUR") {
+      if (age < 18) {
+        notify("Pour créer un compte organisateur vous devez être majeur (18 ans ou plus).", "error");
+        return;
+      }
+    } else {
+      if (age < 15) {
+        notify("L'inscription est réservée aux personnes âgées d'au moins 15 ans.", "error");
+        return;
+      }
+    }
+    setDateError("");
+
     const formData = new FormData(event.currentTarget);
 
     Object.entries(defaultForm).forEach(([name, value]) => {
@@ -187,6 +221,18 @@ const Register = ({ id }) => {
         [name]: files ? files[0] : value,
       }));
     }
+
+    // Si l'utilisateur modifie la date de naissance, valider inline
+    if (name === "date_naissance") {
+      const age = getAge(value);
+      if (age === null) {
+        setDateError("Date de naissance invalide.");
+      } else if (age < 15) {
+        setDateError("L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.");
+      } else {
+        setDateError("");
+      }
+    }
   };
 
   const nextStep = () => {
@@ -214,6 +260,18 @@ const Register = ({ id }) => {
       notify("Les mots de passe ne correspondent pas.", "error");
       return;
     }
+
+    // Vérification d'âge minimale (accès de base) — affiche erreur inline
+    const age = getAge(defaultForm.date_naissance);
+    if (age === null) {
+      setDateError("Veuillez fournir une date de naissance valide.");
+      return;
+    }
+    if (age < 15) {
+      setDateError("L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.");
+      return;
+    }
+    setDateError("");
 
     setStep(2);
   };
@@ -412,6 +470,7 @@ const Register = ({ id }) => {
                         value={defaultForm.date_naissance}
                         required
                       />
+                      {dateError && <p className={style.fieldError}>{dateError}</p>}
                     </div>
                     <div className={style.passwordRow}>
                       <div className={style.inputHalf}>

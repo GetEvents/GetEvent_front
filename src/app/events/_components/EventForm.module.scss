@@ -60,20 +60,34 @@
 .grid textarea,
 .price input {
   width: 100%;
-  padding: 0.85rem 1rem;
+  padding: 0.95rem 1rem;
   color: var(--app-color-text);
-  background: var(--app-color-white);
-  border: 1px solid var(--app-color-border);
-  border-radius: var(--app-radius-md);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
   font: inherit;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.grid input::placeholder,
+.grid textarea::placeholder,
+.price input::placeholder {
+  color: #94a3b8;
+}
+
+.grid textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.6;
 }
 
 .grid input:focus,
 .grid textarea:focus,
 .price input:focus {
   outline: none;
-  border-color: var(--app-color-primary);
-  box-shadow: var(--app-shadow-focus);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: #f8fafc;
 }
 
 .check {
@@ -144,3 +158,4 @@
     padding: var(--app-space-4);
   }
 }
+

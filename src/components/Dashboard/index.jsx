@@ -1348,7 +1348,7 @@ export default function Dashboard({ count = null }) {
           <div className={styles.kpi_card}>
             <div className={styles.kpi_icon}>{ICONS.users}</div>
             <div className={styles.kpi_info}>
-              <h3>Evénement Gratuit</h3>
+              <h3>Participants pour l&apos;Événement Gratuit</h3>
               <div className={styles.kpi_value}>{kpis.freeRegistrations}</div>
             </div>
           </div>
