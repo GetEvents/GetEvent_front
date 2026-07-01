@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getEventById } from "@/actions/event";
 import { getUser } from "@/actions/auth/authActions";
-import EventForm from "../../_components/EventForm";
+import CreateEvent from "@/components/form/CreatEvent";
 import styles from "./style.module.scss";
 
 interface EditEventPageProps {
@@ -23,7 +23,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   return (
     <main className={styles.page}>
-      <EventForm event={event} />
+      <CreateEvent id={event.id} />
     </main>
   );
 }
