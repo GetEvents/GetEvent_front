@@ -101,9 +101,16 @@ export default function Navbar({ currentUser }) {
             <div className={styles.authContainer}>
               {isLoggedIn && (
                 <Link href="/events/createvent" className={styles.createButton}>
-                  Créer un événement2
+                  Créer un événement
                 </Link>
               )}
+              <Link
+                href="/auth/register"
+                className={styles.signupButton}
+                aria-label="Inscription"
+              >
+                Inscription
+              </Link>
               <Link
                 href="/auth/login"
                 className={styles.loginButton}
@@ -145,6 +152,13 @@ export default function Navbar({ currentUser }) {
                 Créer un événement
               </Link>
             )}
+            <Link
+              href="/auth/register"
+              className={styles.mobileSignupButton}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Inscription
+            </Link>
             <Link
               href="/auth/login"
               className={styles.mobileLoginButton}
