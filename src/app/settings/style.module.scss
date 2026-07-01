@@ -112,6 +112,44 @@
   }
 }
 
+.paymentComingSoon {
+  border-color: #d1d5db;
+  background: #f3f4f6;
+  color: #6b7280;
+
+  .sectionTitle {
+    > svg,
+    h2,
+    p {
+      color: #6b7280;
+    }
+  }
+
+  .paymentRow {
+    border-color: #d1d5db;
+    background: #e5e7eb;
+
+    h3,
+    p {
+      color: #6b7280;
+    }
+  }
+}
+
+.comingSoonBadge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.65rem;
+  padding: 0.18rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .passwordForm {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -154,6 +192,7 @@
 
 .btn_primary,
 .btn_success,
+.btn_disabled,
 .btn_danger {
   display: inline-flex;
   align-items: center;
@@ -190,6 +229,12 @@
   border: 1px solid #15803d;
   background: #f0fdf4;
   color: #166534;
+}
+
+.btn_disabled {
+  border: 1px solid #cbd5e1;
+  background: #e5e7eb;
+  color: #64748b;
 }
 
 .card_danger {

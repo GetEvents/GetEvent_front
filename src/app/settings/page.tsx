@@ -99,6 +99,8 @@ export default function SettingsPage() {
       : "") ||
     (stripeQuery.isError ? "Impossible de vérifier le statut Stripe." : "");
 
+  const stripeComingSoon = true;
+
   if (authLoading) return <SettingsSkeleton />;
 
   const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -224,11 +226,18 @@ export default function SettingsPage() {
             </section>
 
             {canConfigurePayments && (
-              <section className={styles.card}>
+              <section className={`${styles.card} ${styles.paymentComingSoon}`}>
                 <div className={styles.sectionTitle}>
                   <CreditCard aria-hidden="true" />
                   <div>
-                    <h2>Paiements Stripe</h2>
+                    <h2>
+                      Paiements Stripe
+                      {stripeComingSoon && (
+                        <span className={styles.comingSoonBadge}>
+                          Fonctionnalite a venir
+                        </span>
+                      )}
+                    </h2>
                     <p>
                       Configurez le compte qui recevra vos ventes de billets.
                     </p>
@@ -263,20 +272,28 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handleStripeConnect}
                       className={
-                        stripeStatus === "onboarded"
-                          ? styles.btn_success
-                          : styles.btn_primary
+                        stripeComingSoon
+                          ? styles.btn_disabled
+                          : stripeStatus === "onboarded"
+                            ? styles.btn_success
+                            : styles.btn_primary
                       }
-                      disabled={stripeLoading || stripeStatus === "onboarded"}
+                      disabled={
+                        stripeComingSoon ||
+                        stripeLoading ||
+                        stripeStatus === "onboarded"
+                      }
                     >
-                      {stripeStatus === "onboarded" && (
+                      {stripeStatus === "onboarded" && !stripeComingSoon && (
                         <Check aria-hidden="true" />
                       )}
-                      {stripeStatus === "onboarded"
-                        ? "Compte configuré"
-                        : stripeLoading
-                          ? "Connexion..."
-                          : "Configurer Stripe"}
+                      {stripeComingSoon
+                        ? "Fonctionnalité à venir"
+                        : stripeStatus === "onboarded"
+                          ? "Compte configuré"
+                          : stripeLoading
+                            ? "Connexion..."
+                            : "Configurer Stripe"}
                     </button>
                   </div>
                 )}
