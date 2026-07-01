@@ -66,7 +66,10 @@
   border: 1px solid #e2e8f0;
   border-radius: 0.85rem;
   font: inherit;
-  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .grid input::placeholder,
@@ -158,4 +161,3 @@
     padding: var(--app-space-4);
   }
 }
-
