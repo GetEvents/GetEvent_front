@@ -160,12 +160,18 @@ const Register = ({ id }) => {
 
     if (defaultForm.role === "ORGANISATEUR") {
       if (age < 18) {
-        notify("Pour créer un compte organisateur vous devez être majeur (18 ans ou plus).", "error");
+        notify(
+          "Pour créer un compte organisateur vous devez être majeur (18 ans ou plus).",
+          "error",
+        );
         return;
       }
     } else {
       if (age < 15) {
-        notify("L'inscription est réservée aux personnes âgées d'au moins 15 ans.", "error");
+        notify(
+          "L'inscription est réservée aux personnes âgées d'au moins 15 ans.",
+          "error",
+        );
         return;
       }
     }
@@ -228,7 +234,9 @@ const Register = ({ id }) => {
       if (age === null) {
         setDateError("Date de naissance invalide.");
       } else if (age < 15) {
-        setDateError("L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.");
+        setDateError(
+          "L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.",
+        );
       } else {
         setDateError("");
       }
@@ -268,7 +276,9 @@ const Register = ({ id }) => {
       return;
     }
     if (age < 15) {
-      setDateError("L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.");
+      setDateError(
+        "L'accès à la plateforme est réservé aux personnes âgées d'au moins 15 ans.",
+      );
       return;
     }
     setDateError("");
@@ -470,7 +480,9 @@ const Register = ({ id }) => {
                         value={defaultForm.date_naissance}
                         required
                       />
-                      {dateError && <p className={style.fieldError}>{dateError}</p>}
+                      {dateError && (
+                        <p className={style.fieldError}>{dateError}</p>
+                      )}
                     </div>
                     <div className={style.passwordRow}>
                       <div className={style.inputHalf}>

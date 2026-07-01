@@ -226,12 +226,14 @@
   color: #0a0e16;
   border: none;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
   text-decoration: none;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(2,6,23,0.15);
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.15);
   }
 }
 
