@@ -180,7 +180,7 @@ export default function EventCard({
 
                 <div className={styles.events_info}>
                   <div className={styles.eventsinfodetaille}>
-                    <h1>{event.title}</h1>
+                    <h3>{event.title}</h3>
 
                     <div className={styles.events_infoh}>
                       <div className={styles.date}>
@@ -248,7 +248,12 @@ export default function EventCard({
                   </div>
                   <div className={styles.eventactin}>
                     <div className={styles.detailview}>
-                      <Link href={`/events/${event.id}`}>Plus détails</Link>
+                      <Link
+                        href={`/events/${event.id}`}
+                        aria-label={`Voir les details de ${event.title}`}
+                      >
+                        Plus détails
+                      </Link>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"

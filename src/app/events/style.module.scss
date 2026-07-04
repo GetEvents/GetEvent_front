@@ -1,11 +1,11 @@
 @use "sass:color";
 
 // Variables
-$primary: #3b82f6;
+$primary: #1d4ed8;
 $primary-glow: rgba(59, 130, 246, 0.5);
 $accent: #6366f1;
 $text-main: #0f172a;
-$text-secondary: #64748b;
+$text-secondary: #475569;
 $glass-bg: rgba(255, 255, 255, 0.8);
 $glass-border: rgba(15, 23, 42, 0.08);
 
@@ -26,6 +26,18 @@ $glass-border: rgba(15, 23, 42, 0.08);
       rgba(255, 255, 255, 0) 50%
     ),
     #f8fafc;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .withPublicNavbar {
@@ -266,7 +278,7 @@ $glass-border: rgba(15, 23, 42, 0.08);
 
 .searchButton {
   background: $primary;
-  color: white;
+  color: #ffffff;
   border: none;
   min-height: 46px;
   padding: 0.8rem 1.75rem;
@@ -279,7 +291,7 @@ $glass-border: rgba(15, 23, 42, 0.08);
   box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
 
   &:hover {
-    background: color.adjust($primary, $lightness: -5%);
+    background: color.adjust($primary, $lightness: -7%);
     transform: scale(1.02);
     box-shadow: 0 15px 30px rgba(59, 130, 246, 0.3);
   }

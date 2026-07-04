@@ -22,7 +22,7 @@ export default function Footer({ currentUser }: FooterProps) {
       <div className={styles.maxContainer}>
         <div className={styles.footerGrid}>
           <div className={styles.brandInfo}>
-            <h3 className={styles.brandTitle}>GetEvent</h3>
+            <p className={styles.brandTitle}>GetEvent</p>
             <p className={styles.brandText}>
               La plateforme de gestion d&apos;événements qui simplifie
               l&apos;organisation en équipe. Créez, planifiez et gérez vos

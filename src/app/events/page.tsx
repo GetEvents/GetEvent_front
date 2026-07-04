@@ -177,7 +177,7 @@ export default function Welcome() {
 
   return (
     <>
-      <div
+      <main
         className={`${style.eventsPage} ${
           !isAuthenticated ? style.withPublicNavbar : ""
         }`}
@@ -386,7 +386,11 @@ export default function Welcome() {
               </p>
             </div>
             <div className={style.headerActions}>
+              <label htmlFor="event-sort" className={style.srOnly}>
+                Trier les événements
+              </label>
               <select
+                id="event-sort"
                 value={sortFilter}
                 onChange={(event) => {
                   const filter = event.target.value as EventFilters["filter"];
@@ -464,7 +468,7 @@ export default function Welcome() {
             </button>
           </div>
         </section>
-      </div>
+      </main>
 
       <NotificationModal
         isOpen={showNotifications}
