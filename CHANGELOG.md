@@ -1,13 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### 0.1.1 (2026-07-04)
 
 ### Features
 
-- add password change and account deletion functionality ([219b058](https://github.com/GetEvents/GetEvent_front/commit/219b058df3b8ec0155cc340ad0c0851c1a98566b)), closes [#8](https://github.com/GetEvents/GetEvent_front/issues/8)
-- add sidebar component with styles and responsive design ([83374b2](https://github.com/GetEvents/GetEvent_front/commit/83374b2e087a4736e1a133a39191caa2a5d8e1e9)), closes [#2](https://github.com/GetEvents/GetEvent_front/issues/2)
+- Ajouter les fonctionnalités de changement de mot de passe et de suppression de compte.([219b058](https://github.com/GetEvents/GetEvent_front/commit/219b058df3b8ec0155cc340ad0c0851c1a98566b)), closes [#8](https://github.com/GetEvents/GetEvent_front/issues/8)
+- Ajouter un composant de barre latérale avec styles et design adaptatif. ([83374b2](https://github.com/GetEvents/GetEvent_front/commit/83374b2e087a4736e1a133a39191caa2a5d8e1e9)), closes [#2](https://github.com/GetEvents/GetEvent_front/issues/2)
 - ajout d'une barre de navigation mobile et ajustement des styles pour la réactivité👤 PHASE 7 — Profil & Settings ([7c990e6](https://github.com/GetEvents/GetEvent_front/commit/7c990e69bd94ea4d3fd4e5ca8d3b2c21c0ef96db)), closes [#8](https://github.com/GetEvents/GetEvent_front/issues/8)
 - Ajout de la gestion des événements et de l'intégration de Google Maps ([9c76ae2](https://github.com/GetEvents/GetEvent_front/commit/9c76ae2393d69812816541b5d482567d58888d72)), closes [#3](https://github.com/GetEvents/GetEvent_front/issues/3)
 - ajout de la gestion des participations avec intégration de la page de rappel et des styles associés🎟️ PHASE 6 — Participations ([08bd269](https://github.com/GetEvents/GetEvent_front/commit/08bd26943382f67c69f39f1b5e361abb2a614043)), closes [#7](https://github.com/GetEvents/GetEvent_front/issues/7)
