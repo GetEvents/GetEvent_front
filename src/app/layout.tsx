@@ -5,6 +5,7 @@ import Footer from "@/components/ui/Footer/Bar_page";
 import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import SaidBar from "@/components/ui/saidbar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import AuthProvider from "@/constext/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
@@ -21,6 +22,12 @@ export const metadata = {
   title: "GetEvent - Plateforme de gestion d'événements",
   description:
     "Créez, gérez et participez à des événements facilement avec GetEvent",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "GetEvent",
+    statusBarStyle: "default",
+  },
   icons: {
     icon: [
       { url: "/flashicon.png", sizes: "32x32", type: "image/png" },
@@ -28,6 +35,10 @@ export const metadata = {
     ],
     apple: [{ url: "/flashicon.png", sizes: "180x180", type: "image/png" }],
   },
+};
+
+export const viewport = {
+  themeColor: "#171717",
 };
 
 export default async function RootLayout({
@@ -46,6 +57,8 @@ export default async function RootLayout({
   return (
     <html lang="fr">
       <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#171717" />
         <link rel="icon" type="image/png" sizes="32x32" href="/flashicon.png" />
         <link rel="icon" type="image/png" sizes="64x64" href="/flashicon.png" />
         <link
@@ -72,6 +85,7 @@ export default async function RootLayout({
                 {children}
               </div>
               <Footer currentUser={isLoggedIn} />
+              <PwaInstallPrompt />
             </Providers>
           </NotificationProvider>
         </AuthProvider>

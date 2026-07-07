@@ -1,0 +1,25 @@
+{
+  "name": "GetEvent",
+  "short_name": "GetEvent",
+  "description": "Plateforme de gestion et de billetterie d'evenements.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ecedef",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/flashicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/flashicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
