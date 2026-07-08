@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useConfirmeEmail } from "@/hooks/useAuthMutations";
 import ButtonComponent from "@/components/ui/button/button";
 import Loading from "@/components/ui/Loading";
-import styles from "../callback/style.module.scss";
+import styles from "./style.module.scss";
 
 export default function EmailVerifyPage() {
   const router = useRouter();
