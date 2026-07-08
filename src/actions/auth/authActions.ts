@@ -202,6 +202,32 @@ export async function login(
   }
 }
 
+export async function confirmeemail(token: string): Promise<ActionResponse> {
+  if (!token) {
+    return {
+      error: true,
+      message: "Le lien de confirmation est invalide ou incomplet.",
+    };
+  }
+
+  const response = await auth.verifyEmail(token);
+
+  if (!response.success) {
+    return {
+      error: true,
+      message: response.error,
+    };
+  }
+
+  return {
+    error: false,
+    message:
+      (response.data as { message?: string }).message ||
+      "Votre adresse e-mail a ete confirmee.",
+    redirect: "/events",
+  };
+}
+
 export async function forgotPassword(
   _state: ServerActionState,
   formData: FormData,

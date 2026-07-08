@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import {
   changeCurrentPassword,
+  confirmeemail,
   deleteCurrentAccount,
   editProfil,
   forgotPassword,
@@ -22,6 +23,7 @@ export const authMutations = {
     mutationOptions({ mutationFn: (data: FormData) => login(null, data) }),
   register: () =>
     mutationOptions({ mutationFn: (data: FormData) => register(null, data) }),
+  confirmeemail: () => mutationOptions({ mutationFn: confirmeemail }),
   updateProfile: () =>
     mutationOptions({ mutationFn: (data: FormData) => editProfil(null, data) }),
   forgotPassword: () =>
@@ -39,6 +41,8 @@ export const authMutations = {
 
 export const useLogin = () => useMutation(authMutations.login());
 export const useRegister = () => useMutation(authMutations.register());
+export const useConfirmeEmail = () =>
+  useMutation(authMutations.confirmeemail());
 export const useForgotPassword = () =>
   useMutation(authMutations.forgotPassword());
 export const useResetPassword = () =>
