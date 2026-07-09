@@ -10,10 +10,20 @@ import type {
 } from "@/actions/types/auth";
 import type { MyParticipationsApiPayload } from "@/actions/types/participation";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL ||
-  process.env.NEXT_PUBLIC_API_ENDPOINT ||
-  "http://localhost:3001";
+const getApiBaseUrl = () => {
+  if (typeof window === "undefined" && process.env.API_INTERNAL_URL) {
+    return process.env.API_INTERNAL_URL;
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_SOCKET_URL ||
+    process.env.NEXT_PUBLIC_API_ENDPOINT ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3001"
+  );
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Helper pour les requêtes
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
