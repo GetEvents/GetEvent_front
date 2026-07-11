@@ -18,6 +18,7 @@ export default function CallbackPage() {
     const handleCallback = async () => {
       try {
         const token = searchParams.get("token");
+        const refreshToken = searchParams.get("refreshToken");
         const error = searchParams.get("error");
 
         // Vérifier les erreurs de redirection
@@ -32,21 +33,24 @@ export default function CallbackPage() {
         }
 
         // Vérifier la présence du token
-        if (!token) {
-          setError("Token d'authentification manquant");
+        if (!token || !refreshToken) {
+          setError("Jetons d'authentification manquants");
           setIsLoading(false);
           return;
         }
 
         // Valider le token (format simple JWT check)
-        if (typeof token !== "string" || token.split(".").length !== 3) {
-          setError("Token invalide");
+        if (
+          token.split(".").length !== 3 ||
+          refreshToken.split(".").length !== 3
+        ) {
+          setError("Jetons invalides");
           setIsLoading(false);
           return;
         }
 
         // Sauvegarder le token
-        await setTokenInCookie(token);
+        await setTokenInCookie(token, refreshToken);
 
         // Rediriger vers les événements
         router.push("/events");
