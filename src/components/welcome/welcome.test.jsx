@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, getByText } from "@/tests/render";
 import WelcomePage from "./index";
 
@@ -41,21 +41,33 @@ vi.mock("../EventTypes", () => ({
 }));
 
 describe("WelcomePage", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("affiche les appels a l'action principaux de la page d'accueil", async () => {
-    const { container } = await render(<WelcomePage />);
+    const { container, unmount } = await render(<WelcomePage />);
 
     expect(getByText(container, /Plateforme de gestion/)).toBeTruthy();
     expect(getByText(container, /Billetterie intelligente/)).toBeTruthy();
     expect(container.querySelector('a[href="/events/create"]')).toBeTruthy();
     expect(container.querySelector('a[href="/events"]')).toBeTruthy();
+
+    await unmount();
   });
 
   it("rend les sections de presentation du prototype", async () => {
-    const { container } = await render(<WelcomePage />);
+    const { container, unmount } = await render(<WelcomePage />);
 
     expect(container.querySelector("#event-types")).toBeTruthy();
     expect(container.querySelector("#features")).toBeTruthy();
     expect(container.querySelector("#impact")).toBeTruthy();
     expect(container.querySelector("#faq")).toBeTruthy();
+
+    await unmount();
   });
 });

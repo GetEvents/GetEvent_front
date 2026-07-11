@@ -35,6 +35,13 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       reportsDirectory: "./coverage",
+      exclude: [
+        "**/*.module.scss",
+        "**/*.scss",
+        "**/*.css",
+        "**/*.d.ts",
+        "**/*.stories.{js,jsx,ts,tsx}",
+      ],
     },
     projects: [
       {
