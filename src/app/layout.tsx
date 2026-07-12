@@ -6,6 +6,7 @@ import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import SaidBar from "@/components/ui/saidbar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import CookieConsent from "@/components/CookieConsent/CookieConsent";
 import AuthProvider from "@/constext/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
@@ -86,6 +87,7 @@ export default async function RootLayout({
               </div>
               <Footer currentUser={isLoggedIn} />
               <PwaInstallPrompt />
+              <CookieConsent />
             </Providers>
           </NotificationProvider>
         </AuthProvider>
