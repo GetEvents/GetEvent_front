@@ -35,7 +35,18 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       reportsDirectory: "./coverage",
+      thresholds: {
+        statements: 50,
+        lines: 50,
+        functions: 48,
+        branches: 35,
+      },
       exclude: [
+        // Les actions Next.js sont executees cote serveur et ne font pas partie
+        // du perimetre des tests unitaires executes dans Chromium.
+        "src/actions/**",
+        // Les helpers de test ne sont pas du code applicatif.
+        "src/tests/**",
         "**/*.module.scss",
         "**/*.scss",
         "**/*.css",
