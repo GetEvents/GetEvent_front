@@ -87,7 +87,7 @@ export default async function RootLayout({
               </div>
               <Footer currentUser={isLoggedIn} />
               <PwaInstallPrompt />
-              <CookieConsent />
+              <CookieConsent hasMobileSidebar={isLoggedIn} />
             </Providers>
           </NotificationProvider>
         </AuthProvider>

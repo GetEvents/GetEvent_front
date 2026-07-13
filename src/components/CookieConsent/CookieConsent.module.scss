@@ -68,3 +68,10 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .withMobileSidebar {
+    // La barre mobile occupe environ 96 px au bas de l'ecran.
+    bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+  }
+}

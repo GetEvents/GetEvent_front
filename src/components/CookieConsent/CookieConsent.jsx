@@ -27,7 +27,7 @@ function saveConsent(optionalCookies) {
   );
 }
 
-export default function CookieConsent() {
+export default function CookieConsent({ hasMobileSidebar = false }) {
   const [visible, setVisible] = useState(() => !readConsent());
 
   const choose = (optionalCookies) => {
@@ -38,7 +38,10 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <section className={styles.banner} aria-label="Gestion des cookies">
+    <section
+      className={`${styles.banner} ${hasMobileSidebar ? styles.withMobileSidebar : ""}`}
+      aria-label="Gestion des cookies"
+    >
       <div className={styles.content}>
         <h2>Vos préférences de cookies</h2>
         <p>
