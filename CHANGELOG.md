@@ -2,6 +2,13 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.12.0](https://github.com/GetEvents/GetEvent_front/compare/v0.11.0...v0.12.0) (2026-07-14)
+
+
+### Features
+
+* mettre à jour le workflow de déploiement pour utiliser Netlify et ajouter un fichier de configuration Netlify🧪 PHASE 11 — Tests ([2570d63](https://github.com/GetEvents/GetEvent_front/commit/2570d63f4854606775512d32ddad1f26537dd255)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
+
 ## [0.11.0](https://github.com/GetEvents/GetEvent_front/compare/v0.10.0...v0.11.0) (2026-07-13)
 
 
