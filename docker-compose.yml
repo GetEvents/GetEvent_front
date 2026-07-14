@@ -1,0 +1,58 @@
+name: getevent-front
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:8080}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:8080}
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+        API_INTERNAL_URL: ${API_INTERNAL_URL:-http://host.docker.internal:8080}
+    image: ghcr.io/getevents/getevent-front:latest
+    container_name: getevent-frontend
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://host.docker.internal:8080}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+      NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:8080}
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:8080}
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "===== GetEvent Front - verification variables ====="
+        echo "NODE_ENV=$$NODE_ENV"
+        echo "PORT=$$PORT"
+        echo "API_INTERNAL_URL=$$API_INTERNAL_URL"
+        echo "NEXT_PUBLIC_API_URL=$$NEXT_PUBLIC_API_URL"
+        echo "NEXT_PUBLIC_API_ENDPOINT=$$NEXT_PUBLIC_API_ENDPOINT"
+        echo "NEXT_PUBLIC_SOCKET_URL=$$NEXT_PUBLIC_SOCKET_URL"
+        if [ -n "$$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY" ]; then echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=present"; else echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=absent"; fi
+        echo "=================================================="
+        exec node server.js
+    ports:
+      - "3002:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:3000",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

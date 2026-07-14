@@ -1,0 +1,48 @@
+// Container principal
+.loadingContainer {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  .loadingContent {
+    text-align: center;
+
+    .spinner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      background: #000000;
+      margin: 0 auto;
+
+      .spinnerInner {
+        width: 2.5rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      }
+    }
+
+    p {
+      margin-top: 1rem;
+      color: #4b5563;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

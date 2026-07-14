@@ -1,0 +1,166 @@
+.page {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Section */
+.header_section {
+  width: 100%;
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 350px;
+    height: 350px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+  }
+}
+
+.header_content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.main_title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.1;
+}
+
+.description {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  font-weight: 500;
+}
+
+.event_badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(26, 26, 26, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem 2.5rem;
+  min-width: 140px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.badge_number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.badge_text {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Content Section */
+.content {
+  padding: 2rem;
+  // background: white;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .header_section {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .header_content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .main_title {
+    font-size: 1.8rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
+
+  .event_badge {
+    min-width: 120px;
+    padding: 1rem 2rem;
+  }
+
+  .badge_number {
+    font-size: 1.8rem;
+  }
+
+  .badge_text {
+    font-size: 0.75rem;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .header_section {
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .header_content {
+    gap: 1.5rem;
+  }
+
+  .main_title {
+    font-size: 2rem;
+  }
+
+  .event_badge {
+    min-width: 130px;
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+}
