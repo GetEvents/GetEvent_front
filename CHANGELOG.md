@@ -2,6 +2,13 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.12.1](https://github.com/GetEvents/GetEvent_front/compare/v0.12.0...v0.12.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **release:** publier les versions frontend depuis main ([b62a03c](https://github.com/GetEvents/GetEvent_front/commit/b62a03c9a83440cb0278e47b18ce0d95e0e24189))
+
 ## [0.12.0](https://github.com/GetEvents/GetEvent_front/compare/v0.11.0...v0.12.0) (2026-07-14)
 
 ### Features
