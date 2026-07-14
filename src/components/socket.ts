@@ -18,7 +18,6 @@ export interface SocketMessage {
   text: string;
   senderId: number;
   senderName: string;
-  senderEmail?: string;
   senderPhoto?: string | null;
   createdAt: string;
 }
