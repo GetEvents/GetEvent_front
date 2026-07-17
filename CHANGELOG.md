@@ -2,6 +2,13 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.13.0](https://github.com/GetEvents/GetEvent_front/compare/v0.12.0...v0.13.0) (2026-07-17)
+
+
+### Features
+
+* ajouter la gestion des erreurs de socket et le compteur de caractères pour les messages🔔 PHASE 10 — Notifications ([1432a6c](https://github.com/GetEvents/GetEvent_front/commit/1432a6c0913222c6e916ff754ac632612f6e6d25)), closes [#11](https://github.com/GetEvents/GetEvent_front/issues/11)
+
 ## [0.12.0](https://github.com/GetEvents/GetEvent_front/compare/v0.11.0...v0.12.0) (2026-07-14)
 
 
