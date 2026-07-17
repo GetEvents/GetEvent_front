@@ -16,13 +16,14 @@ import {
   joinEvent,
   leaveEvent,
   onMessageReceived,
+  onSocketError,
   onUserJoined,
   sendMessage,
   updateSocketAuth,
 } from "@/socket";
 import styles from "./style.module.scss";
 
-type ChatSender = Pick<User, "id" | "nom" | "prenom" | "email" | "photo">;
+type ChatSender = Pick<User, "id" | "nom" | "prenom" | "photo">;
 
 type ChatMessage = {
   id: number | string;
@@ -64,6 +65,7 @@ export default function MessageClient({
 }: MessageClientProps) {
   const isOrganizer = String(currentUserId) === String(organizerId);
   const [message, setMessage] = useState("");
+  const [socketError, setSocketError] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     mapInitialMessages(initialMessages, currentUserId),
   );
@@ -127,7 +129,6 @@ export default function MessageClient({
               id: receivedMessage.senderId,
               prenom: senderNameParts?.[0] || "",
               nom: senderNameParts?.slice(1).join(" ") || "",
-              email: receivedMessage.senderEmail || "",
               photo: receivedMessage.senderPhoto,
             },
             createdAt: receivedMessage.createdAt,
@@ -176,6 +177,12 @@ export default function MessageClient({
   }, [canChat, currentUserId, eventId]);
 
   useEffect(() => {
+    return onSocketError((error) => {
+      setSocketError(error.message || "Une erreur est survenue.");
+    });
+  }, []);
+
+  useEffect(() => {
     const chat = chatRef.current;
     if (!chat) return;
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
@@ -188,6 +195,7 @@ export default function MessageClient({
       const content = message.trim();
       if (!content || !canChat) return;
 
+      setSocketError("");
       if (sendMessage({ eventId, text: content })) {
         setMessage("");
       }
@@ -226,8 +234,10 @@ export default function MessageClient({
             >
               {!chatMessage.self && !chatMessage.isSystem && (
                 <div className={styles.senderInfo}>
-                  <span className={styles.email}>
-                    {chatMessage.sender?.email || "Participant"}
+                  <span className={styles.senderName}>
+                    {[chatMessage.sender?.prenom, chatMessage.sender?.nom]
+                      .filter(Boolean)
+                      .join(" ") || "Participant"}
                   </span>
                   {String(chatMessage.sender?.id || chatMessage.senderId) ===
                     String(organizerId) && (
@@ -248,6 +258,11 @@ export default function MessageClient({
       </div>
 
       <div className={styles.inputBox}>
+        {socketError && (
+          <p className={styles.errorMessage} role="alert">
+            {socketError}
+          </p>
+        )}
         {!accessChecked ? (
           <p className={styles.accessMessage}>Vérification de votre accès...</p>
         ) : canChat ? (
@@ -258,7 +273,11 @@ export default function MessageClient({
               placeholder="Écrivez votre message..."
               aria-label="Votre message"
               autoComplete="off"
+              maxLength={2000}
             />
+            <span className={styles.characterCount} aria-live="polite">
+              {message.length}/2000
+            </span>
             <button
               type="submit"
               disabled={!message.trim()}

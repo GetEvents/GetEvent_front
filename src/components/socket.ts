@@ -18,7 +18,6 @@ export interface SocketMessage {
   text: string;
   senderId: number;
   senderName: string;
-  senderEmail?: string;
   senderPhoto?: string | null;
   createdAt: string;
 }
@@ -35,7 +34,6 @@ interface MessageEditedPayload extends MessageSentPayload {
 interface UserPresencePayload {
   userId: number;
   userName: string;
-  userEmail?: string;
   timestamp: string;
 }
 
