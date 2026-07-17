@@ -190,6 +190,19 @@
   text-align: center;
 }
 
+.errorMessage {
+  margin: 0 0 0.5rem;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.characterCount {
+  flex: 0 0 auto;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
 .message {
   display: flex;
   flex-direction: column;

@@ -34,7 +34,6 @@ interface MessageEditedPayload extends MessageSentPayload {
 interface UserPresencePayload {
   userId: number;
   userName: string;
-  userEmail?: string;
   timestamp: string;
 }
 

@@ -16,6 +16,7 @@ import {
   joinEvent,
   leaveEvent,
   onMessageReceived,
+  onSocketError,
   onUserJoined,
   sendMessage,
   updateSocketAuth,
@@ -64,6 +65,7 @@ export default function MessageClient({
 }: MessageClientProps) {
   const isOrganizer = String(currentUserId) === String(organizerId);
   const [message, setMessage] = useState("");
+  const [socketError, setSocketError] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     mapInitialMessages(initialMessages, currentUserId),
   );
@@ -175,6 +177,12 @@ export default function MessageClient({
   }, [canChat, currentUserId, eventId]);
 
   useEffect(() => {
+    return onSocketError((error) => {
+      setSocketError(error.message || "Une erreur est survenue.");
+    });
+  }, []);
+
+  useEffect(() => {
     const chat = chatRef.current;
     if (!chat) return;
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
@@ -187,6 +195,7 @@ export default function MessageClient({
       const content = message.trim();
       if (!content || !canChat) return;
 
+      setSocketError("");
       if (sendMessage({ eventId, text: content })) {
         setMessage("");
       }
@@ -249,6 +258,11 @@ export default function MessageClient({
       </div>
 
       <div className={styles.inputBox}>
+        {socketError && (
+          <p className={styles.errorMessage} role="alert">
+            {socketError}
+          </p>
+        )}
         {!accessChecked ? (
           <p className={styles.accessMessage}>Vérification de votre accès...</p>
         ) : canChat ? (
@@ -259,7 +273,11 @@ export default function MessageClient({
               placeholder="Écrivez votre message..."
               aria-label="Votre message"
               autoComplete="off"
+              maxLength={2000}
             />
+            <span className={styles.characterCount} aria-live="polite">
+              {message.length}/2000
+            </span>
             <button
               type="submit"
               disabled={!message.trim()}
