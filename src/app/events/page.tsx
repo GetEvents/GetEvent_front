@@ -110,14 +110,17 @@ export default function Welcome() {
   useEffect(() => {
     if (!googleMapsReady) return;
 
-    initMapAuto<{ location: string }>((update) => {
-      setLocation((currentLocation) => {
-        const currentForm = { location: currentLocation };
-        const nextForm =
-          typeof update === "function" ? update(currentForm) : update;
-        return nextForm.location;
-      });
-    });
+    return initMapAuto<{ location: string }>(
+      (update) => {
+        setLocation((currentLocation) => {
+          const currentForm = { location: currentLocation };
+          const nextForm =
+            typeof update === "function" ? update(currentForm) : update;
+          return nextForm.location;
+        });
+      },
+      { variant: "search" },
+    );
   }, [googleMapsReady]);
 
   const searchEvents = (options: SearchOptions = {}) => {

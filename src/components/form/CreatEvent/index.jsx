@@ -77,7 +77,7 @@ const CreatEvent = ({ id }) => {
   }, []);
 
   useEffect(() => {
-    if (currentStep === 2 && googleMapsReady) initMapAuto(setForm);
+    if (currentStep === 2 && googleMapsReady) return initMapAuto(setForm);
   }, [currentStep, googleMapsReady]);
 
   // Charger l'événement uniquement au montage du composant

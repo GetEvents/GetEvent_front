@@ -20,7 +20,7 @@ export const getGoogleMapId = () =>
 const isGoogleMapsReady = () =>
   Boolean(
     window.google?.maps?.Map &&
-    window.google?.maps?.places?.Autocomplete &&
+    window.google?.maps?.places?.PlaceAutocompleteElement &&
     window.google?.maps?.marker?.AdvancedMarkerElement,
   );
 

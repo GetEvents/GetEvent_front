@@ -2,34 +2,30 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initMapAuto } from "./autocomplet";
 
 describe("initMapAuto", () => {
-  let listeners: Record<string, Array<() => void>>;
-  let autocomplete: any;
+  let autocomplete: HTMLElement & { value: string; placeholder: string };
   let marker: any;
   let map: any;
+  let place: any;
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <div id="maps"></div><input id="pac_input" /><div id="pac_card"></div>
-      <div id="infowindow-content"><b id="place-name"></b><span id="place-address"></span></div>
-      <button id="changetype-all"></button><button id="changetype-address"></button>
-      <button id="changetype-establishment"></button><button id="changetype-geocode"></button>
-      <button id="changetype-cities"></button><button id="changetype-regions"></button>`;
-    listeners = {};
+      <div id="maps"></div><input id="pac_input" />
+      <div id="infowindow-content"><b id="place-name"></b><span id="place-address"></span></div>`;
     map = {
-      controls: { TOP_LEFT: { push: vi.fn() } },
       fitBounds: vi.fn(),
       setCenter: vi.fn(),
       setZoom: vi.fn(),
     };
-    autocomplete = {
-      addListener: vi.fn((name, cb) => (listeners[name] ||= []).push(cb)),
-      bindTo: vi.fn(),
-      setTypes: vi.fn(),
-      getPlace: vi.fn(() => ({
-        name: "Palais des congres",
-        formatted_address: "Cotonou, Benin",
-        geometry: { location: { lat: 1, lng: 2 }, viewport: {} },
-      })),
+    autocomplete = Object.assign(document.createElement("div"), {
+      value: "",
+      placeholder: "",
+    });
+    place = {
+      displayName: "Palais des congres",
+      formattedAddress: "Cotonou, Benin",
+      location: { lat: 1, lng: 2 },
+      viewport: {},
+      fetchFields: vi.fn().mockResolvedValue(undefined),
     };
     marker = { map: null, position: null };
     const infowindow = { setContent: vi.fn(), close: vi.fn(), open: vi.fn() };
@@ -38,9 +34,8 @@ describe("initMapAuto", () => {
         Map: vi.fn(function () {
           return map;
         }),
-        ControlPosition: { TOP_LEFT: "TOP_LEFT" },
         places: {
-          Autocomplete: vi.fn(function () {
+          PlaceAutocompleteElement: vi.fn(function () {
             return autocomplete;
           }),
         },
@@ -61,10 +56,14 @@ describe("initMapAuto", () => {
     expect(() => initMapAuto(vi.fn())).not.toThrow();
   });
 
-  it("configure la carte et reporte le lieu selectionne", () => {
+  it("configure la carte et reporte le lieu selectionne", async () => {
     const setForm = vi.fn((updater) => updater({ location: "" }));
     initMapAuto(setForm);
-    listeners.place_changed.forEach((listener) => listener());
+    const event = new Event("gmp-select") as Event & { placePrediction: any };
+    event.placePrediction = { toPlace: () => place };
+    autocomplete.dispatchEvent(event);
+    await vi.waitFor(() => expect(place.fetchFields).toHaveBeenCalled());
+
     expect(setForm).toHaveBeenCalled();
     expect(
       (document.querySelector("#pac_input") as HTMLInputElement).value,
@@ -80,20 +79,51 @@ describe("initMapAuto", () => {
     );
   });
 
-  it("configure les filtres de type", () => {
-    initMapAuto(vi.fn());
-    document.querySelector<HTMLButtonElement>("#changetype-address")?.click();
-    document.querySelector<HTMLButtonElement>("#changetype-cities")?.click();
-    expect(autocomplete.setTypes).toHaveBeenCalledWith(["address"]);
-    expect(autocomplete.setTypes).toHaveBeenCalledWith(["(cities)"]);
+  it("synchronise la saisie manuelle", () => {
+    const setForm = vi.fn((updater) => updater({ location: "" }));
+    initMapAuto(setForm);
+    autocomplete.value = "Porto-Novo";
+    autocomplete.dispatchEvent(new Event("input"));
+    expect(setForm).toHaveBeenCalled();
+    expect(
+      (document.querySelector("#pac_input") as HTMLInputElement).value,
+    ).toBe("Porto-Novo");
   });
 
-  it("alerte quand le lieu ne possede pas de geometrie", () => {
+  it("enveloppe l'autocomplete dans un conteneur visuellement aligné sur les autres champs", () => {
+    initMapAuto(vi.fn());
+
+    const wrapper = document.querySelector(
+      "[data-autocomplete-wrapper='location-form']",
+    );
+
+    expect(wrapper).not.toBeNull();
+    expect(wrapper?.className).toContain("form-control");
+    const styles = wrapper?.getAttribute("style") ?? "";
+    expect(styles).toContain("border: 1px solid");
+    expect(styles).toContain("background-color: rgb(255, 255, 255)");
+  });
+
+  it("injecte des styles pour supprimer le contour de focus du composant Google", () => {
+    initMapAuto(vi.fn());
+
+    const style = document.querySelector("style[data-autocomplete-styles]");
+
+    expect(style).not.toBeNull();
+    expect(style?.textContent).toContain("::part(focus-ring)");
+    expect(style?.textContent).toContain("display: none");
+  });
+
+  it("alerte quand le lieu ne possede pas de position", async () => {
     const alert = vi.fn();
     vi.stubGlobal("alert", alert);
-    autocomplete.getPlace.mockReturnValue({ name: "Lieu inconnu" });
+    place.location = null;
+    place.displayName = "Lieu inconnu";
     initMapAuto(vi.fn());
-    listeners.place_changed[1]();
+    const event = new Event("gmp-select") as Event & { placePrediction: any };
+    event.placePrediction = { toPlace: () => place };
+    autocomplete.dispatchEvent(event);
+    await vi.waitFor(() => expect(alert).toHaveBeenCalled());
     expect(alert).toHaveBeenCalledWith(expect.stringContaining("Lieu inconnu"));
   });
 });

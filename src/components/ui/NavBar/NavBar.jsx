@@ -51,7 +51,8 @@ export default function Navbar({ currentUser }) {
               src="/LogoI.png"
               alt="GetEvent"
               width={200}
-              height={156}
+              height={113}
+              style={{ height: "auto" }}
               priority
               quality={90}
             />
