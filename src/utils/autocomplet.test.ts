@@ -31,7 +31,7 @@ describe("initMapAuto", () => {
         geometry: { location: { lat: 1, lng: 2 }, viewport: {} },
       })),
     };
-    marker = { setVisible: vi.fn(), setPosition: vi.fn() };
+    marker = { map: null, position: null };
     const infowindow = { setContent: vi.fn(), close: vi.fn(), open: vi.fn() };
     vi.stubGlobal("google", {
       maps: {
@@ -47,10 +47,11 @@ describe("initMapAuto", () => {
         InfoWindow: vi.fn(function () {
           return infowindow;
         }),
-        Marker: vi.fn(function () {
-          return marker;
-        }),
-        Point: vi.fn(function () {}),
+        marker: {
+          AdvancedMarkerElement: vi.fn(function () {
+            return marker;
+          }),
+        },
       },
     });
   });
@@ -69,7 +70,8 @@ describe("initMapAuto", () => {
       (document.querySelector("#pac_input") as HTMLInputElement).value,
     ).toBe("Cotonou, Benin");
     expect(map.fitBounds).toHaveBeenCalled();
-    expect(marker.setPosition).toHaveBeenCalled();
+    expect(marker.position).toEqual({ lat: 1, lng: 2 });
+    expect(marker.map).toBe(map);
     expect(document.querySelector("#place-name")?.textContent).toBe(
       "Palais des congres",
     );

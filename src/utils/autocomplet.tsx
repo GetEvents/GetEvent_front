@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import { getGoogleMapId } from "@/hooks/useGoogleMaps";
 
 type FormWithLocation = {
   location: string;
@@ -19,16 +20,25 @@ export function initMapAuto<T extends FormWithLocation>(
   }
 
   const searchInput = input;
+  const maps = window.google?.maps;
+
+  if (!maps?.Map || !maps.places?.Autocomplete) {
+    console.error(
+      "Google Maps n'est pas prêt pour l'initialisation de l'autocomplete.",
+    );
+    return;
+  }
 
   // Initialisation de la carte
-  const map = new google.maps.Map(mapElement, {
+  const map = new maps.Map(mapElement, {
     center: { lat: 40.749933, lng: -73.98633 },
     zoom: 13,
+    mapId: getGoogleMapId(),
     mapTypeControl: false,
   });
 
   // Positionner le champ de recherche sur la carte
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(card);
+  map.controls[maps.ControlPosition.TOP_LEFT].push(card);
 
   // Configuration de l'autocomplete
   const autocomplete = new google.maps.places.Autocomplete(searchInput, {
@@ -55,15 +65,15 @@ export function initMapAuto<T extends FormWithLocation>(
   const infowindow = new google.maps.InfoWindow();
   infowindow.setContent(infowindowContent);
 
-  const marker = new google.maps.Marker({
+  const marker = new google.maps.marker.AdvancedMarkerElement({
     map,
-    anchorPoint: new google.maps.Point(0, -29),
+    title: "Lieu sélectionné",
   });
 
   // Lorsque l'utilisateur sélectionne un lieu
   autocomplete.addListener("place_changed", () => {
     infowindow.close();
-    marker.setVisible(false);
+    marker.map = null;
 
     const place = autocomplete.getPlace();
 
@@ -81,8 +91,8 @@ export function initMapAuto<T extends FormWithLocation>(
     }
 
     // Mettre à jour le marqueur et l'info window
-    marker.setPosition(place.geometry.location);
-    marker.setVisible(true);
+    marker.position = place.geometry.location;
+    marker.map = map;
 
     const placeName =
       infowindowContent.querySelector<HTMLElement>("#place-name");

@@ -87,8 +87,8 @@ vi.mock("@/utils/autocomplet", () => ({
   initMapAuto: vi.fn(),
 }));
 
-vi.mock("@/utils/loadGoogleMap", () => ({
-  loadGoogleMapsScript: vi.fn(),
+vi.mock("@/hooks/useGoogleMaps", () => ({
+  useGoogleMaps: vi.fn(() => true),
 }));
 
 describe("EventsPage", () => {

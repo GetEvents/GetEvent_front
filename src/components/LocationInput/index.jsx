@@ -1,6 +1,7 @@
 // components/LocationInput/index.js
 "use client";
 import { useEffect, useRef } from "react";
+import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 
 const LocationInput = ({
   value,
@@ -9,9 +10,10 @@ const LocationInput = ({
   label = "Lieu de l'événement",
 }) => {
   const inputRef = useRef(null);
+  const googleMapsReady = useGoogleMaps(["places"]);
 
   useEffect(() => {
-    if (!window.google || !window.google.maps || !inputRef.current) return;
+    if (!googleMapsReady || !inputRef.current) return;
 
     const autocomplete = new window.google.maps.places.Autocomplete(
       inputRef.current,
@@ -22,7 +24,7 @@ const LocationInput = ({
         onChange({ target: { name, value: place.formatted_address } });
       }
     });
-  }, [name, onChange]);
+  }, [googleMapsReady, name, onChange]);
 
   return (
     <div className="mb-3 pac_card">

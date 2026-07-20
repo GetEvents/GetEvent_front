@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./CookieConsent.module.scss";
 
 const COOKIE_NAME = "getevent_cookie_consent";
 const MAX_AGE = 60 * 60 * 24 * 180;
 
 function readConsent() {
+  if (typeof document === "undefined") return null;
   const prefix = `${COOKIE_NAME}=`;
   const value = document.cookie
     .split(";")
@@ -28,7 +29,19 @@ function saveConsent(optionalCookies) {
 }
 
 export default function CookieConsent({ hasMobileSidebar = false }) {
-  const [visible, setVisible] = useState(() => !readConsent());
+  // Toujours false au premier rendu (serveur ET client) pour éviter tout mismatch d'hydratation
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    queueMicrotask(() => {
+      if (active) setVisible(!readConsent());
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const choose = (optionalCookies) => {
     saveConsent(optionalCookies);

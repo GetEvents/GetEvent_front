@@ -4,26 +4,23 @@ Toutes les modifications importantes apportées à ce projet seront documentées
 
 ## [0.13.0](https://github.com/GetEvents/GetEvent_front/compare/v0.12.0...v0.13.0) (2026-07-17)
 
-
 ### Features
 
-* ajouter la gestion des erreurs de socket et le compteur de caractères pour les messages🔔 PHASE 10 — Notifications ([1432a6c](https://github.com/GetEvents/GetEvent_front/commit/1432a6c0913222c6e916ff754ac632612f6e6d25)), closes [#11](https://github.com/GetEvents/GetEvent_front/issues/11)
+- ajouter la gestion des erreurs de socket et le compteur de caractères pour les messages🔔 PHASE 10 — Notifications ([1432a6c](https://github.com/GetEvents/GetEvent_front/commit/1432a6c0913222c6e916ff754ac632612f6e6d25)), closes [#11](https://github.com/GetEvents/GetEvent_front/issues/11)
 
 ## [0.12.0](https://github.com/GetEvents/GetEvent_front/compare/v0.11.0...v0.12.0) (2026-07-14)
 
-
 ### Features
 
-* mettre à jour le workflow de déploiement pour utiliser Netlify et ajouter un fichier de configuration Netlify🧪 PHASE 11 — Tests ([2570d63](https://github.com/GetEvents/GetEvent_front/commit/2570d63f4854606775512d32ddad1f26537dd255)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
+- mettre à jour le workflow de déploiement pour utiliser Netlify et ajouter un fichier de configuration Netlify🧪 PHASE 11 — Tests ([2570d63](https://github.com/GetEvents/GetEvent_front/commit/2570d63f4854606775512d32ddad1f26537dd255)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
 
 ## [0.11.0](https://github.com/GetEvents/GetEvent_front/compare/v0.10.0...v0.11.0) (2026-07-13)
 
-
 ### Features
 
-* ajouter un composant CookieConsent pour la gestion des cookies🧪 PHASE 11 — Tests ([5a155dc](https://github.com/GetEvents/GetEvent_front/commit/5a155dc78962d924f8f5f6b8e615c527fc6496bf)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
-* ajouter une option pour la barre de consentement des cookies sur mobile🧪 PHASE 11 — Tests ([eacc00f](https://github.com/GetEvents/GetEvent_front/commit/eacc00f2c6042b7492d7895b1fffce8c29165d02)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
-* update release-please configuration and enhance changelog ([167c38c](https://github.com/GetEvents/GetEvent_front/commit/167c38c3bc8c012ac4e265c517c9e51a83328b30)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
+- ajouter un composant CookieConsent pour la gestion des cookies🧪 PHASE 11 — Tests ([5a155dc](https://github.com/GetEvents/GetEvent_front/commit/5a155dc78962d924f8f5f6b8e615c527fc6496bf)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
+- ajouter une option pour la barre de consentement des cookies sur mobile🧪 PHASE 11 — Tests ([eacc00f](https://github.com/GetEvents/GetEvent_front/commit/eacc00f2c6042b7492d7895b1fffce8c29165d02)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
+- update release-please configuration and enhance changelog ([167c38c](https://github.com/GetEvents/GetEvent_front/commit/167c38c3bc8c012ac4e265c517c9e51a83328b30)), closes [#12](https://github.com/GetEvents/GetEvent_front/issues/12)
 
 ## [0.10.0](https://github.com/GetEvents/GetEvent_front/compare/v0.9.0...v0.10.0) (2026-07-11)
 

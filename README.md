@@ -51,11 +51,15 @@ Creer un fichier `.env.local` a partir des variables attendues. Ne jamais commit
 Exemple :
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_API_ENDPOINT=http://localhost:8080
-NEXT_PUBLIC_SOCKET_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_ENDPOINT=http://localhost:3001
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_public_key
+NEXT_PUBLIC_GOOGLE_MAP_ID=your_google_map_id
+API_INTERNAL_URL=http://localhost:3001
 ```
+
+`NEXT_PUBLIC_GOOGLE_MAP_ID` active les marqueurs avancés Google Maps. En l'absence de valeur locale, l'application utilise `DEMO_MAP_ID`; un Map ID propre au projet doit être configuré en production.
 
 Important : seules les variables qui commencent par `NEXT_PUBLIC_` sont exposees au navigateur. Aucune cle secrete privee ne doit etre placee dans une variable `NEXT_PUBLIC_*`.
 
