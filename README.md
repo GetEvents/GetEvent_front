@@ -255,4 +255,4 @@ Le workflow `deploy.yml` s'exécute lors d'un push sur `main` ou manuellement. I
 
 ## Auteur
 
-Projet developpe par TINGOUGOUI Migbedon Marcelin dans le cadre d'un projet de validation de competences en developpement web.
+Projet developpe par TINGOUGOUI Migbedon Marcelin dans le cadre de mon projet de validation de competences en developpement web.

@@ -24,12 +24,7 @@ export function initMapAuto<T extends FormWithLocation>(
 
   if (!mapElement || !searchInput || !infowindowContent) return;
 
-  if (!maps?.Map || !maps.places?.PlaceAutocompleteElement) {
-    console.error(
-      "Google Maps n'est pas prêt pour l'initialisation de l'autocomplétion.",
-    );
-    return;
-  }
+  if (!maps?.Map || !maps.places?.PlaceAutocompleteElement) return;
 
   document.getElementById("place-autocomplete")?.remove();
 
