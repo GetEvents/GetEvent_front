@@ -154,7 +154,7 @@ export async function addEvent(
       };
 }
 
-export async function editeEvent(
+export async function editEvent(
   _state: EventActionState | null,
   formData: FormData,
 ): Promise<EventActionState> {
@@ -182,7 +182,7 @@ export async function editeEvent(
       };
 }
 
-export async function delectEvent(id: number): Promise<EventActionState> {
+export async function deleteEvent(id: number): Promise<EventActionState> {
   const token = await requireToken();
   const response = await events.delete({ id, token });
   return response.success

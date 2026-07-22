@@ -411,7 +411,7 @@ export const events = {
    * @param {number} id
    */
   delete: async ({ id, token }: IdTokenParam) => {
-    return apiRequest("DELETE", `/events/delectEvent?id=${id}`, {
+    return apiRequest("DELETE", `/events/deleteEvent?id=${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

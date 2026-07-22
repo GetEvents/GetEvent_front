@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/actions/auth/authActions";
-import CreateEvent from "@/components/form/CreatEvent";
+import CreateEvent from "@/components/form/CreateEvent";
 import styles from "./style.module.scss";
 interface PageProps {
   params: Promise<{ id: number }>; // En Next.js 15+, params est une Promise

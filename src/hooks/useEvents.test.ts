@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const actions = vi.hoisted(() => ({
   addEvent: vi.fn(),
-  delectEvent: vi.fn(),
-  editeEvent: vi.fn(),
+  deleteEvent: vi.fn(),
+  editEvent: vi.fn(),
   getAllEvent: vi.fn(),
   getEventById: vi.fn(),
   getEventByUser: vi.fn(),
@@ -68,8 +68,8 @@ describe("useEvents query options", () => {
     await eventMutations.join().mutationFn(5);
     await eventMutations.leave().mutationFn(6);
     expect(actions.addEvent).toHaveBeenCalledWith(null, data);
-    expect(actions.editeEvent).toHaveBeenCalledWith(null, data);
-    expect(actions.delectEvent).toHaveBeenCalledWith(4);
+    expect(actions.editEvent).toHaveBeenCalledWith(null, data);
+    expect(actions.deleteEvent).toHaveBeenCalledWith(4);
     expect(actions.joinEvent).toHaveBeenCalledWith(5);
     expect(actions.leaveEvent).toHaveBeenCalledWith(6);
   });

@@ -3,11 +3,11 @@ import "./globals.css";
 import "react-phone-number-input/style.css";
 import Footer from "@/components/ui/Footer/Bar_page";
 import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
-import SaidBar from "@/components/ui/saidbar";
+import Sidebar from "@/components/ui/sidebar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
-import AuthProvider from "@/constext/AuthProvider";
+import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
 import { cookies } from "next/headers";
@@ -81,7 +81,7 @@ export default async function RootLayout({
                 className={isLoggedIn ? styles.loginIsTrue : styles.container}
               >
                 <div className={styles.containerSaideBar}>
-                  {isLoggedIn && <SaidBar visible={true} />}
+                  {isLoggedIn && <Sidebar visible={true} />}
                 </div>
                 {children}
               </div>

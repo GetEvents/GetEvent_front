@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getEventById } from "@/actions/event";
 import { getUser } from "@/actions/auth/authActions";
-import CreateEvent from "@/components/form/CreatEvent";
+import CreateEvent from "@/components/form/CreateEvent";
 import styles from "./style.module.scss";
 
 interface EditEventPageProps {

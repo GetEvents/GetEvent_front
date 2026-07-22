@@ -3,7 +3,7 @@ import styles from "./style.module.scss";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, React } from "react";
-import { delectEvent, getEventByUser } from "@/actions/event/index";
+import { deleteEvent, getEventByUser } from "@/actions/event/index";
 import { getUser } from "@/actions/auth/authAction";
 import Loading from "../Loading";
 import DelectModal from "../DelectModal";
@@ -57,7 +57,7 @@ export default function EventCard({ count }) {
 
     setIsDeleting(true);
     try {
-      await delectEvent(eventToDelete.id); // attendre que l'action soit finie
+      await deleteEvent(eventToDelete.id); // attendre que l'action soit finie
       closeDeleteModal();
       window.location.href = "/events";
     } catch (err) {

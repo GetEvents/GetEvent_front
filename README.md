@@ -148,7 +148,7 @@ GetEvent_front/
 |   |-- app/                 # Routage Next.js avec App Router : pages, layouts et routes applicatives
 |   |-- actions/             # Actions metier frontend : auth, evenements, paiements, notifications
 |   |-- components/          # Composants d'interface reutilisables : formulaires, cartes, navbar, dashboard
-|   |-- constext/            # Contexte React d'authentification et provider global
+|   |-- context/             # Contexte React d'authentification et provider global
 |   |-- hooks/               # Hooks React personnalises : auth, evenements, participants, paiements
 |   |-- lib/                 # Fonctions utilitaires partagees et client API
 |   |-- services/            # Services d'appel a l'API backend
