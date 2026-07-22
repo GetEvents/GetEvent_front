@@ -29,7 +29,7 @@ describe("loadGoogleMapsApi", () => {
       maps: {
         Map: vi.fn(),
         marker: { AdvancedMarkerElement: vi.fn() },
-        places: { Autocomplete: vi.fn() },
+        places: { PlaceAutocompleteElement: vi.fn() },
       },
     });
     (
@@ -44,7 +44,7 @@ describe("loadGoogleMapsApi", () => {
       maps: {
         Map: vi.fn(),
         marker: { AdvancedMarkerElement: vi.fn() },
-        places: { Autocomplete: vi.fn() },
+        places: { PlaceAutocompleteElement: vi.fn() },
       },
     });
     const { loadGoogleMapsApi } = await import("./useGoogleMaps");
