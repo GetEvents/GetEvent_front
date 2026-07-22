@@ -9,7 +9,7 @@ import { initMapAuto } from "@/utils/autocomplet";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
-const CreatEvent = ({ id }) => {
+const CreateEvent = ({ id }) => {
   const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent();
@@ -825,4 +825,4 @@ const CreatEvent = ({ id }) => {
   );
 };
 
-export default CreatEvent;
+export default CreateEvent;

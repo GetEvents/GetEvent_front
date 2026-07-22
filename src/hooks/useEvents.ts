@@ -10,8 +10,8 @@ import {
 } from "@tanstack/react-query";
 import {
   addEvent,
-  delectEvent,
-  editeEvent,
+  deleteEvent,
+  editEvent,
   getAllEvent,
   getEventById,
   getEventByUser,
@@ -69,11 +69,11 @@ export const eventMutations = {
     }),
   update: () =>
     mutationOptions({
-      mutationFn: (formData: FormData) => editeEvent(null, formData),
+      mutationFn: (formData: FormData) => editEvent(null, formData),
     }),
   delete: () =>
     mutationOptions({
-      mutationFn: (eventId: number) => delectEvent(eventId),
+      mutationFn: (eventId: number) => deleteEvent(eventId),
     }),
   join: () =>
     mutationOptions({
