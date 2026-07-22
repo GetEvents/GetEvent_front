@@ -51,11 +51,15 @@ Creer un fichier `.env.local` a partir des variables attendues. Ne jamais commit
 Exemple :
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_API_ENDPOINT=http://localhost:8080
-NEXT_PUBLIC_SOCKET_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_ENDPOINT=http://localhost:3001
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_public_key
+NEXT_PUBLIC_GOOGLE_MAP_ID=your_google_map_id
+API_INTERNAL_URL=http://localhost:3001
 ```
+
+`NEXT_PUBLIC_GOOGLE_MAP_ID` active les marqueurs avancés Google Maps. En l'absence de valeur locale, l'application utilise `DEMO_MAP_ID`; un Map ID propre au projet doit être configuré en production.
 
 Important : seules les variables qui commencent par `NEXT_PUBLIC_` sont exposees au navigateur. Aucune cle secrete privee ne doit etre placee dans une variable `NEXT_PUBLIC_*`.
 
@@ -111,21 +115,19 @@ Genere la version statique de Storybook.
 
 ## Tests
 
-Le projet contient une configuration Vitest/Storybook dans `vitest.config.ts`, avec Playwright pour les tests navigateur. Les dependances de test sont presentes, mais aucun script `test` n'est encore declare dans `package.json`.
+Le projet contient une configuration Vitest/Storybook dans `vitest.config.ts`, avec Playwright pour les tests navigateur.
 
-Scripts recommandes a ajouter :
+Scripts disponibles :
 
-```json
-{
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-  }
-}
+```bash
+npm test
+npm run test:watch
+npm run test:coverage
 ```
 
-Tests frontend prioritaires a creer :
+`npm test` exécute les tests unitaires du projet Vitest. Le mode surveillance et le rapport de couverture sont accessibles avec les deux autres commandes.
+
+Composants et parcours prioritaires à maintenir sous test :
 
 - `LoginForm`
 - `RegisterForm`
@@ -231,18 +233,25 @@ npm run lint
 npm run build
 ```
 
-## CI/CD recommande pour le frontend
+## CI/CD du frontend
 
-Le frontend ne contient pas encore de workflow GitHub Actions dedie. Pipeline recommande :
+Le frontend contient deux workflows GitHub Actions dans `.github/workflows/`.
+
+### Intégration continue
+
+Le workflow `ci.yml` s'exécute lors d'un push sur `develop` ou d'une pull request vers `develop`. Il :
 
 1. Recuperer le code avec `actions/checkout`.
 2. Installer Node.js 20.
 3. Installer les dependances avec `npm ci`.
-4. Executer `npm run lint`.
-5. Executer `npm run build`.
-6. Executer les tests frontend quand ils seront ajoutes.
-7. Construire Storybook avec `npm run build-storybook`.
-8. Deployer sur la plateforme cible.
+4. Installe Chromium pour les tests Playwright.
+5. Execute `npm run lint` et `npm test`.
+6. Execute `npm run build` et `npm run build-storybook`.
+7. Construit une image Docker de contrôle.
+
+### Déploiement continu
+
+Le workflow `deploy.yml` s'exécute lors d'un push sur `main` ou manuellement. Il valide le lint et le build Next.js, puis déclenche le déploiement de production Netlify avec le secret `NETLIFY_BUILD_HOOK_URL`.
 
 ## Auteur
 

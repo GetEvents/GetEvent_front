@@ -6,10 +6,11 @@ import Input from "@/components/ui/Input/input";
 import { useEffect, useRef, useState } from "react";
 import { useCreateEvent, useEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
-import { loadGoogleMapsScript } from "@/utils/loadGoogleMap";
+import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 const CreatEvent = ({ id }) => {
+  const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent();
   const mutation = id ? updateMutation : createMutation;
@@ -76,18 +77,8 @@ const CreatEvent = ({ id }) => {
   }, []);
 
   useEffect(() => {
-    if (currentStep === 2 && typeof window !== "undefined") {
-      loadGoogleMapsScript(() => {
-        if (window.google && window.google.maps) {
-          initMapAuto(setForm);
-        } else {
-          console.error(
-            "Google Maps API n'est pas disponible après chargement.",
-          );
-        }
-      });
-    }
-  }, [currentStep]);
+    if (currentStep === 2 && googleMapsReady) return initMapAuto(setForm);
+  }, [currentStep, googleMapsReady]);
 
   // Charger l'événement uniquement au montage du composant
   useEffect(() => {

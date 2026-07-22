@@ -90,8 +90,12 @@ const Sidebar = ({ visible }) => {
               src={isCollapsed ? "/flashicon.png" : "/LogoI.png"}
               alt="GetEvent"
               width={isCollapsed ? 36 : 130}
-              height={isCollapsed ? 36 : 45}
-              style={{ objectFit: "contain", transition: "all 0.1s ease" }}
+              height={isCollapsed ? 36 : 73}
+              style={{
+                height: "auto",
+                objectFit: "contain",
+                transition: "all 0.1s ease",
+              }}
               priority
               quality={100}
             />

@@ -13,7 +13,7 @@ import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents, fetchEvents } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
-import { loadGoogleMapsScript } from "@/utils/loadGoogleMap";
+import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import style from "./style.module.scss";
 
 const EVENTS_PER_PAGE = 6;
@@ -44,6 +44,7 @@ interface Feedback {
 }
 
 export default function Welcome() {
+  const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const { user, setUser, setToken, isAuthenticated } = useAuth();
   const [extraEvents, setExtraEvents] = useState<Event[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -107,19 +108,20 @@ export default function Welcome() {
   const loading = (isLoading || isFetching) && !isLoadingMore;
 
   useEffect(() => {
-    loadGoogleMapsScript(() => {
-      if (window.google?.maps) {
-        initMapAuto<{ location: string }>((update) => {
-          setLocation((currentLocation) => {
-            const currentForm = { location: currentLocation };
-            const nextForm =
-              typeof update === "function" ? update(currentForm) : update;
-            return nextForm.location;
-          });
+    if (!googleMapsReady) return;
+
+    return initMapAuto<{ location: string }>(
+      (update) => {
+        setLocation((currentLocation) => {
+          const currentForm = { location: currentLocation };
+          const nextForm =
+            typeof update === "function" ? update(currentForm) : update;
+          return nextForm.location;
         });
-      }
-    });
-  }, []);
+      },
+      { variant: "search" },
+    );
+  }, [googleMapsReady]);
 
   const searchEvents = (options: SearchOptions = {}) => {
     const category = options.category ?? activeFilter;

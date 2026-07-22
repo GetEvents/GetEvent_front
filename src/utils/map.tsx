@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getGoogleMapId, useGoogleMaps } from "@/hooks/useGoogleMaps";
 
 interface EventMapProps {
   title: string;
@@ -10,48 +11,21 @@ interface EventMapProps {
 export default function EventMap({ title, location }: EventMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [unavailable, setUnavailable] = useState(false);
+  const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const hasMapConfig = Boolean(location && apiKey);
 
   useEffect(() => {
-    if (!hasMapConfig) return;
+    if (!hasMapConfig || !googleMapsReady) return;
 
-    const loadGoogleMapsScript = async () => {
-      if (window.google) return;
-
-      await new Promise<void>((resolve, reject) => {
-        const existingScript = document.querySelector<HTMLScriptElement>(
-          'script[data-google-maps="true"]',
-        );
-
-        if (existingScript) {
-          existingScript.addEventListener("load", () => resolve(), {
-            once: true,
-          });
-          existingScript.addEventListener("error", () => reject(), {
-            once: true,
-          });
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-        script.dataset.googleMaps = "true";
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject();
-        document.body.appendChild(script);
-      });
-    };
-
-    const initMap = async () => {
+    const initMap = () => {
       try {
-        await loadGoogleMapsScript();
-        if (!mapRef.current) return;
+        if (!mapRef.current || !window.google?.maps?.Map) return;
 
-        const map = new google.maps.Map(mapRef.current, {
+        const map = new window.google.maps.Map(mapRef.current, {
           center: { lat: 48.8566, lng: 2.3522 },
           zoom: 13,
+          mapId: getGoogleMapId(),
         });
         const geocoder = new google.maps.Geocoder();
 
@@ -62,11 +36,10 @@ export default function EventMap({ title, location }: EventMapProps) {
           }
 
           const coordinates = results[0].geometry.location;
-          const marker = new google.maps.Marker({
+          const marker = new google.maps.marker.AdvancedMarkerElement({
             map,
             position: coordinates,
             title: title || "Événement",
-            animation: google.maps.Animation.DROP,
           });
           const infoWindow = new google.maps.InfoWindow({
             content: `<div style="max-width:220px"><strong>${title}</strong><p>${location}</p></div>`,
@@ -83,8 +56,8 @@ export default function EventMap({ title, location }: EventMapProps) {
       }
     };
 
-    void initMap();
-  }, [apiKey, hasMapConfig, location, title]);
+    initMap();
+  }, [apiKey, googleMapsReady, hasMapConfig, location, title]);
 
   if (!hasMapConfig || unavailable) {
     return (

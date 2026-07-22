@@ -3,7 +3,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { events, participations } from "@/services/api";
-import { refreshAccessToken } from "@/actions/auth/authActions";
 import type {
   Event,
   EventActionState,
@@ -12,7 +11,7 @@ import type {
 
 const getToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
-  return cookieStore.get("token")?.value || (await refreshAccessToken());
+  return cookieStore.get("token")?.value ?? null;
 };
 
 const requireToken = async (): Promise<string> => {

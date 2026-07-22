@@ -208,19 +208,26 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Refresh the session before rendering regular pages. Server Components can
+  // read cookies, but Next.js does not allow them to set or delete cookies.
+  if (!token || !isAccessTokenUsable(token)) {
+    if (refreshToken) {
+      const refreshedTokens = await refreshSession(refreshToken);
+      if (refreshedTokens) {
+        return continueWithSession(request, refreshedTokens);
+      }
+    }
+
+    if (token || refreshToken) {
+      return clearSession(NextResponse.next());
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/",
-    "/events/my-events/:path*",
-    "/events/createvent/:path*",
-    "/events/editEvent/:path*",
-    "/participations/:path*",
-    "/settings/:path*",
-    "/dashboard/:path*",
-    "/auth/login",
-    "/auth/register",
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

@@ -10,6 +10,7 @@ services:
         NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:8080}
         NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:8080}
         NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+        NEXT_PUBLIC_GOOGLE_MAP_ID: ${NEXT_PUBLIC_GOOGLE_MAP_ID:-DEMO_MAP_ID}
         API_INTERNAL_URL: ${API_INTERNAL_URL:-http://host.docker.internal:8080}
     image: ghcr.io/getevents/getevent-front:latest
     container_name: getevent-frontend
@@ -24,6 +25,7 @@ services:
       NEXT_PUBLIC_API_ENDPOINT: ${NEXT_PUBLIC_API_ENDPOINT:-http://localhost:8080}
       NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:8080}
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+      NEXT_PUBLIC_GOOGLE_MAP_ID: ${NEXT_PUBLIC_GOOGLE_MAP_ID:-DEMO_MAP_ID}
     command:
       - /bin/sh
       - -c
@@ -36,6 +38,7 @@ services:
         echo "NEXT_PUBLIC_API_ENDPOINT=$$NEXT_PUBLIC_API_ENDPOINT"
         echo "NEXT_PUBLIC_SOCKET_URL=$$NEXT_PUBLIC_SOCKET_URL"
         if [ -n "$$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY" ]; then echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=present"; else echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=absent"; fi
+        echo "NEXT_PUBLIC_GOOGLE_MAP_ID=$$NEXT_PUBLIC_GOOGLE_MAP_ID"
         echo "=================================================="
         exec node server.js
     ports:

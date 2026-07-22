@@ -152,7 +152,7 @@ export default function EventCard({
         <EventCardSkeleton />
       ) : eventList != null && eventList.length > 0 ? (
         <div className={styles.events_schowdiv}>
-          {eventList.map((event) => {
+          {eventList.map((event, index) => {
             const eventExpired = isEventExpired(event);
             const expiredMessage = "Impossible: cet evenement est termine";
 
@@ -165,7 +165,8 @@ export default function EventCard({
                       alt={event.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 340px"
-                      priority={false}
+                      loading={index < 3 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
                     />
                   ) : (
                     <Image
@@ -173,7 +174,8 @@ export default function EventCard({
                       alt="event title"
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 340px"
-                      priority={false}
+                      loading={index < 3 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
                     />
                   )}
                 </div>

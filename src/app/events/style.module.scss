@@ -269,6 +269,24 @@ $glass-border: rgba(15, 23, 42, 0.08);
 .locationInput {
   border-left: 1px solid rgba(15, 23, 42, 0.08);
 
+  :global(#place-autocomplete) {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    background: transparent;
+    border: 0 solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none;
+    padding: 0;
+    color: $text-main;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color-scheme: light;
+  }
+
   @media (max-width: 768px) {
     border-left: none;
     border-top: 1px solid rgba(15, 23, 42, 0.08);

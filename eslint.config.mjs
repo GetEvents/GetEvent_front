@@ -7,7 +7,15 @@ import prettier from "eslint-plugin-prettier";
 
 export default defineConfig([
   next,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "coverage/**",
+    "storybook-static*/**",
+    ".vitest-attachments/**",
+    "next-env.d.ts",
+  ]),
   {
     plugins: {
       prettier,
