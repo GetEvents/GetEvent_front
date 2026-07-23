@@ -8,10 +8,10 @@ import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
 import { fetchGetNotifications } from "@/actions/notification";
 import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
-import type { Event, EventFilters } from "@/actions/types/event";
+import type { EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
-import { useEvents, fetchEvents } from "@/hooks/useEvents";
+import { useEvents } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import style from "./style.module.scss";
@@ -46,7 +46,6 @@ interface Feedback {
 export default function Welcome() {
   const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const { user, setUser, setToken, isAuthenticated } = useAuth();
-  const [extraEvents, setExtraEvents] = useState<Event[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,7 +54,6 @@ export default function Welcome() {
     useState<EventFilters["filter"]>("recent");
   const [location, setLocation] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [queryParams, setQueryParams] = useState<EventFilters>({
@@ -72,10 +70,7 @@ export default function Welcome() {
     error,
   } = useEvents(queryParams);
 
-  const eventList = useMemo(
-    () => [...queryEvents, ...extraEvents],
-    [queryEvents, extraEvents],
-  );
+  const eventList = queryEvents;
 
   const effectiveFeedback =
     feedback || (error ? { error: true, message: error.message } : null);
@@ -104,8 +99,8 @@ export default function Welcome() {
     void loadUser();
   }, [setToken, setUser]);
 
-  const isSearching = isFetching || isLoadingMore;
-  const loading = (isLoading || isFetching) && !isLoadingMore;
+  const isSearching = isFetching;
+  const loading = isLoading || isFetching;
 
   useEffect(() => {
     if (!googleMapsReady) return;
@@ -138,31 +133,6 @@ export default function Welcome() {
     });
   };
 
-  const handleLoadMore = async () => {
-    setIsLoadingMore(true);
-
-    try {
-      const response = await fetchEvents({
-        page: Math.ceil(eventList.length / 10) + 1,
-        search: searchQuery,
-        category: activeFilter,
-        location,
-        filter: sortFilter,
-      });
-      setExtraEvents((previous) => [...previous, ...response]);
-    } catch (error) {
-      setFeedback({
-        error: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Impossible de charger plus d'événements.",
-      });
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
   const totalPages = Math.max(1, Math.ceil(eventList.length / EVENTS_PER_PAGE));
   const visibleEvents = useMemo(() => {
     const start = (currentPage - 1) * EVENTS_PER_PAGE;
@@ -182,7 +152,7 @@ export default function Welcome() {
       <main
         className={`${style.eventsPage} ${
           !isAuthenticated ? style.withPublicNavbar : ""
-        }`}
+        } ${isAuthenticated ? style.withMobileSidebar : ""}`}
       >
         {isAuthenticated && (
           <div className={style.topNavBar}>
@@ -458,17 +428,6 @@ export default function Welcome() {
               </button>
             </div>
           )}
-
-          <div className={style.loadMoreContainer}>
-            <button
-              type="button"
-              className={style.loadMoreBtn}
-              onClick={() => void handleLoadMore()}
-              disabled={isSearching}
-            >
-              {isSearching ? "Chargement..." : "Charger plus d'événements"}
-            </button>
-          </div>
         </section>
       </main>
 

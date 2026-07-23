@@ -13,9 +13,4 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Mobile responsive: add padding bottom when sidebar is at bottom */
-@media (max-width: 768px) {
-  body {
-    padding-bottom: 96px;
-  }
-}
+

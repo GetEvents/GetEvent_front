@@ -73,11 +73,7 @@
     width: 100%;
   }
 
-  /* Add padding to prevent content from hiding behind fixed bottom sidebar */
-  :global(main),
-  :global(body) {
-    padding-bottom: 96px;
-  }
+ 
 }
 
 /* Tablet responsive adjustments */
