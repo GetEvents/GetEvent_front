@@ -49,7 +49,7 @@ export default function EventActions({
     joinMutation.mutate(eventId, {
       onSuccess: (result) => {
         if (result.error) return notify(result.message, "error");
-        notify(result.message, "success");
+        notify(result.message, result.paymentUrl ? "info" : "success");
         if (result.paymentUrl) return window.location.assign(result.paymentUrl);
         router.refresh();
       },

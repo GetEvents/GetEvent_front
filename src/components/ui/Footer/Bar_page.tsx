@@ -109,24 +109,6 @@ export default function Footer({ currentUser }: FooterProps) {
           </div>
 
           <div className={styles.footerCol}>
-            <h3>Support</h3>
-            <ul>
-              <li>
-                <button>Centre d&apos;aide</button>
-              </li>
-              <li>
-                <button>Documentation</button>
-              </li>
-              <li>
-                <button>Tutoriels</button>
-              </li>
-              <li>
-                <button>Statut global</button>
-              </li>
-            </ul>
-          </div>
-
-          <div className={styles.footerCol}>
             <h3>Légal</h3>
             <ul>
               <li>
@@ -144,9 +126,6 @@ export default function Footer({ currentUser }: FooterProps) {
 
         <div className={styles.bottomBar}>
           <p>© 2026 GetEvent. Tous droits réservés.</p>
-          <div className={styles.credit}>
-            Crafted with <span className={styles.heart}>♥</span> by Marcelin
-          </div>
         </div>
       </div>
     </footer>

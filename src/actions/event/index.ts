@@ -214,11 +214,16 @@ export async function joinEvent(
     message?: string;
     data?: { paymentUrl?: string };
   };
+  const paymentUrl = payload.data?.paymentUrl;
 
   return {
     error: false,
-    message: payload.message || "Redirection...",
-    paymentUrl: payload.data?.paymentUrl,
+    message:
+      payload.message ||
+      (paymentUrl
+        ? "Redirection vers le paiement..."
+        : "Inscription confirmée. Votre billet est disponible dans vos participations."),
+    paymentUrl,
   };
 }
 
