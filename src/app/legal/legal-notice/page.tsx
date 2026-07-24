@@ -12,13 +12,6 @@ export default function LegalNoticePage() {
       title="Mentions légales"
       lead="Les informations d’identification, de publication et d’hébergement de la plateforme GetEvent."
     >
-      <div className={styles.warning} role="note">
-        <strong>À finaliser avant la mise en production :</strong> les champs
-        surlignés ci-dessous ne peuvent pas être déduits du code source. Ils
-        doivent être remplacés par les informations administratives exactes de
-        l’éditeur et de l’hébergeur du site web.
-      </div>
-
       <section className={styles.section}>
         <h2>1. Éditeur de la plateforme</h2>
         <p>
@@ -28,22 +21,29 @@ export default function LegalNoticePage() {
         <ul>
           <li>
             Forme ou statut juridique :{" "}
-            <span className={styles.placeholder}>à compléter</span>
+            <span className={styles.placeholder}>
+              personne physique – projet académique non constitué en société
+            </span>
           </li>
           <li>
             Adresse professionnelle :{" "}
-            <span className={styles.placeholder}>à compléter</span>
+            <span className={styles.placeholder}>
+              26 rue Pablo Picasso 93000 Bobigny
+            </span>
           </li>
           <li>
             Numéro RCCM / IFU, le cas échéant :{" "}
-            <span className={styles.placeholder}>à compléter</span>
+            <span className={styles.placeholder}>
+              non applicable – activité non immatriculée
+            </span>
           </li>
           <li>
-            Téléphone : <span className={styles.placeholder}>à compléter</span>
+            Téléphone :{" "}
+            <span className={styles.placeholder}>+33 6 67 53 71 31</span>
           </li>
           <li>
             E-mail :{" "}
-            <a href="mailto:contact@getevent.com">contact@getevent.com</a>
+            <a href="mailto:contact@getevents.fr">contact@getevents.fr</a>
           </li>
         </ul>
       </section>
@@ -54,7 +54,7 @@ export default function LegalNoticePage() {
           Le directeur de la publication est{" "}
           <strong>Marcelin Tingougoui</strong>. Il peut être contacté à
           l’adresse{" "}
-          <a href="mailto:contact@getevent.com">contact@getevent.com</a>.
+          <a href="mailto:contact@getevents.fr">contact@getevents.fr</a>.
         </p>
       </section>
 
@@ -63,7 +63,9 @@ export default function LegalNoticePage() {
         <p>
           Hébergeur de l’interface web :{" "}
           <span className={styles.placeholder}>
-            nom, raison sociale et adresse à confirmer
+            L’interface web de GetEvent est hébergée par : Netlify, Inc. 101 2nd
+            Street San Francisco, CA 94105 États-Unis Site web :
+            https://www.netlify.com/
           </span>
           .
         </p>
@@ -99,7 +101,7 @@ export default function LegalNoticePage() {
           notamment à la loi n° 2017-20 du 20 avril 2018 portant Code du
           numérique, telle que modifiée par la loi n° 2020-35 du 6 janvier 2021.
           Pour toute question ou signalement, écrivez à{" "}
-          <a href="mailto:contact@getevent.com">contact@getevent.com</a>.
+          <a href="mailto:contact@getevents.fr">contact@getevents.fr</a>.
         </p>
         <p>
           Textes officiels :{" "}

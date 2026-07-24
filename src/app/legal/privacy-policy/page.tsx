@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
           Le responsable des traitements réalisés pour exploiter GetEvent est
           l’éditeur identifié dans les mentions légales. Les demandes relatives
           aux données personnelles peuvent être adressées à{" "}
-          <a href="mailto:contact@getevent.com">contact@getevent.com</a>.
+          <a href="mailto:contact@getevents.fr">contact@getevents.fr</a>.
         </p>
       </section>
 
@@ -207,7 +207,7 @@ export default function PrivacyPolicyPage() {
         </p>
         <p>
           Envoyez votre demande à{" "}
-          <a href="mailto:contact@getevent.com">contact@getevent.com</a> en
+          <a href="mailto:contact@getevents.fr">contact@getevents.fr</a> en
           précisant le droit exercé. Une preuve d’identité peut être demandée en
           cas de doute raisonnable. Vous pouvez également saisir l’Autorité de
           Protection des Données à caractère Personnel du Bénin (APDP).
