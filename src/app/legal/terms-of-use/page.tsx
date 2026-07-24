@@ -182,7 +182,7 @@ export default function TermsOfUsePage() {
           Les présentes conditions sont régies par le droit béninois. Avant
           toute action, les parties s’efforcent de résoudre leur différend à
           l’amiable en écrivant à{" "}
-          <a href="mailto:contact@getevent.com">contact@getevent.com</a>. À
+          <a href="mailto:contact@getevents.fr">contact@getevents.fr</a>. À
           défaut d’accord, les juridictions matériellement et territorialement
           compétentes sont saisies conformément aux règles applicables.
         </p>
