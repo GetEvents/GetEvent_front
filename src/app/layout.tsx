@@ -48,28 +48,20 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-  const userResponse = token ? await getUser() : null;
-  const currentUser = userResponse?.user || null;
+  let currentUser = null;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    const userResponse = token ? await getUser() : null;
+    currentUser = userResponse?.user || null;
+  } catch {
+    currentUser = null;
+  }
 
-  // Vérifier si le token existe (validation complète côté client)
   const isLoggedIn = Boolean(currentUser);
 
   return (
     <html lang="fr">
-      <head>
-        <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#171717" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/flashicon.png" />
-        <link rel="icon" type="image/png" sizes="64x64" href="/flashicon.png" />
-        <link
-          rel="apple-touch-icon"
-          type="image/png"
-          sizes="180x180"
-          href="/flashicon.png"
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
