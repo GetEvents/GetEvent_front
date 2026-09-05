@@ -2,6 +2,19 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.15.0](https://github.com/GetEvents/GetEvent_front/compare/v0.14.1...v0.15.0) (2026-09-05)
+
+
+### Features
+
+* ajouter la gestion des notifications push et le badge d'applica… ([6fef0e9](https://github.com/GetEvents/GetEvent_front/commit/6fef0e9e2b9d531f7d998e91e5a158b246d016d3))
+* ajouter la gestion des notifications push et le badge d'application ([249c187](https://github.com/GetEvents/GetEvent_front/commit/249c187747c274210c8c84c5c684881c87f25f1d))
+
+
+### Bug Fixes
+
+* ajouter la configuration de Vite pour la résolution des alias dans Storybook ([71e87e9](https://github.com/GetEvents/GetEvent_front/commit/71e87e970ecd897efad22206efb37d9460078554))
+
 ## [0.14.1](https://github.com/GetEvents/GetEvent_front/compare/v0.14.0...v0.14.1) (2026-07-22)
 
 ### Bug Fixes
