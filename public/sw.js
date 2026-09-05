@@ -56,22 +56,23 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const targetUrl = event.notification.data?.url || "/";
+  const rawUrl = event.notification.data?.url || "/";
+  const fullUrl = new URL(rawUrl, self.location.origin).href;
 
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        // Si un onglet de l'app est déjà ouvert, lui donner le focus et naviguer
+        // Si un onglet ou la PWA est déjà ouvert, lui donner le focus et naviguer
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && "focus" in client) {
-            client.navigate(targetUrl);
+            client.navigate(fullUrl);
             return client.focus();
           }
         }
         // Sinon ouvrir une nouvelle fenêtre
         if (self.clients.openWindow) {
-          return self.clients.openWindow(targetUrl);
+          return self.clients.openWindow(fullUrl);
         }
       }),
   );
