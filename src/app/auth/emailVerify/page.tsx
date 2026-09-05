@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConfirmeEmail } from "@/hooks/useAuthMutations";
 import ButtonComponent from "@/components/ui/button/button";
 import Loading from "@/components/ui/Loading";
 import styles from "./style.module.scss";
 
-export default function EmailVerifyPage() {
+function EmailVerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isPending, mutateAsync } = useConfirmeEmail();
+
   const hasVerified = useRef(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -66,5 +67,13 @@ export default function EmailVerifyPage() {
         />
       </section>
     </main>
+  );
+}
+
+export default function EmailVerifyPage() {
+  return (
+    <Suspense fallback={<Loading message="Confirmation de votre email..." />}>
+      <EmailVerifyContent />
+    </Suspense>
   );
 }
