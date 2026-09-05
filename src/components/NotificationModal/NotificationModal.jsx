@@ -27,10 +27,20 @@ export default function NotificationModal({
   }, [isOpen, onClose]);
 
   const updateParent = (nextNotifications) => {
+    const unread = nextNotifications.filter(
+      (notification) => !notification.isRead,
+    ).length;
     setNotifications?.(nextNotifications);
-    setNotificationCount?.(
-      nextNotifications.filter((notification) => !notification.isRead).length,
-    );
+    setNotificationCount?.(unread);
+
+    // Mettre à jour ou effacer le badge sur l'icône de l'app PWA
+    if (typeof window !== "undefined" && "setAppBadge" in navigator) {
+      if (unread > 0) {
+        navigator.setAppBadge(unread).catch(() => {});
+      } else {
+        navigator.clearAppBadge().catch(() => {});
+      }
+    }
   };
 
   const handleMarkAsRead = async (notificationId) => {

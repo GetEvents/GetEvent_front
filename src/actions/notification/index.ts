@@ -54,3 +54,15 @@ export async function deleteNotification(notificationId: number) {
   if (!token) return { success: false, error: "Non authentifié." };
   return notifications.delete({ notificationId, token });
 }
+
+export async function savePushSubscriptionAction(
+  subscription: PushSubscriptionJSON,
+) {
+  const token = await getToken();
+  if (!token) return { success: false, error: "Non authentifié." };
+  return notifications.subscribePush({ subscription, token });
+}
+
+export async function removePushSubscriptionAction(endpoint: string) {
+  return notifications.unsubscribePush(endpoint);
+}

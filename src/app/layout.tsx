@@ -5,6 +5,7 @@ import Footer from "@/components/ui/Footer/Bar_page";
 import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import Sidebar from "@/components/ui/sidebar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
+import PushNotificationManager from "@/components/Notification/PushNotificationManager";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
 import AuthProvider from "@/context/AuthProvider";
@@ -87,6 +88,7 @@ export default async function RootLayout({
               </div>
               <Footer currentUser={isLoggedIn} />
               <PwaInstallPrompt />
+              <PushNotificationManager isLoggedIn={isLoggedIn} />
               <CookieConsent hasMobileSidebar={isLoggedIn} />
             </Providers>
           </NotificationProvider>

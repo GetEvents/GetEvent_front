@@ -809,12 +809,27 @@ export const notifications = {
   },
 
   /**
-   * Supprimer toutes les notifications
-   * @param {string} token
+   * Enregistrer une souscription push
    */
-  deleteAll: async (token: string) => {
-    return apiRequest("DELETE", "/notifications/delete-all", {
+  subscribePush: async ({
+    subscription,
+    token,
+  }: {
+    subscription: PushSubscriptionJSON;
+    token: string;
+  }) => {
+    return apiRequest("POST", "/notifications/push/subscribe", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: { subscription },
+    });
+  },
+
+  /**
+   * Supprimer une souscription push
+   */
+  unsubscribePush: async (endpoint: string) => {
+    return apiRequest("POST", "/notifications/push/unsubscribe", {
+      body: { endpoint },
     });
   },
 };
@@ -1037,7 +1052,7 @@ export const clearToken = () => {
   }
 };
 
-export default {
+const api = {
   auth,
   events,
   messages,
@@ -1048,3 +1063,5 @@ export default {
   getToken,
   clearToken,
 };
+
+export default api;
