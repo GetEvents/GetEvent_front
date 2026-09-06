@@ -105,12 +105,12 @@ const CreateEvent = ({ id }) => {
         category: eventData.category ?? "",
         description: eventData.description ?? "",
         image: eventData.image ?? null,
-        startDate: eventData.startDate ?? "",
-        startTime: eventData.startTime ?? "",
-        endDate: eventData.endDate ?? "",
-        endTime: eventData.endTime ?? "",
+        startDate: formatDate(eventData.startDate),
+        startTime: formatTime(eventData.startTime || eventData.startDate),
+        endDate: formatDate(eventData.endDate),
+        endTime: formatTime(eventData.endTime || eventData.endDate),
         location: eventData.location ?? "",
-        isOnline: eventData.isOnline ?? false,
+        isOnline: Boolean(eventData.isOnline),
         capacity: eventData.capacity ?? 0,
         isFree: !eventData.paymentRequired,
         paymentPrice: eventData.paymentPrice ?? "",
@@ -119,14 +119,15 @@ const CreateEvent = ({ id }) => {
     }
   }, [eventQuery.data, id]);
 
-  const formatDate = (dateString) => {
+  function formatDate(dateString) {
     if (!dateString) return "";
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
-  };
+  }
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
