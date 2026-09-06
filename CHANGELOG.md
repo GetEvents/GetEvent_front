@@ -2,6 +2,22 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.16.0](https://github.com/GetEvents/GetEvent_front/compare/v0.15.0...v0.16.0) (2026-09-06)
+
+
+### Features
+
+* ajouter un gestionnaire de notifications push avec une bannière d'autorisation ([aa99ef3](https://github.com/GetEvents/GetEvent_front/commit/aa99ef3647c4d783d0ff9c3e71c71b731d9cd043))
+* ajouter un gestionnaire de notifications push avec une bannière… ([bbdc8c7](https://github.com/GetEvents/GetEvent_front/commit/bbdc8c714f4820fd427ecacb49d5164f3d86be58))
+
+
+### Bug Fixes
+
+* corriger l'URL cible lors du clic sur la notification ([89485a5](https://github.com/GetEvents/GetEvent_front/commit/89485a5b2a9976614489af8bc033fe7da0759a3c))
+* corriger l'URL cible lors du clic sur la notification ([b5d7193](https://github.com/GetEvents/GetEvent_front/commit/b5d7193b922cffd0d3605972d27868ae066eb49b))
+* corriger le formatage des dates et des heures dans le formulaire de création d'événement ([428baca](https://github.com/GetEvents/GetEvent_front/commit/428bacab4fd0831c09648831f6b2ec700a2a7bbd))
+* corriger le formatage des dates et des heures dans le formulaire… ([4c7cf62](https://github.com/GetEvents/GetEvent_front/commit/4c7cf6243502e01645a6903df6ab71297f27cc9e))
+
 ## [0.15.0](https://github.com/GetEvents/GetEvent_front/compare/v0.14.1...v0.15.0) (2026-09-05)
 
 
