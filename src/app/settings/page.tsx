@@ -406,6 +406,7 @@ export default function SettingsPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDeleteAccount}
+        eventTitle=""
         isLoading={deleteAccountMutation.isPending}
         title="Supprimer votre compte"
         message="Voulez-vous vraiment supprimer définitivement votre compte et l'ensemble de vos données ? Cette action est irréversible."
