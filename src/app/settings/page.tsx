@@ -15,6 +15,7 @@ import {
 } from "@/actions/payment";
 import Profil from "@/components/profile";
 import ProfilForm from "@/components/form/RegisterForm";
+import DelectModal from "@/components/DelectModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChangePassword, useDeleteAccount } from "@/hooks/useAuthMutations";
 import styles from "./style.module.scss";
@@ -75,6 +76,7 @@ export default function SettingsPage() {
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeActionError, setStripeActionError] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const changePasswordMutation = useChangePassword();
   const deleteAccountMutation = useDeleteAccount();
 
@@ -143,7 +145,7 @@ export default function SettingsPage() {
     } catch {
       setPasswordState((currentState) => ({
         ...currentState,
-        error: "Une erreur est survenue pendant la modification.",
+        error: "Impossible de modifier le mot de passe.",
         loading: false,
       }));
     }
@@ -171,12 +173,8 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      "Supprimer définitivement votre compte et toutes vos données ?",
-    );
-
-    if (!confirmed || deleteAccountMutation.isPending) return;
+  const handleConfirmDeleteAccount = async () => {
+    if (deleteAccountMutation.isPending) return;
 
     setDeleteError("");
 
@@ -185,14 +183,15 @@ export default function SettingsPage() {
 
       if (result.error) {
         setDeleteError(result.message);
+        setIsDeleteModalOpen(false);
         return;
       }
 
+      setIsDeleteModalOpen(false);
       window.location.assign("/");
     } catch {
       setDeleteError("Impossible de supprimer votre compte.");
-    } finally {
-      // L'état de chargement est géré par TanStack Query.
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -390,7 +389,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={styles.btn_danger}
-                onClick={handleDeleteAccount}
+                onClick={() => setIsDeleteModalOpen(true)}
                 disabled={deleteAccountMutation.isPending}
               >
                 <Trash2 aria-hidden="true" />
@@ -402,6 +401,18 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <DelectModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDeleteAccount}
+        eventTitle=""
+        isLoading={deleteAccountMutation.isPending}
+        title="Supprimer votre compte"
+        message="Voulez-vous vraiment supprimer définitivement votre compte et l'ensemble de vos données ? Cette action est irréversible."
+        confirmLabel="Supprimer définitivement"
+        loadingLabel="Suppression en cours..."
+      />
     </main>
   );
 }
