@@ -18,11 +18,11 @@ import { authMutations } from "./useAuthMutations";
 describe("authMutations", () => {
   it("relie les formulaires aux actions serveur", async () => {
     const data = new FormData();
-    await authMutations.login().mutationFn(data);
-    await authMutations.register().mutationFn(data);
-    await authMutations.updateProfile().mutationFn(data);
-    await authMutations.forgotPassword().mutationFn(data);
-    await authMutations.resetPassword().mutationFn(data);
+    await authMutations.login().mutationFn!(data, undefined as any);
+    await authMutations.register().mutationFn!(data, undefined as any);
+    await authMutations.updateProfile().mutationFn!(data, undefined as any);
+    await authMutations.forgotPassword().mutationFn!(data, undefined as any);
+    await authMutations.resetPassword().mutationFn!(data, undefined as any);
     expect(actions.login).toHaveBeenCalledWith(null, data);
     expect(actions.register).toHaveBeenCalledWith(null, data);
     expect(actions.editProfil).toHaveBeenCalledWith(null, data);

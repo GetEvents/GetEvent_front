@@ -316,7 +316,7 @@ export async function changeCurrentPassword(
   }
 
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value || (await refreshAccessToken());
+  let token = cookieStore.get("token")?.value || (await refreshAccessToken());
 
   if (!token) {
     return {
@@ -325,7 +325,19 @@ export async function changeCurrentPassword(
     };
   }
 
-  const response = await auth.resetPassword(password, token);
+  let response = await auth.resetPassword(password, token);
+
+  if (
+    !response.success &&
+    (response.error?.includes("expiré") ||
+      response.error?.includes("invalide") ||
+      response.error?.includes("Token"))
+  ) {
+    const refreshedToken = await refreshAccessToken();
+    if (refreshedToken) {
+      response = await auth.resetPassword(password, refreshedToken);
+    }
+  }
 
   if (!response.success) {
     return {
@@ -344,7 +356,7 @@ export async function changeCurrentPassword(
 
 export async function deleteCurrentAccount(): Promise<ActionResponse> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value || (await refreshAccessToken());
+  let token = cookieStore.get("token")?.value || (await refreshAccessToken());
 
   if (!token) {
     return {
@@ -353,7 +365,19 @@ export async function deleteCurrentAccount(): Promise<ActionResponse> {
     };
   }
 
-  const response = await auth.deleteAccount(token);
+  let response = await auth.deleteAccount(token);
+
+  if (
+    !response.success &&
+    (response.error?.includes("expiré") ||
+      response.error?.includes("invalide") ||
+      response.error?.includes("Token"))
+  ) {
+    const refreshedToken = await refreshAccessToken();
+    if (refreshedToken) {
+      response = await auth.deleteAccount(refreshedToken);
+    }
+  }
 
   if (!response.success) {
     return {
@@ -376,7 +400,7 @@ export async function editProfil(
   formData: FormData,
 ): Promise<ActionResponse> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  let token = cookieStore.get("token")?.value || (await refreshAccessToken());
 
   if (!token) {
     return {
@@ -443,7 +467,20 @@ export async function editProfil(
   }
 
   try {
-    const response = await auth.updateProfile({ formData: sendData, token });
+    let response = await auth.updateProfile({ formData: sendData, token });
+
+    if (
+      !response.success &&
+      (response.error?.includes("expiré") ||
+        response.error?.includes("invalide") ||
+        response.error?.includes("Token"))
+    ) {
+      const refreshedToken = await refreshAccessToken();
+      if (refreshedToken) {
+        token = refreshedToken;
+        response = await auth.updateProfile({ formData: sendData, token });
+      }
+    }
 
     if (!response.success) {
       return {
@@ -470,14 +507,31 @@ export async function editProfil(
 }
 export async function getUser(): Promise<GetUserResponse | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  let token = cookieStore.get("token")?.value;
+
+  if (!token) {
+    token = (await refreshAccessToken()) ?? undefined;
+  }
 
   if (!token) {
     return null;
   }
 
   try {
-    const result = await auth.getProfile(token);
+    let result = await auth.getProfile(token);
+
+    if (
+      !result.success &&
+      (result.error?.includes("expiré") ||
+        result.error?.includes("invalide") ||
+        result.error?.includes("Token"))
+    ) {
+      const refreshedToken = await refreshAccessToken();
+      if (refreshedToken) {
+        token = refreshedToken;
+        result = await auth.getProfile(token);
+      }
+    }
 
     if (result.success) {
       return {
@@ -503,14 +557,27 @@ export async function getUser(): Promise<GetUserResponse | null> {
 }
 export async function getAllUser(): Promise<GetAllUsersResponse | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  let token = cookieStore.get("token")?.value || (await refreshAccessToken());
 
   if (!token) {
     return null;
   }
 
   try {
-    const response = await auth.getAllUsers(token);
+    let response = await auth.getAllUsers(token);
+
+    if (
+      !response.success &&
+      (response.error?.includes("expiré") ||
+        response.error?.includes("invalide") ||
+        response.error?.includes("Token"))
+    ) {
+      const refreshedToken = await refreshAccessToken();
+      if (refreshedToken) {
+        token = refreshedToken;
+        response = await auth.getAllUsers(token);
+      }
+    }
 
     if (response.success) {
       return {
@@ -571,7 +638,9 @@ export async function refreshAccessToken(): Promise<string | null> {
 
 export async function getTokenFromCookie(): Promise<string | undefined> {
   const cookieStore = await cookies();
-  return cookieStore.get("token")?.value;
+  return (
+    cookieStore.get("token")?.value || (await refreshAccessToken()) || undefined
+  );
 }
 export async function setTokenInCookie(
   token: string,

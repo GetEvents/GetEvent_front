@@ -51,8 +51,10 @@ export default async function RootLayout({
   let currentUser = null;
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    const userResponse = token ? await getUser() : null;
+    const hasSession =
+      Boolean(cookieStore.get("token")?.value) ||
+      Boolean(cookieStore.get("refreshToken")?.value);
+    const userResponse = hasSession ? await getUser() : null;
     currentUser = userResponse?.user || null;
   } catch {
     currentUser = null;

@@ -54,7 +54,7 @@ describe("useEvents query options", () => {
   it("configure correctement les requetes", async () => {
     const list = eventQueries.list({ category: "music" });
     actions.getAllEvent.mockResolvedValue({ events: [] });
-    await expect(list.queryFn()).resolves.toEqual([]);
+    await expect(list.queryFn!({} as any)).resolves.toEqual([]);
     expect(eventQueries.detail(0).enabled).toBe(false);
     expect(eventQueries.detail(2).enabled).toBe(true);
     expect(eventQueries.mine().queryFn).toBe(actions.getEventByUser);
@@ -62,11 +62,11 @@ describe("useEvents query options", () => {
 
   it("relie chaque mutation a son action", async () => {
     const data = new FormData();
-    await eventMutations.create().mutationFn(data);
-    await eventMutations.update().mutationFn(data);
-    await eventMutations.delete().mutationFn(4);
-    await eventMutations.join().mutationFn(5);
-    await eventMutations.leave().mutationFn(6);
+    await eventMutations.create().mutationFn!(data, undefined as any);
+    await eventMutations.update().mutationFn!(data, undefined as any);
+    await eventMutations.delete().mutationFn!(4, undefined as any);
+    await eventMutations.join().mutationFn!(5, undefined as any);
+    await eventMutations.leave().mutationFn!(6, undefined as any);
     expect(actions.addEvent).toHaveBeenCalledWith(null, data);
     expect(actions.editEvent).toHaveBeenCalledWith(null, data);
     expect(actions.deleteEvent).toHaveBeenCalledWith(4);
