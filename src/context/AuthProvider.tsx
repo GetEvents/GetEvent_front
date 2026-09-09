@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { getUser } from "@/actions/auth/authActions";
+import { useCallback, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { User } from "@/actions/types/auth";
 
@@ -12,6 +13,34 @@ interface Props {
 export default function AuthProvider({ children, initialUser = null }: Props) {
   const [user, setUser] = useState<User | null>(initialUser);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!initialUser);
+
+  const refreshUser = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const response = await getUser();
+      const nextUser = response?.error ? null : response?.user || null;
+      setUser(nextUser);
+      return nextUser;
+    } catch {
+      setUser(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialUser) return;
+
+    const restoreSession = window.setTimeout(() => {
+      void refreshUser();
+    }, 0);
+
+    return () => window.clearTimeout(restoreSession);
+  }, [initialUser, refreshUser]);
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -23,7 +52,7 @@ export default function AuthProvider({ children, initialUser = null }: Props) {
         user,
         token,
         isAuthenticated: !!user,
-        loading: false,
+        loading,
         error: null,
         setUser,
         setToken,
