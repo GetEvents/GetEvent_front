@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.16.1](https://github.com/GetEvents/GetEvent_front/compare/v0.16.0...v0.16.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* améliorer la gestion de l'authentification et du chargement des … ([8c400b7](https://github.com/GetEvents/GetEvent_front/commit/8c400b78c1b5cb30c527effd41008a018b79f1d2))
+* améliorer la gestion de l'authentification et du chargement des utilisateurs ([b419acf](https://github.com/GetEvents/GetEvent_front/commit/b419acf6f6af34cb097c9ff3f3925cf07a22bb96))
+
 ## [0.16.0](https://github.com/GetEvents/GetEvent_front/compare/v0.15.0...v0.16.0) (2026-09-07)
 
 
