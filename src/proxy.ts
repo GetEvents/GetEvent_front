@@ -73,9 +73,12 @@ function getTokensFromPayload(payload: unknown): SessionTokens | null {
   return { token, refreshToken };
 }
 
-async function refreshSession(
-  refreshToken: string,
-): Promise<SessionTokens | null> {
+type RefreshResult = {
+  tokens: SessionTokens | null;
+  isUnauthorized?: boolean;
+};
+
+async function refreshSession(refreshToken: string): Promise<RefreshResult> {
   try {
     const response = await fetch(`${getApiBaseUrl()}/api/auth/refresh`, {
       method: "POST",
@@ -84,13 +87,18 @@ async function refreshSession(
       cache: "no-store",
     });
 
-    if (!response.ok) {
-      return null;
+    if (response.status === 401 || response.status === 403) {
+      return { tokens: null, isUnauthorized: true };
     }
 
-    return getTokensFromPayload(await response.json());
+    if (!response.ok) {
+      return { tokens: null, isUnauthorized: false };
+    }
+
+    const tokens = getTokensFromPayload(await response.json());
+    return { tokens, isUnauthorized: false };
   } catch {
-    return null;
+    return { tokens: null, isUnauthorized: false };
   }
 }
 
@@ -186,9 +194,9 @@ export async function proxy(request: NextRequest) {
     }
 
     if (refreshToken) {
-      const refreshedTokens = await refreshSession(refreshToken);
-      if (refreshedTokens) {
-        return continueWithSession(request, refreshedTokens);
+      const refreshed = await refreshSession(refreshToken);
+      if (refreshed.tokens) {
+        return continueWithSession(request, refreshed.tokens);
       }
     }
 
@@ -201,9 +209,9 @@ export async function proxy(request: NextRequest) {
     }
 
     if (refreshToken) {
-      const refreshedTokens = await refreshSession(refreshToken);
-      if (refreshedTokens) {
-        return redirectWithSession(request, "/events", refreshedTokens);
+      const refreshed = await refreshSession(refreshToken);
+      if (refreshed.tokens) {
+        return redirectWithSession(request, "/events", refreshed.tokens);
       }
     }
   }
@@ -212,13 +220,14 @@ export async function proxy(request: NextRequest) {
   // read cookies, but Next.js does not allow them to set or delete cookies.
   if (!token || !isAccessTokenUsable(token)) {
     if (refreshToken) {
-      const refreshedTokens = await refreshSession(refreshToken);
-      if (refreshedTokens) {
-        return continueWithSession(request, refreshedTokens);
+      const refreshed = await refreshSession(refreshToken);
+      if (refreshed.tokens) {
+        return continueWithSession(request, refreshed.tokens);
       }
-    }
-
-    if (token || refreshToken) {
+      if (refreshed.isUnauthorized) {
+        return clearSession(NextResponse.next());
+      }
+    } else if (token) {
       return clearSession(NextResponse.next());
     }
   }
