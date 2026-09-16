@@ -2,6 +2,13 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.1](https://github.com/GetEvents/GetEvent_front/compare/v0.17.0...v0.17.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* ajouter un espacement inférieur pour les conteneurs sur les écra… ([3518823](https://github.com/GetEvents/GetEvent_front/commit/3518823b153e5a8640adce82d6f7e3a56bf99020))
+
 ## [0.17.0](https://github.com/GetEvents/GetEvent_front/compare/v0.16.0...v0.17.0) (2026-09-16)
 
 
