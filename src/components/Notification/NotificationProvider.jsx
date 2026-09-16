@@ -19,9 +19,9 @@ const TYPE_STYLES = {
 };
 
 const ICONS = {
-  success: "✓",
-  error: "✕",
-  info: "i",
+  success: "fa-circle-check",
+  error: "fa-circle-xmark",
+  info: "fa-circle-info",
 };
 
 export function NotificationProvider({ children }) {
@@ -70,7 +70,10 @@ export function NotificationProvider({ children }) {
             aria-live="polite"
           >
             <span className={styles.icon}>
-              {ICONS[notification.type] || ICONS.info}
+              <i
+                className={`fa-solid ${ICONS[notification.type] || ICONS.info}`}
+                aria-hidden="true"
+              />
             </span>
             <p className={styles.message}>{notification.message}</p>
             <button
@@ -79,7 +82,7 @@ export function NotificationProvider({ children }) {
               className={styles.closeButton}
               aria-label="Fermer la notification"
             >
-              ×
+              <i className="fa-solid fa-xmark" aria-hidden="true" />
             </button>
           </div>
         ))}
