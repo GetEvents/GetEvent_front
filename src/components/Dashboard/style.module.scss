@@ -3,6 +3,10 @@
   color: #333;
   border-radius: 12px;
 
+  @media (max-width: 768px) {
+    margin-bottom: 5rem;
+  }
+
   .dashboard_header {
     margin-bottom: 2rem;
 

@@ -797,6 +797,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .container {
+    margin-bottom: 5rem;
+  }
+}
+
 // Small Mobile to Tablet (481px - 768px)
 @media (min-width: 481px) and (max-width: 768px) {
   .hero {

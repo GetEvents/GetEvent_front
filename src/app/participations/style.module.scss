@@ -182,6 +182,10 @@
 }
 
 @media (max-width: 800px) {
+  .parent_container {
+    margin-bottom: 5rem;
+  }
+
   .ticket_grid {
     grid-template-columns: 1fr;
   }
