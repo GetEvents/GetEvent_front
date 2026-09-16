@@ -2,6 +2,20 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.0](https://github.com/GetEvents/GetEvent_front/compare/v0.16.0...v0.17.0) (2026-09-16)
+
+
+### Features
+
+* intégrer Font Awesome pour les icônes dans les composants ([30aef87](https://github.com/GetEvents/GetEvent_front/commit/30aef878d5737d94cefd91f92608bb6cf969a43d))
+* intégrer Font Awesome pour les icônes dans les composants ([be1f0dc](https://github.com/GetEvents/GetEvent_front/commit/be1f0dc8ab2106d145debc99e2e44755f8fbafbc))
+
+
+### Bug Fixes
+
+* améliorer la gestion de l'authentification et du chargement des … ([8c400b7](https://github.com/GetEvents/GetEvent_front/commit/8c400b78c1b5cb30c527effd41008a018b79f1d2))
+* améliorer la gestion de l'authentification et du chargement des utilisateurs ([b419acf](https://github.com/GetEvents/GetEvent_front/commit/b419acf6f6af34cb097c9ff3f3925cf07a22bb96))
+
 ## [0.16.0](https://github.com/GetEvents/GetEvent_front/compare/v0.15.0...v0.16.0) (2026-09-07)
 
 
