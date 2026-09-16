@@ -7,17 +7,17 @@ const faqCategories = [
   {
     id: 1,
     name: "Général",
-    icon: "❓",
+    icon: "fa-circle-question",
   },
   {
     id: 2,
     name: "Événements",
-    icon: "📅",
+    icon: "fa-calendar-days",
   },
   {
     id: 4,
     name: "Support",
-    icon: "🛠️",
+    icon: "fa-screwdriver-wrench",
   },
 ];
 
@@ -121,7 +121,9 @@ export default function FAQSection() {
         <div className={styles.categories}>
           {faqCategories.map((category) => (
             <div key={category.id} className={styles.categoryBadge}>
-              <span>{category.icon}</span>
+              <span>
+                <i className={`fa-solid ${category.icon}`} aria-hidden="true" />
+              </span>
               {category.name}
             </div>
           ))}

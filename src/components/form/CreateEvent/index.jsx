@@ -237,7 +237,10 @@ const CreateEvent = ({ id }) => {
             {/* ÉTAPE 1: GÉNÉRAL */}
             {currentStep === 1 && (
               <div>
-                <h3 className="mb-3">📝 Général</h3>
+                <h3 className="mb-3">
+                  <i className="fa-solid fa-pen-to-square" aria-hidden="true" />{" "}
+                  Général
+                </h3>
                 <p className="text-muted mb-4">
                   Renseignez les informations générales de votre événement
                 </p>
@@ -299,13 +302,20 @@ const CreateEvent = ({ id }) => {
                     rows="5"
                   />
                   <p className={style.descriptionHint}>
-                    ✨ Une bonne description aide les participants à comprendre
+                    <i
+                      className="fa-solid fa-wand-magic-sparkles"
+                      aria-hidden="true"
+                    />{" "}
+                    Une bonne description aide les participants à comprendre
                     votre événement
                   </p>
                 </div>
                 {!id && (
                   <div className={style.localizationHeader}>
-                    <h5 className={style.locTitle}>🎟️ Billetterie</h5>
+                    <h5 className={style.locTitle}>
+                      <i className="fa-solid fa-ticket" aria-hidden="true" />{" "}
+                      Billetterie
+                    </h5>
                     <div className={style.toggleContainer}>
                       <input
                         type="checkbox"
@@ -420,12 +430,18 @@ const CreateEvent = ({ id }) => {
             {/* ÉTAPE 2: LOGISTIQUE */}
             {currentStep === 2 && (
               <div>
-                <h3 className="mb-3">🗓️ Logistique de l&apos;événement</h3>
+                <h3 className="mb-3">
+                  <i className="fa-solid fa-calendar-days" aria-hidden="true" />{" "}
+                  Logistique de l&apos;événement
+                </h3>
                 <p className="text-muted mb-4">
                   Définissez quand et où votre événement aura lieu
                 </p>
 
-                <h5 className="mt-4 mb-3">📅 Temporalité</h5>
+                <h5 className="mt-4 mb-3">
+                  <i className="fa-solid fa-calendar-days" aria-hidden="true" />{" "}
+                  Temporalité
+                </h5>
                 <div className={style.formodifdiv}>
                   <div className={style.fordivI}>
                     <div className="mb-3">
@@ -474,7 +490,13 @@ const CreateEvent = ({ id }) => {
                 </div>
 
                 <div className={style.localizationHeader}>
-                  <h5 className={style.locTitle}>📍 Localisation</h5>
+                  <h5 className={style.locTitle}>
+                    <i
+                      className="fa-solid fa-location-dot"
+                      aria-hidden="true"
+                    />{" "}
+                    Localisation
+                  </h5>
                   <div className={style.toggleContainer}>
                     <input
                       type="checkbox"
@@ -535,13 +557,17 @@ const CreateEvent = ({ id }) => {
             {/* ÉTAPE 3: CONFIRMATION */}
             {currentStep === 3 && (
               <div>
-                <h3 className="mb-3">✅ Confirmation</h3>
+                <h3 className="mb-3">
+                  <i className="fa-solid fa-circle-check" aria-hidden="true" />{" "}
+                  Confirmation
+                </h3>
                 <p className="text-muted mb-4">
                   Vérifiez les informations avant de finaliser
                 </p>
                 <div className={style.confirmMessage}>
                   <p>
-                    ✓ Toutes les informations sont à jour dans le résumé
+                    <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                    Toutes les informations sont à jour dans le résumé
                     ci-dessous
                   </p>
                 </div>
@@ -572,7 +598,8 @@ const CreateEvent = ({ id }) => {
                       <div className={style.recapItem}>
                         <span className={style.label}>Image:</span>
                         <p className={`${style.value} ${style.success}`}>
-                          ✓ {eventImage.name}
+                          <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                          {eventImage.name}
                         </p>
                         {imagePreviewUrl && (
                           <div className={style.imagePreview}>
@@ -592,7 +619,23 @@ const CreateEvent = ({ id }) => {
                     <div className={style.recapItem}>
                       <span className={style.label}>Type:</span>
                       <p className={style.value}>
-                        {form.isOnline ? "🌐 En ligne" : "📍 En présentiel"}
+                        {form.isOnline ? (
+                          <>
+                            <i
+                              className="fa-solid fa-globe"
+                              aria-hidden="true"
+                            />{" "}
+                            En ligne
+                          </>
+                        ) : (
+                          <>
+                            <i
+                              className="fa-solid fa-location-dot"
+                              aria-hidden="true"
+                            />{" "}
+                            En présentiel
+                          </>
+                        )}
                       </p>
                     </div>
                     <div className={style.recapItem}>
@@ -683,9 +726,11 @@ const CreateEvent = ({ id }) => {
                   <Button
                     type="submit"
                     className={`btn btn-success ${style.btnSubmit}`}
-                    label={id ? "✓ Modifier" : "✓ Créer l'événement"}
                     disabled={pending}
-                  />
+                  >
+                    <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                    {id ? "Modifier" : "Créer l'événement"}
+                  </Button>
                 )}
               </div>
             </div>
@@ -707,7 +752,10 @@ const CreateEvent = ({ id }) => {
                         className={style.recapCardImage}
                       />
                       <div className={style.livePreviewBadge}>
-                        <span>👁️ Aperçu en direct</span>
+                        <span>
+                          <i className="fa-solid fa-eye" aria-hidden="true" />{" "}
+                          Aperçu en direct
+                        </span>
                       </div>
                     </>
                   ) : (
@@ -754,7 +802,12 @@ const CreateEvent = ({ id }) => {
                   {form.startDate && (
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>📅</span>
+                        <span className={style.recapInfoIcon}>
+                          <i
+                            className="fa-solid fa-calendar-days"
+                            aria-hidden="true"
+                          />
+                        </span>
                         <h6 className={style.recapInfoTitle}>Date & Heure</h6>
                       </div>
                       <div className={style.recapInfoContent}>
@@ -781,7 +834,12 @@ const CreateEvent = ({ id }) => {
                   {!form.isOnline && form.location && (
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>📍</span>
+                        <span className={style.recapInfoIcon}>
+                          <i
+                            className="fa-solid fa-location-dot"
+                            aria-hidden="true"
+                          />
+                        </span>
                         <h6 className={style.recapInfoTitle}>Lieu</h6>
                       </div>
                       <div className={style.recapInfoContent}>
@@ -796,7 +854,12 @@ const CreateEvent = ({ id }) => {
                   {/* Type d'accès */}
                   <div className={style.recapInfoBlock}>
                     <div className={style.recapInfoHeader}>
-                      <span className={style.recapInfoIcon}>🔓</span>
+                      <span className={style.recapInfoIcon}>
+                        <i
+                          className="fa-solid fa-lock-open"
+                          aria-hidden="true"
+                        />
+                      </span>
                       <h6 className={style.recapInfoTitle}>
                         Type d&apos;accès
                       </h6>
@@ -808,7 +871,9 @@ const CreateEvent = ({ id }) => {
                   {form.capacity && (
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>👥</span>
+                        <span className={style.recapInfoIcon}>
+                          <i className="fa-solid fa-users" aria-hidden="true" />
+                        </span>
                         <h6 className={style.recapInfoTitle}>Capacité</h6>
                       </div>
                       <p className={style.recapCapacity}>

@@ -141,11 +141,15 @@ export default function Home() {
               className={`${styles.ctaGroup} ${isCtaVisible ? styles.ctaVisible : ""}`}
             >
               <Link href="/events/create" className={styles.primaryBtn}>
-                <span className={styles.btnIcon}>🚀</span>
+                <span className={styles.btnIcon}>
+                  <i className="fa-solid fa-rocket" aria-hidden="true" />
+                </span>
                 Créer mon événement
               </Link>
               <Link href="/events" className={styles.secondaryBtn}>
-                <span className={styles.btnIcon}>🎫</span>
+                <span className={styles.btnIcon}>
+                  <i className="fa-solid fa-ticket" aria-hidden="true" />
+                </span>
                 Rejoindre un événement
               </Link>
             </div>
@@ -180,15 +184,21 @@ export default function Home() {
               className={`${styles.trustBadges} ${isBadgesVisible ? styles.badgesVisible : ""}`}
             >
               <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>⭐</span>
+                <span className={styles.trustIcon}>
+                  <i className="fa-solid fa-star" aria-hidden="true" />
+                </span>
                 <span>4.8/5</span>
               </div>
               <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>🔒</span>
+                <span className={styles.trustIcon}>
+                  <i className="fa-solid fa-lock" aria-hidden="true" />
+                </span>
                 <span>Paiement sécurisé</span>
               </div>
               <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>⚡</span>
+                <span className={styles.trustIcon}>
+                  <i className="fa-solid fa-bolt" aria-hidden="true" />
+                </span>
                 <span>Temps réel</span>
               </div>
             </div>

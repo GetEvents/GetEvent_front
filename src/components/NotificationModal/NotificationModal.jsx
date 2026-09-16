@@ -171,7 +171,7 @@ export default function NotificationModal({
                           onClick={() => handleMarkAsRead(notification.id)}
                           title="Marquer comme lue"
                         >
-                          ✓
+                          <i className="fa-solid fa-check" aria-hidden="true" />
                         </button>
                       )}
                       <button
@@ -180,7 +180,7 @@ export default function NotificationModal({
                         onClick={() => handleDelete(notification.id)}
                         title="Supprimer"
                       >
-                        ×
+                        <i className="fa-solid fa-xmark" aria-hidden="true" />
                       </button>
                     </div>
                   </article>

@@ -125,7 +125,7 @@ export default function PushNotificationManager({
     >
       <div className={styles.content}>
         <div className={styles.icon} aria-hidden="true">
-          🔔
+          <i className="fa-solid fa-bell" />
         </div>
         <div className={styles.text}>
           <h3 className={styles.title}>Activer les notifications</h3>

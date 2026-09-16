@@ -1355,14 +1355,20 @@ export default function Dashboard({ count = null }) {
         </div>
         <div className={styles.charts_section}>
           <div className={styles.chart_card}>
-            <h3>📈 Revenus par événement</h3>
+            <h3>
+              <i className="fa-solid fa-chart-line" aria-hidden="true" />{" "}
+              Revenus par événement
+            </h3>
             <div className={styles.chart_wrapper}>
               <canvas ref={chartRefBar}></canvas>
             </div>
           </div>
 
           <div className={styles.chart_card}>
-            <h3>👥 Répartition des participants</h3>
+            <h3>
+              <i className="fa-solid fa-users" aria-hidden="true" /> Répartition
+              des participants
+            </h3>
             <div className={styles.chart_wrapper}>
               <canvas ref={chartRefDoughnut}></canvas>
             </div>
