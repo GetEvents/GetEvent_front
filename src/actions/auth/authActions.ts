@@ -616,24 +616,38 @@ export async function logout(): Promise<void> {
   redirect("/auth/login");
 }
 
+let activeRefreshPromise: Promise<string | null> | null = null;
+
 export async function refreshAccessToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  if (!refreshToken) {
-    return null;
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
   }
 
-  const response = await auth.refresh(refreshToken);
+  activeRefreshPromise = (async () => {
+    try {
+      const cookieStore = await cookies();
+      const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  if (!response.success) {
-    cookieStore.delete("token");
-    cookieStore.delete("refreshToken");
-    return null;
-  }
+      if (!refreshToken) {
+        return null;
+      }
 
-  await setAuthCookies(response.data.token, response.data.refreshToken);
-  return response.data.token;
+      const response = await auth.refresh(refreshToken);
+
+      if (!response.success) {
+        cookieStore.delete("token");
+        cookieStore.delete("refreshToken");
+        return null;
+      }
+
+      await setAuthCookies(response.data.token, response.data.refreshToken);
+      return response.data.token;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
 }
 
 export async function getTokenFromCookie(): Promise<string | undefined> {
