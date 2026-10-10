@@ -6,6 +6,13 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+// Écoute de l'événement fetch pour la conformité PWA
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request)),
+  );
+});
+
 // Écoute de l'événement push déclenché par le backend
 self.addEventListener("push", (event) => {
   let data = {};
