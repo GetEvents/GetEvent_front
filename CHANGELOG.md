@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.3](https://github.com/GetEvents/GetEvent_front/compare/v0.17.2...v0.17.3) (2026-10-10)
+
+
+### Bug Fixes
+
+* mettre à jour les couleurs de fond et de thème dans le manifeste et le layout ([d49b367](https://github.com/GetEvents/GetEvent_front/commit/d49b36742e4cf44898af1bbcf24d21e1d8783650))
+* mettre à jour les couleurs de fond et de thème dans le manifeste… ([553fd71](https://github.com/GetEvents/GetEvent_front/commit/553fd71f9a4542da902843f1694c1cd5eed6b3e2))
+
 ## [0.17.2](https://github.com/GetEvents/GetEvent_front/compare/v0.17.1...v0.17.2) (2026-10-10)
 
 
