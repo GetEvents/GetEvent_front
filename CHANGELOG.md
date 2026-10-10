@@ -2,6 +2,16 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.2](https://github.com/GetEvents/GetEvent_front/compare/v0.17.1...v0.17.2) (2026-10-10)
+
+
+### Bug Fixes
+
+* améliorer la gestion de la promesse de rafraîchissement du token d'authentification ([e3e174d](https://github.com/GetEvents/GetEvent_front/commit/e3e174d09ab2bc8c7e7203b0d8b1993057eb2dfa))
+* améliorer la gestion de la promesse de rafraîchissement du token… ([ddf5752](https://github.com/GetEvents/GetEvent_front/commit/ddf5752e9d326344dcffbd45efdb7c2a5de0035f))
+* supprimer les couleurs de fond et de thème du manifeste ([81a4041](https://github.com/GetEvents/GetEvent_front/commit/81a404115917a6ed2a48e72ff6d27026e1f21e07))
+* supprimer les couleurs de fond et de thème du manifeste ([2c73def](https://github.com/GetEvents/GetEvent_front/commit/2c73def52117946f4130bb1c328b8f5267a5fb0b))
+
 ## [0.17.1](https://github.com/GetEvents/GetEvent_front/compare/v0.17.0...v0.17.1) (2026-09-16)
 
 
