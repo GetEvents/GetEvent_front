@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.4](https://github.com/GetEvents/GetEvent_front/compare/v0.17.3...v0.17.4) (2026-10-12)
+
+
+### Bug Fixes
+
+* refactor la gestion des requêtes de paiement et des remboursemen… ([78b292c](https://github.com/GetEvents/GetEvent_front/commit/78b292cc82c9d20ced3b9f3031f204a8077f1e60))
+* refactor la gestion des requêtes de paiement et des remboursements dans les hooks ([c12d0f6](https://github.com/GetEvents/GetEvent_front/commit/c12d0f6f4d45d3b23552c6bf386b5bf15565e4b0))
+
 ## [0.17.3](https://github.com/GetEvents/GetEvent_front/compare/v0.17.2...v0.17.3) (2026-10-10)
 
 
