@@ -1,13 +1,7 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import Chart from "chart.js/auto";
@@ -19,12 +13,13 @@ import {
   useUnsubscribeParticipant,
 } from "@/hooks/useParticipants";
 import { useAuth } from "@/hooks/useAuth";
+import { updateRefundStatus } from "@/actions/payment";
 import {
-  getOrganizerBalance,
-  getRefunds,
-  updateRefundStatus,
-} from "@/actions/payment";
-import { usePayout } from "@/hooks/usePayout";
+  paymentKeys,
+  useOrganizerBalance,
+  usePayout,
+  useRefunds,
+} from "@/hooks/usePayout";
 import DelectModal from "@/components/DelectModal";
 import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
 
@@ -742,190 +737,162 @@ export default function Dashboard({ count = null }) {
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [participantActionMessage, setParticipantActionMessage] =
     useState(null);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [actionErrorMessage, setActionErrorMessage] = useState("");
   const [eventToDelete, setEventToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const chartRefBar = useRef(null);
-  const chartRefDoughnut = useRef(null);
-
-  // Data
-  const [eventsList, setEventsList] = useState([]);
-  const [participants, setParticipants] = useState([]);
-  const [organizerBalance, setOrganizerBalance] = useState(null);
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutMessage, setPayoutMessage] = useState(null);
-  const [refunds, setRefunds] = useState([]);
   const [refundActionMessage, setRefundActionMessage] = useState(null);
   const [isUpdatingRefund, setIsUpdatingRefund] = useState(false);
-  const [kpis, setKpis] = useState({
-    totalEvents: 0,
-    activeEvents: 0,
-    draftEvents: 0,
-    finishedEvents: 0,
-    totalTickets: 0,
-    totalRevenue: 0,
-    totalParticipants: 0,
-    averageFillRate: 0,
-    freeRegistrations: 0,
-  });
-  const [chartData, setChartData] = useState({
-    labels: [],
-    revenues: [],
-    participantsCounts: [],
-  });
+  const chartRefBar = useRef(null);
+  const chartRefDoughnut = useRef(null);
   const unsubscribeMutation = useUnsubscribeParticipant();
 
-  const fetchDashboardData = useCallback(async () => {
-    if (authLoading) return;
+  const isOrganizerOrAdmin =
+    Boolean(user) && (user.role === "ORGANISATEUR" || user.role === "ADMIN");
+  const canFetch = !authLoading && isAuthenticated && isOrganizerOrAdmin;
 
-    if (!isAuthenticated || !user) {
-      setEventsList([]);
-      setParticipants([]);
-      setOrganizerBalance(null);
-      setRefunds([]);
-      setErrorMessage("Vous devez être connecté pour accéder au dashboard.");
-      setLoading(false);
-      return;
-    }
+  // 1. Requête des événements de l'organisateur via useQuery
+  const {
+    data: eventsRes,
+    isLoading: eventsLoading,
+    isError: eventsIsError,
+  } = useQuery({
+    ...eventQueries.mine(),
+    enabled: canFetch,
+  });
 
-    if (user.role !== "ORGANISATEUR" && user.role !== "ADMIN") {
-      setEventsList([]);
-      setParticipants([]);
-      setOrganizerBalance(null);
-      setRefunds([]);
-      setErrorMessage("Cet espace est réservé aux organisateurs.");
-      setLoading(false);
-      return;
-    }
+  const eventsList = useMemo(() => {
+    if (!eventsRes) return [];
+    return Array.isArray(eventsRes)
+      ? eventsRes
+      : Array.isArray(eventsRes?.events)
+        ? eventsRes.events
+        : [];
+  }, [eventsRes]);
 
-    setLoading(true);
-    setErrorMessage("");
-    try {
-      const [eventsRes, balanceResult, refundsResult] = await Promise.all([
-        queryClient.fetchQuery(eventQueries.mine()),
-        getOrganizerBalance(),
-        user.role === "ADMIN"
-          ? getRefunds()
-          : Promise.resolve({ success: true, refunds: [] }),
-      ]);
-      setOrganizerBalance(
-        balanceResult.success
-          ? {
-              balance: balanceResult.balance ?? 0,
-              reservedBalance: balanceResult.reservedBalance ?? 0,
-              availableBalance: balanceResult.availableBalance ?? 0,
-              currency: balanceResult.currency || "XOF",
-            }
-          : null,
-      );
-      setRefunds(refundsResult.success ? refundsResult.refunds : []);
-      // On s'assure que c'est bien la liste (selon l'API)
-      const list = Array.isArray(eventsRes)
-        ? eventsRes
-        : Array.isArray(eventsRes?.events)
-          ? eventsRes.events
-          : [];
-      setEventsList(list);
-      setScannerEventId((currentEventId) =>
-        list.some((event) => String(event.id) === currentEventId)
-          ? currentEventId
-          : String(list[0]?.id || ""),
-      );
+  // 2. Requêtes des participants par événement avec useQueries
+  const participantsQueries = useQueries({
+    queries: eventsList.map((ev) => ({
+      ...participantQueries.byEvent(Number(ev.id)),
+      enabled: canFetch && Boolean(ev.id),
+      staleTime: 60 * 1000,
+    })),
+  });
 
-      // Met à jour le compteur global du parent si la prop existe
-      if (typeof count === "function") {
-        count(list.length);
-      }
+  const participantsLoading =
+    eventsList.length > 0 && participantsQueries.some((q) => q.isLoading);
 
-      // Calcul des KPIs
-      let tEvents = list.length;
-      let aEvents = 0,
-        dEvents = 0,
-        fEvents = 0;
-      let tTickets = 0,
-        tRevenue = 0,
-        tCapacity = 0;
-      let freeRegistrations = 0;
+  // 3. Solde de l'organisateur via useQuery
+  const { data: balanceResult, isLoading: balanceLoading } =
+    useOrganizerBalance(canFetch);
 
-      let pSalesByEvent = [];
-      let allParticipants = [];
+  const organizerBalance = useMemo(() => {
+    if (!balanceResult?.success) return null;
+    return {
+      balance: balanceResult.balance ?? 0,
+      reservedBalance: balanceResult.reservedBalance ?? 0,
+      availableBalance: balanceResult.availableBalance ?? 0,
+      currency: balanceResult.currency || "XOF",
+    };
+  }, [balanceResult]);
 
-      for (const ev of list) {
-        // Status mockup simple
-        const isExpired = new Date(ev.endDate || ev.startDate) < new Date();
-        if (isExpired) fEvents++;
-        else aEvents++; // Note: ajouter condition brouillon si API le gère.
+  // 4. Demandes de remboursement via useQuery (ADMIN uniquement)
+  const { data: refundsResult, isLoading: refundsLoading } = useRefunds(
+    "PENDING",
+    !authLoading && isAuthenticated && user?.role === "ADMIN",
+  );
 
-        // Capacity
-        tCapacity += Number.parseInt(ev.capacity || 0, 10);
+  const refunds = useMemo(() => {
+    return refundsResult?.success && Array.isArray(refundsResult.refunds)
+      ? refundsResult.refunds
+      : [];
+  }, [refundsResult]);
 
-        let eventRevenue = 0;
-        let eventParticipants = 0;
+  // 5. Calcul réactif des KPIs, graphiques et liste consolidée des participants
+  const { participants, kpis, chartData } = useMemo(() => {
+    let tEvents = eventsList.length;
+    let aEvents = 0,
+      dEvents = 0,
+      fEvents = 0;
+    let tTickets = 0,
+      tRevenue = 0,
+      tCapacity = 0;
+    let freeRegistrations = 0;
 
-        try {
-          const partRes = await queryClient.fetchQuery(
-            participantQueries.byEvent(Number(ev.id)),
-          );
-          if (
-            partRes &&
-            !partRes.error &&
-            partRes.participant &&
-            Array.isArray(partRes.participant.data)
-          ) {
-            const evParts = partRes.participant.data;
-            eventParticipants = evParts.length;
+    let pSalesByEvent = [];
+    let allParticipants = [];
 
-            const soldCount = evParts.length;
-            const price = Number.parseFloat(ev.paymentPrice) || 0;
-            if (price > 0) {
-              // Événement payant
-              tTickets += soldCount;
-              tRevenue += soldCount * price;
-              eventRevenue = soldCount * price;
-            } else {
-              // Événement gratuit
-              freeRegistrations += soldCount;
-              eventRevenue = 0;
-            }
+    for (let i = 0; i < eventsList.length; i++) {
+      const ev = eventsList[i];
+      const isExpired = new Date(ev.endDate || ev.startDate) < new Date();
+      if (isExpired) fEvents++;
+      else aEvents++;
 
-            allParticipants = [
-              ...allParticipants,
-              ...evParts.map((p) => ({
-                ...p,
-                eventTitle: ev.title,
-                eventId: ev.id,
-                eventPaymentRequired: Boolean(ev.paymentRequired),
-                eventPaymentPrice: ev.paymentPrice,
-              })),
-            ];
-          }
-        } catch {
-          const price = Number.parseFloat(ev.paymentPrice) || 0;
-          if (price > 0 && ev.participantsCount) {
-            tTickets += ev.participantsCount;
-            tRevenue += ev.participantsCount * price;
-            eventRevenue = ev.participantsCount * price;
-            eventParticipants = ev.participantsCount;
-          }
+      tCapacity += Number.parseInt(ev.capacity || 0, 10);
+
+      let eventRevenue = 0;
+      let eventParticipants = 0;
+
+      const partRes = participantsQueries[i]?.data;
+
+      if (
+        partRes &&
+        !partRes.error &&
+        partRes.participant &&
+        Array.isArray(partRes.participant.data)
+      ) {
+        const evParts = partRes.participant.data;
+        eventParticipants = evParts.length;
+
+        const soldCount = evParts.length;
+        const price = Number.parseFloat(ev.paymentPrice) || 0;
+        if (price > 0) {
+          tTickets += soldCount;
+          tRevenue += soldCount * price;
+          eventRevenue = soldCount * price;
+        } else {
+          freeRegistrations += soldCount;
+          eventRevenue = 0;
         }
 
-        pSalesByEvent.push({
-          title: ev.title,
-          revenue: eventRevenue,
-          participants: eventParticipants,
-        });
+        allParticipants = [
+          ...allParticipants,
+          ...evParts.map((p) => ({
+            ...p,
+            eventTitle: ev.title,
+            eventId: ev.id,
+            eventPaymentRequired: Boolean(ev.paymentRequired),
+            eventPaymentPrice: ev.paymentPrice,
+          })),
+        ];
+      } else {
+        const price = Number.parseFloat(ev.paymentPrice) || 0;
+        if (price > 0 && ev.participantsCount) {
+          tTickets += ev.participantsCount;
+          tRevenue += ev.participantsCount * price;
+          eventRevenue = ev.participantsCount * price;
+          eventParticipants = ev.participantsCount;
+        }
       }
 
-      setParticipants(allParticipants);
-      setChartData({
+      pSalesByEvent.push({
+        title: ev.title,
+        revenue: eventRevenue,
+        participants: eventParticipants,
+      });
+    }
+
+    return {
+      participants: allParticipants,
+      chartData: {
         labels: pSalesByEvent.map((s) =>
           s.title.length > 12 ? s.title.substring(0, 16) + "..." : s.title,
         ),
         revenues: pSalesByEvent.map((s) => s.revenue),
         participantsCounts: pSalesByEvent.map((s) => s.participants),
-      });
-      setKpis({
+      },
+      kpis: {
         totalEvents: tEvents,
         activeEvents: aEvents,
         draftEvents: dEvents,
@@ -937,21 +904,45 @@ export default function Dashboard({ count = null }) {
         averageFillRate:
           tCapacity > 0 ? Math.round((tTickets / tCapacity) * 100) : 0,
         freeRegistrations,
-      });
-    } catch {
-      setOrganizerBalance(null);
-      setRefunds([]);
-      setErrorMessage("Impossible de charger les données du dashboard.");
-    } finally {
-      setLoading(false);
-    }
-  }, [authLoading, count, isAuthenticated, queryClient, user]);
+      },
+    };
+  }, [eventsList, participantsQueries]);
 
+  // Détermination de l'événement actif pour le scanner
+  const activeScannerEventId = useMemo(() => {
+    if (!eventsList || eventsList.length === 0) return "";
+    return eventsList.some((event) => String(event.id) === scannerEventId)
+      ? scannerEventId
+      : String(eventsList[0]?.id || "");
+  }, [eventsList, scannerEventId]);
+
+  // Notification du nombre d'événements au parent sans déclenchement intempestif
+  const lastCountRef = useRef(null);
   useEffect(() => {
-    // The async loader owns the dashboard's initial client-side data lifecycle.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchDashboardData();
-  }, [fetchDashboardData]);
+    if (
+      typeof count === "function" &&
+      eventsList.length >= 0 &&
+      lastCountRef.current !== eventsList.length
+    ) {
+      lastCountRef.current = eventsList.length;
+      count(eventsList.length);
+    }
+  }, [count, eventsList.length]);
+
+  const loading =
+    eventsLoading ||
+    participantsLoading ||
+    balanceLoading ||
+    (user?.role === "ADMIN" && refundsLoading);
+
+  const errorMessage =
+    !isAuthenticated || !user
+      ? "Vous devez être connecté pour accéder au dashboard."
+      : !isOrganizerOrAdmin
+        ? "Cet espace est réservé aux organisateurs."
+        : eventsIsError
+          ? "Impossible de charger les données du dashboard."
+          : actionErrorMessage;
 
   const closeDeleteModal = () => {
     if (isDeleting) return;
@@ -968,19 +959,15 @@ export default function Dashboard({ count = null }) {
       );
 
       if (response.error) {
-        setErrorMessage(
+        setActionErrorMessage(
           response.message || "Impossible de supprimer l'événement.",
         );
         return;
       }
 
-      setEventsList((currentEvents) =>
-        currentEvents.filter((event) => event.id !== eventToDelete.id),
-      );
       setEventToDelete(null);
-      void fetchDashboardData();
     } catch {
-      setErrorMessage("Impossible de supprimer l'événement.");
+      setActionErrorMessage("Impossible de supprimer l'événement.");
     } finally {
       setIsDeleting(false);
     }
@@ -1021,22 +1008,7 @@ export default function Dashboard({ count = null }) {
         return;
       }
 
-      const removedParticipantId = selectedParticipantToRemove.id;
       const removedEventId = selectedParticipantToRemove.eventId;
-
-      setParticipants((currentParticipants) =>
-        currentParticipants.filter(
-          (participant) =>
-            !(
-              String(participant.id) === String(removedParticipantId) &&
-              String(participant.eventId) === String(removedEventId)
-            ),
-        ),
-      );
-      setKpis((currentKpis) => ({
-        ...currentKpis,
-        totalParticipants: Math.max(0, currentKpis.totalParticipants - 1),
-      }));
       setSelectedParticipantToRemove(null);
       setUnsubscribeReason("");
       setParticipantActionMessage({
@@ -1047,18 +1019,18 @@ export default function Dashboard({ count = null }) {
             ? "Le participant a été retiré. La demande de remboursement est en attente."
             : "Le participant a bien été désinscrit."),
       });
-      if (user.role === "ADMIN" && result.refundRequired) {
-        const refreshedRefunds = await getRefunds();
-        if (refreshedRefunds.success) {
-          setRefunds(refreshedRefunds.refunds);
-        }
-      }
+
       void queryClient.invalidateQueries({
         queryKey: participantKeys.byEvent(Number(removedEventId)),
       });
       void queryClient.invalidateQueries({
         queryKey: participantKeys.byUser(),
       });
+      if (user?.role === "ADMIN" && result.refundRequired) {
+        void queryClient.invalidateQueries({
+          queryKey: paymentKeys.refunds(),
+        });
+      }
     } catch {
       setParticipantActionMessage({
         type: "error",
@@ -1087,11 +1059,9 @@ export default function Dashboard({ count = null }) {
         return;
       }
 
-      setRefunds((currentRefunds) =>
-        currentRefunds.map((refund) =>
-          refund.id === id ? { ...refund, ...result.refund } : refund,
-        ),
-      );
+      void queryClient.invalidateQueries({
+        queryKey: paymentKeys.refunds(),
+      });
       setRefundActionMessage({ type: "success", message: result.message });
     } catch {
       setRefundActionMessage({
@@ -1136,16 +1106,9 @@ export default function Dashboard({ count = null }) {
         return;
       }
 
-      const refreshedBalance = await getOrganizerBalance();
-      if (refreshedBalance.success) {
-        setOrganizerBalance({
-          balance: refreshedBalance.balance ?? 0,
-          reservedBalance: refreshedBalance.reservedBalance ?? 0,
-          availableBalance: refreshedBalance.availableBalance ?? 0,
-          currency: refreshedBalance.currency || "XOF",
-        });
-      }
-
+      void queryClient.invalidateQueries({
+        queryKey: paymentKeys.balance(),
+      });
       setPayoutAmount("");
       setPayoutMessage({ type: "success", message: result.message });
     } catch {
@@ -1467,7 +1430,7 @@ export default function Dashboard({ count = null }) {
                 <label className={styles.scanner_event_select}>
                   <span>Événement contrôlé</span>
                   <select
-                    value={scannerEventId}
+                    value={activeScannerEventId}
                     onChange={(event) => setScannerEventId(event.target.value)}
                   >
                     {eventsList.map((event) => (
@@ -1478,10 +1441,10 @@ export default function Dashboard({ count = null }) {
                   </select>
                 </label>
 
-                {scannerEventId && (
+                {activeScannerEventId && (
                   <TicketQRCodeLecteur
-                    key={scannerEventId}
-                    eventId={Number(scannerEventId)}
+                    key={activeScannerEventId}
+                    eventId={Number(activeScannerEventId)}
                   />
                 )}
               </>
