@@ -125,6 +125,7 @@ const Sidebar = ({ visible }) => {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  prefetch={true}
                   className={`${styles.navItem} ${isActive ? styles.active : ""}`}
                   title={item.title}
                 >
@@ -145,8 +146,10 @@ const Sidebar = ({ visible }) => {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className={`${styles.mobileNavItem} ${isActive ? styles.active : ""}`}
                 title={item.title}
+                aria-label={item.title}
               >
                 {item.icon}
               </Link>
