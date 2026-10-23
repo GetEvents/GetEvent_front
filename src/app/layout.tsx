@@ -41,6 +41,9 @@ export const metadata = {
 
 export const viewport = {
   themeColor: "#ecedef",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default async function RootLayout({
@@ -63,8 +66,12 @@ export default async function RootLayout({
   const isLoggedIn = Boolean(currentUser);
 
   return (
-    <html lang="fr">
+    <html
+      lang="fr"
+      style={{ backgroundColor: "#ecedef", colorScheme: "light" }}
+    >
       <body
+        style={{ backgroundColor: "#ecedef" }}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider initialUser={currentUser}>

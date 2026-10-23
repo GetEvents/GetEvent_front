@@ -5,10 +5,18 @@
 :root {
   --background: #ecedef;
   --foreground: #171717;
+  color-scheme: light;
+}
+
+html {
+  background-color: #ecedef;
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
+  background-color: #ecedef;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
 }

@@ -1,19 +1,103 @@
-self.addEventListener("install", () => {
-  self.skipWaiting();
-});
+const CACHE_NAME = "getevent-pwa-v1";
+const STATIC_ASSETS = ["/", "/manifest.webmanifest", "/flashicon.png"];
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-// Écoute de l'événement fetch pour la conformité PWA
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request)),
+// 1. Installation : mise en cache immédiate des assets de démarrage
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+      .catch(() => self.skipWaiting()),
   );
 });
 
-// Écoute de l'événement push déclenché par le backend
+// 2. Activation : nettoyage des anciens caches
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
+          }),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+// 3. Gestion des requêtes réseau (Fetch)
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
+  // Ignorer les requêtes non-GET et les appels API / Socket
+  if (
+    request.method !== "GET" ||
+    request.url.includes("/api/") ||
+    request.url.includes("/socket.io/") ||
+    request.url.startsWith("chrome-extension")
+  ) {
+    return;
+  }
+
+  const url = new URL(request.url);
+
+  // A. Assets statiques (JS, CSS, images, polices) : Cache-First avec rafraîchissement en tâche de fond (Stale-While-Revalidate)
+  const isStaticAsset =
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/images/") ||
+    url.pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|woff|woff2|css|js)$/);
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        const fetchPromise = fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+
+        return cachedResponse || fetchPromise;
+      }),
+    );
+    return;
+  }
+
+  // B. Pages HTML / Navigations : Network-First avec fallback cache
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() =>
+          caches.match(request).then((cached) => cached || caches.match("/")),
+        ),
+    );
+    return;
+  }
+
+  // C. Autres requêtes : réseau direct avec fallback cache
+  event.respondWith(fetch(request).catch(() => caches.match(request)));
+});
+
+// 4. Écoute des notifications Push
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -27,7 +111,6 @@ self.addEventListener("push", (event) => {
   const url = data.url || "/";
   const unreadCount = data.unreadCount;
 
-  // 1. Mise à jour du badge sur l'icône de l'application (Badging API)
   if ("setAppBadge" in self.navigator) {
     if (typeof unreadCount === "number" && unreadCount > 0) {
       self.navigator.setAppBadge(unreadCount).catch(() => {});
@@ -38,7 +121,6 @@ self.addEventListener("push", (event) => {
     }
   }
 
-  // 2. Affichage de la notification native du système
   const options = {
     body: message,
     icon: "/flashicon.png",
@@ -59,7 +141,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Clic sur la notification
+// 5. Clic sur la notification
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
@@ -70,14 +152,12 @@ self.addEventListener("notificationclick", (event) => {
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        // Si un onglet ou la PWA est déjà ouvert, lui donner le focus et naviguer
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && "focus" in client) {
             client.navigate(fullUrl);
             return client.focus();
           }
         }
-        // Sinon ouvrir une nouvelle fenêtre
         if (self.clients.openWindow) {
           return self.clients.openWindow(fullUrl);
         }
