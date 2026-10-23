@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
 import { fetchGetNotifications } from "@/actions/notification";
 import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
-import type { EventFilters } from "@/actions/types/event";
+import type { Event, EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
@@ -43,6 +43,18 @@ interface Feedback {
   message: string;
 }
 
+const isEventExpired = (event: Event, now: number): boolean => {
+  if (!event?.endDate) return false;
+  const endDate = new Date(event.endDate);
+  if (Number.isNaN(endDate.getTime())) return false;
+  const endDateTime = new Date(endDate);
+  if (event?.endTime) {
+    const [hours = "00", minutes = "00"] = String(event.endTime).split(":");
+    endDateTime.setHours(Number(hours) || 0, Number(minutes) || 0, 0, 0);
+  }
+  return endDateTime.getTime() < now;
+};
+
 export default function Welcome() {
   const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const { user, setUser, setToken, isAuthenticated } = useAuth();
@@ -50,6 +62,9 @@ export default function Welcome() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [timelineFilter, setTimelineFilter] = useState<"upcoming" | "past">(
+    "upcoming",
+  );
   const [sortFilter, setSortFilter] =
     useState<EventFilters["filter"]>("recent");
   const [location, setLocation] = useState("");
@@ -133,11 +148,29 @@ export default function Welcome() {
     });
   };
 
-  const totalPages = Math.max(1, Math.ceil(eventList.length / EVENTS_PER_PAGE));
+  const [currentTime] = useState(Date.now);
+
+  const upcomingEvents = useMemo(
+    () => eventList.filter((event) => !isEventExpired(event, currentTime)),
+    [eventList, currentTime],
+  );
+
+  const pastEvents = useMemo(
+    () => eventList.filter((event) => isEventExpired(event, currentTime)),
+    [eventList, currentTime],
+  );
+
+  const displayedEvents =
+    timelineFilter === "past" ? pastEvents : upcomingEvents;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(displayedEvents.length / EVENTS_PER_PAGE),
+  );
   const visibleEvents = useMemo(() => {
     const start = (currentPage - 1) * EVENTS_PER_PAGE;
-    return eventList.slice(start, start + EVENTS_PER_PAGE);
-  }, [currentPage, eventList]);
+    return displayedEvents.slice(start, start + EVENTS_PER_PAGE);
+  }, [currentPage, displayedEvents]);
 
   const handlePageChange = (pageNumber: number) => {
     const nextPage = Math.min(Math.max(pageNumber, 1), totalPages);
@@ -350,32 +383,86 @@ export default function Welcome() {
         <section className={style.eventsSection}>
           <div className={style.sectionHeader}>
             <div>
-              <h2 className={style.sectionTitle}>Événements à venir</h2>
+              <h2 className={style.sectionTitle}>
+                {timelineFilter === "past"
+                  ? "Événements passés"
+                  : "Événements à venir"}
+              </h2>
               <p className={style.sectionSubtitle}>
                 {loading
                   ? "Recherche des meilleures expériences..."
-                  : `${eventList.length} événement${eventList.length > 1 ? "s" : ""} trouvé${eventList.length > 1 ? "s" : ""}`}
+                  : `${displayedEvents.length} événement${
+                      displayedEvents.length > 1 ? "s" : ""
+                    } ${timelineFilter === "past" ? "terminé" : "à venir"}${
+                      displayedEvents.length > 1 ? "s" : ""
+                    }`}
               </p>
             </div>
             <div className={style.headerActions}>
-              <label htmlFor="event-sort" className={style.srOnly}>
-                Trier les événements
-              </label>
-              <select
-                id="event-sort"
-                value={sortFilter}
-                onChange={(event) => {
-                  const filter = event.target.value as EventFilters["filter"];
-                  setSortFilter(filter);
-                  void searchEvents({ filter });
-                }}
-                className={style.sortSelect}
-              >
-                <option value="recent">Plus récent</option>
-                <option value="popular">Plus populaire</option>
-                <option value="price-asc">Prix croissant</option>
-                <option value="price-desc">Prix décroissant</option>
-              </select>
+              <div className={style.timelineToggle}>
+                <button
+                  type="button"
+                  className={`${style.timelineBtn} ${
+                    timelineFilter === "upcoming" ? style.active : ""
+                  }`}
+                  onClick={() => {
+                    setTimelineFilter("upcoming");
+                    setCurrentPage(1);
+                  }}
+                >
+                  À venir
+                  <span className={style.timelineCount}>
+                    {upcomingEvents.length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className={`${style.timelineBtn} ${
+                    timelineFilter === "past" ? style.active : ""
+                  }`}
+                  onClick={() => {
+                    setTimelineFilter("past");
+                    setCurrentPage(1);
+                  }}
+                >
+                  Événements passés
+                  <span className={style.timelineCount}>
+                    {pastEvents.length}
+                  </span>
+                </button>
+              </div>
+
+              <div className={style.sortSelectWrapper}>
+                <ArrowUpDown
+                  size={15}
+                  className={style.sortIcon}
+                  aria-hidden="true"
+                />
+                <label htmlFor="event-sort" className={style.srOnly}>
+                  Trier les événements
+                </label>
+                <select
+                  id="event-sort"
+                  value={sortFilter}
+                  onChange={(event) => {
+                    const filter = event.target.value as EventFilters["filter"];
+                    setSortFilter(filter);
+                    void searchEvents({ filter });
+                  }}
+                  className={style.sortSelect}
+                >
+                  <option value="recent">Plus récent</option>
+                  <option value="oldest">Plus ancien</option>
+                  <option value="popular">Plus populaire</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix décroissant</option>
+                </select>
+                <ChevronDown
+                  size={15}
+                  className={style.sortChevron}
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
 
@@ -389,7 +476,7 @@ export default function Welcome() {
             handleClose={() => setFeedback(null)}
           />
 
-          {eventList.length > EVENTS_PER_PAGE && (
+          {displayedEvents.length > EVENTS_PER_PAGE && (
             <div className={style.paginationContainer}>
               <button
                 type="button"

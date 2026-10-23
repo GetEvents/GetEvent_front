@@ -194,7 +194,8 @@ $border-color: #e2e8f0;
 }
 
 /* FOOTER */
-.mobileNav {
+.mobileNav,
+.mobileNavLabel {
   display: none;
 }
 
@@ -306,67 +307,99 @@ $border-color: #e2e8f0;
 
     .sidebarFooter {
       position: fixed !important;
-      bottom: 1.5rem !important;
+      bottom: 1.25rem !important;
       left: 50% !important;
       right: auto !important;
       transform: translateX(-50%) !important;
       z-index: 10006 !important;
-      display: flex !important;
+      display: inline-flex !important;
       flex-direction: row !important;
       align-items: center !important;
-      width: min(calc(100vw - 2rem), 460px) !important;
-      gap: 0.6rem !important;
-      padding: 0.65rem 0.9rem !important;
-      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+      justify-content: center !important;
+      width: fit-content !important;
+      max-width: calc(100vw - 2rem) !important;
+      gap: 0.25rem !important;
+      padding: 0.35rem 0.55rem 0.35rem 0.55rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
       border-radius: 9999px !important;
-      background: rgba(255, 255, 255, 0.85) !important;
-      backdrop-filter: blur(12px) saturate(180%) !important;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+      background: rgba(15, 23, 42, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28) !important;
 
       .mobileNav {
         display: flex !important;
-        flex: 1 1 auto !important;
+        flex: 0 1 auto !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: space-around !important;
-        gap: 0.25rem !important;
+        justify-content: center !important;
+        gap: 0.3rem !important;
 
         .mobileNavItem {
           display: flex !important;
+          flex-direction: column !important;
           align-items: center !important;
           justify-content: center !important;
-          width: 50px !important;
-          height: 50px !important;
-          border-radius: 50% !important;
-          color: $text-muted !important;
-          transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease !important;
+          gap: 2px !important;
+          padding: 4px 8px 3px 8px !important;
+          min-width: 50px !important;
+          border-radius: 9999px !important;
+          color: rgba(255, 255, 255, 0.85) !important;
+          text-decoration: none !important;
+          transition: transform 0.15s ease, background 0.2s ease !important;
           touch-action: manipulation !important;
           -webkit-tap-highlight-color: transparent !important;
 
-          svg {
-            width: 26px !important;
-            height: 26px !important;
-            transition: transform 0.15s ease !important;
+          .mobileNavIcon {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 32px !important;
+            height: 28px !important;
+            border-radius: 9999px !important;
+            transition: all 0.2s ease !important;
+
+            svg {
+              width: 20px !important;
+              height: 20px !important;
+              color: #ffffff !important;
+            }
+          }
+
+          .mobileNavLabel {
+            display: block !important;
+            font-size: 0.65rem !important;
+            font-weight: 500 !important;
+            color: rgba(255, 255, 255, 0.88) !important;
+            line-height: 1.1 !important;
+            text-align: center !important;
+            letter-spacing: 0.1px !important;
+            white-space: nowrap !important;
           }
 
           &:hover {
-            background: $bg-active !important;
-            color: $primary !important;
+            .mobileNavIcon {
+              background: rgba(255, 255, 255, 0.12) !important;
+            }
           }
 
           &:active {
-            transform: scale(0.86) !important;
-            background: rgba(37, 99, 235, 0.12) !important;
-            color: $primary !important;
+            transform: scale(0.92) !important;
           }
 
           &.active {
-            background: #eff6ff !important;
-            color: #2563eb !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.14) !important;
+            .mobileNavIcon {
+              background: #2563eb !important;
+              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45) !important;
 
-            svg {
-              transform: scale(1.08) !important;
+              svg {
+                color: #ffffff !important;
+              }
+            }
+
+            .mobileNavLabel {
+              color: #ffffff !important;
+              font-weight: 700 !important;
             }
           }
         }
@@ -374,73 +407,36 @@ $border-color: #e2e8f0;
 
       .profileBox {
         display: none !important;
-        border-left: 1px solid rgba(226, 232, 240, 0.8) !important;
-        padding-left: 0.65rem !important;
-        margin-left: 0 !important;
-        background: transparent !important;
-        border-top: none !important;
-        border-right: none !important;
-        border-bottom: none !important;
-        border-radius: 0 !important;
-        width: 52px !important;
-        height: 44px !important;
-        align-items: center !important;
-        justify-content: center !important;
-
-        .avatarPlaceholder {
-          width: 42px !important;
-          height: 42px !important;
-          font-size: 1.05rem !important;
-        }
       }
 
       .logoutBtn {
-        width: 52px !important;
-        height: 52px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        border-radius: 50% !important;
-        border: 1px solid transparent !important;
-        background: transparent !important;
-        color: $text-muted !important;
-        padding: 0 !important;
-
-        svg {
-          width: 32px !important;
-          height: 32px !important;
-        }
-
-        &:hover {
-          background: #fef2f2 !important;
-          color: #dc3545 !important;
-          border-color: #fca5a5 !important;
-        }
+        display: none !important;
       }
 
       @media (max-width: 360px) {
-        gap: 0.3rem !important;
-        padding: 0.5rem 0.6rem !important;
+        gap: 0.15rem !important;
+        padding: 0.3rem 0.4rem !important;
 
-        .mobileNav .mobileNavItem,
-        .logoutBtn {
-          width: 36px !important;
-          height: 36px !important;
+        .mobileNav {
+          gap: 0.15rem !important;
 
-          svg {
-            width: 24px !important;
-            height: 24px !important;
-          }
-        }
+          .mobileNavItem {
+            min-width: 44px !important;
+            padding: 3px 5px !important;
 
-        .profileBox {
-          width: 44px !important;
-          height: 36px !important;
-          padding-left: 0.4rem !important;
+            .mobileNavIcon {
+              width: 28px !important;
+              height: 24px !important;
 
-          .avatarPlaceholder {
-            width: 34px !important;
-            height: 34px !important;
+              svg {
+                width: 18px !important;
+                height: 18px !important;
+              }
+            }
+
+            .mobileNavLabel {
+              font-size: 0.6rem !important;
+            }
           }
         }
       }

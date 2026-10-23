@@ -36,7 +36,6 @@ export function EventCardSkeleton({ count = 6 }) {
             <div className={styles.skeletonTitle} />
             <div className={styles.skeletonLocation} />
             <div className={styles.skeletonFooter}>
-              <div className={styles.skeletonPrice} />
               <div className={styles.skeletonBtn} />
             </div>
           </div>
@@ -207,12 +206,24 @@ export default function EventCard({
                     {event.category || "Événement"}
                   </span>
 
-                  {/* Badge Statut flottant uniquement si l'événement est terminé */}
-                  {eventExpired && (
-                    <span className={`${styles.badgeStatus} ${styles.expired}`}>
-                      Terminé
-                    </span>
-                  )}
+                  {/* Badges en haut à droite : Statut ou Tarif */}
+                  <div className={styles.badgesRight}>
+                    {eventExpired ? (
+                      <span
+                        className={`${styles.badgeStatus} ${styles.expired}`}
+                      >
+                        Terminé
+                      </span>
+                    ) : (
+                      <span
+                        className={`${styles.badgePrice} ${
+                          isFree ? styles.free : styles.paid
+                        }`}
+                      >
+                        {priceText}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Corps de carte émergeant naturellement du fondu */}
@@ -252,65 +263,50 @@ export default function EventCard({
                   )}
                 </div>
 
-                {/* Pied de carte épuré : Tarif & CTA */}
+                {/* Pied de carte épuré : Actions & CTA */}
                 <div className={styles.eventactin}>
-                  <div className={styles.priceBlock}>
-                    <span className={styles.priceLabel}>Accès</span>
-                    <span
-                      className={`${styles.priceValue} ${
-                        isFree ? styles.free : ""
-                      }`}
-                    >
-                      {priceText}
+                  {current_user?.id &&
+                    event.organisateur?.id &&
+                    String(current_user.id) ===
+                      String(event.organisateur.id) && (
+                      <div className={styles.editdelect}>
+                        <Link
+                          className={styles.actionBtn}
+                          href={
+                            eventExpired ? "#" : `/events/editEvent/${event.id}`
+                          }
+                          aria-disabled={eventExpired}
+                          tabIndex={eventExpired ? -1 : 0}
+                          title={eventExpired ? expiredMessage : "Modifier"}
+                          onClick={(e) => {
+                            if (eventExpired) e.preventDefault();
+                          }}
+                        >
+                          <Pencil size={15} aria-hidden="true" />
+                        </Link>
+                        <button
+                          type="button"
+                          className={`${styles.actionBtn} ${styles.delete}`}
+                          onClick={() => openDeleteModal(event)}
+                          disabled={eventExpired}
+                          title={eventExpired ? expiredMessage : "Supprimer"}
+                          aria-label="Supprimer cet événement"
+                        >
+                          <Trash2 size={15} aria-hidden="true" />
+                        </button>
+                      </div>
+                    )}
+
+                  <Link
+                    href={`/events/${event.id}`}
+                    className={styles.ctaDetailsBtn}
+                    aria-label={`Voir les détails de ${event.title}`}
+                  >
+                    <span>Voir l&apos;événement</span>
+                    <span className={styles.ctaArrow}>
+                      <ArrowUpRight size={14} aria-hidden="true" />
                     </span>
-                  </div>
-
-                  <div className={styles.actionsRight}>
-                    {current_user?.id &&
-                      event.organisateur?.id &&
-                      String(current_user.id) ===
-                        String(event.organisateur.id) && (
-                        <div className={styles.editdelect}>
-                          <Link
-                            className={styles.actionBtn}
-                            href={
-                              eventExpired
-                                ? "#"
-                                : `/events/editEvent/${event.id}`
-                            }
-                            aria-disabled={eventExpired}
-                            tabIndex={eventExpired ? -1 : 0}
-                            title={eventExpired ? expiredMessage : "Modifier"}
-                            onClick={(e) => {
-                              if (eventExpired) e.preventDefault();
-                            }}
-                          >
-                            <Pencil size={15} aria-hidden="true" />
-                          </Link>
-                          <button
-                            type="button"
-                            className={`${styles.actionBtn} ${styles.delete}`}
-                            onClick={() => openDeleteModal(event)}
-                            disabled={eventExpired}
-                            title={eventExpired ? expiredMessage : "Supprimer"}
-                            aria-label="Supprimer cet événement"
-                          >
-                            <Trash2 size={15} aria-hidden="true" />
-                          </button>
-                        </div>
-                      )}
-
-                    <Link
-                      href={`/events/${event.id}`}
-                      className={styles.ctaDetailsBtn}
-                      aria-label={`Voir les détails de ${event.title}`}
-                    >
-                      <span>Détails</span>
-                      <span className={styles.ctaArrow}>
-                        <ArrowUpRight size={14} aria-hidden="true" />
-                      </span>
-                    </Link>
-                  </div>
+                  </Link>
                 </div>
               </article>
             );

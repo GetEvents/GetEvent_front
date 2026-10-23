@@ -51,7 +51,7 @@ export interface EventFilters {
   search?: string;
   location?: string;
   category?: string;
-  filter?: "recent" | "popular" | "price-asc" | "price-desc";
+  filter?: "recent" | "oldest" | "popular" | "price-asc" | "price-desc";
 }
 
 export interface EventActionState {

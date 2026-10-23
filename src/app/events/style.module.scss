@@ -520,25 +520,115 @@ $glass-border: rgba(15, 23, 42, 0.08);
 
 .headerActions {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.sortSelect {
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  color: $text-main;
-  padding: 0.75rem 1.25rem;
+.timelineToggle {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
   border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  outline: none;
-  transition: all 250ms ease;
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 
-  &:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    background: #f8fafc;
+  .timelineBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    .timelineCount {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.08);
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    &:hover:not(.active) {
+      color: #0f172a;
+    }
+
+    &.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+
+      .timelineCount {
+        background: #2563eb;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.sortSelectWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  .sortIcon {
+    position: absolute;
+    left: 14px;
+    color: #64748b;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .sortChevron {
+    position: absolute;
+    right: 14px;
+    color: #64748b;
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.2s ease;
+  }
+
+  .sortSelect {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    padding: 0.65rem 2.25rem 0.65rem 2.4rem;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: $text-main;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    transition: all 200ms ease;
+
+    &:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
   }
 }
 
@@ -704,8 +794,31 @@ $glass-border: rgba(15, 23, 42, 0.08);
     text-align: left;
   }
 
-  .headerActions,
-  .sortSelect {
+  .headerActions {
+    flex-direction: column;
+    align-items: stretch;
     width: 100%;
+    gap: 0.6rem;
+  }
+
+  .timelineToggle {
+    width: 100%;
+    display: flex;
+
+    .timelineBtn {
+      flex: 1;
+      justify-content: center;
+      padding: 8px 10px;
+    }
+  }
+
+  .sortSelectWrapper {
+    width: 100%;
+
+    .sortSelect {
+      width: 100%;
+      min-height: 44px;
+      font-size: 0.9rem;
+    }
   }
 }

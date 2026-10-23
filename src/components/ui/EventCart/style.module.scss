@@ -109,8 +109,9 @@
   gap: 5px;
   padding: 5px 12px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #0f172a;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-size: 0.75rem;
@@ -119,38 +120,59 @@
   letter-spacing: 0.3px;
 }
 
-.badgeStatus {
+.badgesRight {
   position: absolute;
   top: 14px;
   right: 14px;
   z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+}
+
+.badgePrice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 5px 12px;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.78125rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
 
   &.free {
     background: rgba(16, 185, 129, 0.95);
-    backdrop-filter: blur(8px);
     color: #ffffff;
-    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
   }
 
   &.paid {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    color: #0f172a;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    background: rgba(15, 23, 42, 0.88);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
+}
+
+.badgeStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   &.expired {
     background: rgba(239, 68, 68, 0.95);
-    backdrop-filter: blur(8px);
     color: #ffffff;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
   }
 }
 
@@ -244,61 +266,29 @@
   }
 }
 
-// Pied de carte : Tarif & Bouton d'action avec fine séparation
+// Pied de carte : Action & CTA
 .eventactin {
-  padding: 12px 20px 16px 20px;
+  padding: 12px 18px 16px 18px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   border-top: 1px solid #f1f5f9;
   background: #ffffff;
-}
-
-.priceBlock {
-  display: flex;
-  flex-direction: column;
-
-  .priceLabel {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    line-height: 1;
-    margin-bottom: 3px;
-  }
-
-  .priceValue {
-    font-size: 1.0625rem;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.2;
-
-    &.free {
-      color: #059669;
-    }
-  }
-}
-
-.actionsRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .editdelect {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 
   .actionBtn {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 12px;
     background: #f1f5f9;
     color: #475569;
     border: none;
@@ -319,15 +309,17 @@
 }
 
 .ctaDetailsBtn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
   border-radius: 12px;
-  background: #f8fafc;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-  font-size: 0.8125rem;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.25s ease;
@@ -339,19 +331,20 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #e2e8f0;
-    color: #0f172a;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     transition: all 0.25s ease;
   }
 
   &:hover {
-    background: #0f172a;
+    background: #2563eb;
     color: #ffffff;
-    border-color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
 
     .ctaArrow {
       background: #ffffff;
-      color: #0f172a;
+      color: #2563eb;
       transform: translate(2px, -2px);
     }
   }
@@ -427,20 +420,12 @@
     padding-top: 12px;
     border-top: 1px solid #f1f5f9;
     display: flex;
-    justify-content: space-between;
     align-items: center;
 
-    .skeletonPrice {
-      height: 22px;
-      width: 70px;
-      border-radius: 6px;
-      background: #f1f5f9;
-    }
-
     .skeletonBtn {
-      height: 34px;
-      width: 85px;
-      border-radius: 10px;
+      height: 38px;
+      width: 100%;
+      border-radius: 12px;
       background: #f1f5f9;
     }
   }

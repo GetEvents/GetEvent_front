@@ -36,7 +36,8 @@ const Sidebar = ({ visible }) => {
       {
         href: "/events",
         title: "Découvrir",
-        icon: <CalendarDays size={24} aria-hidden="true" />,
+        shortTitle: "Découvrir",
+        icon: <CalendarDays size={22} aria-hidden="true" />,
       },
     ];
 
@@ -44,7 +45,8 @@ const Sidebar = ({ visible }) => {
       items.push({
         href: "/events/my-events",
         title: "Tableau de bord",
-        icon: <LayoutDashboard size={24} aria-hidden="true" />,
+        shortTitle: "Dashboard",
+        icon: <LayoutDashboard size={22} aria-hidden="true" />,
       });
     }
 
@@ -52,12 +54,14 @@ const Sidebar = ({ visible }) => {
       {
         href: "/participations",
         title: "Mes participations",
-        icon: <TicketCheck size={24} aria-hidden="true" />,
+        shortTitle: "Billets",
+        icon: <TicketCheck size={22} aria-hidden="true" />,
       },
       {
         href: "/settings",
         title: "Paramètres",
-        icon: <Settings size={24} aria-hidden="true" />,
+        shortTitle: "Réglages",
+        icon: <Settings size={22} aria-hidden="true" />,
       },
     );
 
@@ -151,7 +155,10 @@ const Sidebar = ({ visible }) => {
                 title={item.title}
                 aria-label={item.title}
               >
-                {item.icon}
+                <div className={styles.mobileNavIcon}>{item.icon}</div>
+                <span className={styles.mobileNavLabel}>
+                  {item.shortTitle || item.title}
+                </span>
               </Link>
             );
           })}
@@ -177,8 +184,11 @@ const Sidebar = ({ visible }) => {
           title="Se déconnecter"
           aria-label="Se déconnecter"
         >
-          <LogOut size={20} aria-hidden="true" />
+          <div className={styles.mobileNavIcon}>
+            <LogOut size={22} aria-hidden="true" />
+          </div>
           <span className={styles.navText}>Déconnexion</span>
+          <span className={styles.mobileNavLabel}>Quitter</span>
         </button>
       </div>
     </aside>

@@ -1,10 +1,12 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   CreditCard,
+  LogOut,
   ShieldCheck,
   Trash2,
   UserRound,
@@ -17,7 +19,11 @@ import Profil from "@/components/profile";
 import ProfilForm from "@/components/form/RegisterForm";
 import DelectModal from "@/components/DelectModal";
 import { useAuth } from "@/hooks/useAuth";
-import { useChangePassword, useDeleteAccount } from "@/hooks/useAuthMutations";
+import {
+  useChangePassword,
+  useDeleteAccount,
+  useLogout,
+} from "@/hooks/useAuthMutations";
 import styles from "./style.module.scss";
 
 type PasswordState = {
@@ -77,8 +83,18 @@ export default function SettingsPage() {
   const [stripeActionError, setStripeActionError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const router = useRouter();
+  const logoutMutation = useLogout();
   const changePasswordMutation = useChangePassword();
   const deleteAccountMutation = useDeleteAccount();
+
+  const handleLogOut = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+    } finally {
+      router.push("/auth/login");
+    }
+  };
 
   const canConfigurePayments =
     user?.role === "ORGANISATEUR" || user?.role === "ADMIN";
@@ -369,6 +385,28 @@ export default function SettingsPage() {
                     : "Modifier le mot de passe"}
                 </button>
               </form>
+            </section>
+
+            <section
+              className={`${styles.card} ${styles.mobileOnlyLogoutCard}`}
+            >
+              <div className={styles.sectionTitle}>
+                <LogOut aria-hidden="true" />
+                <div>
+                  <h2>Déconnexion</h2>
+                  <p>Fermer votre session active sur cet appareil.</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={styles.btn_logout}
+                onClick={handleLogOut}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut aria-hidden="true" />
+                {logoutMutation.isPending ? "Déconnexion..." : "Se déconnecter"}
+              </button>
             </section>
 
             <section className={`${styles.card} ${styles.card_danger}`}>
