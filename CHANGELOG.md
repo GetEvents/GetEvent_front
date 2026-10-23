@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.18.0](https://github.com/GetEvents/GetEvent_front/compare/v0.17.5...v0.18.0) (2026-10-23)
+
+
+### Features
+
+* ajouter un écran de démarrage et un indicateur de chargement; r… ([35bd6d5](https://github.com/GetEvents/GetEvent_front/commit/35bd6d5b3f9fd98b2971bc7015fe513755009b2a))
+* ajouter un écran de démarrage et un indicateur de chargement; refactoriser le style des onglets du tableau de bord et améliorer l'accessibilité ([c10d76e](https://github.com/GetEvents/GetEvent_front/commit/c10d76e568489589fa15230cc761631f918b152c))
+
 ## [0.17.5](https://github.com/GetEvents/GetEvent_front/compare/v0.17.4...v0.17.5) (2026-10-23)
 
 
