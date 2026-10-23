@@ -5,7 +5,13 @@ import dynamic from "next/dynamic";
 import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import styles from "./style.module.scss";
 import Link from "next/link";
-import { TrendingUp, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  QrCode,
+  RotateCcw,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -1421,31 +1427,47 @@ export default function Dashboard({ count = null }) {
         <p>Suivez l&apos;activité de vos événements en un coup d&apos;œil.</p>
       </div>
 
-      <div className={styles.tabs_nav}>
+      <div
+        className={styles.tabs_nav}
+        role="tablist"
+        aria-label="Onglets du tableau de bord"
+      >
         <button
+          role="tab"
+          aria-selected={activeTab === "overview"}
           className={`${styles.tab_btn} ${activeTab === "overview" ? styles.active : ""}`}
           onClick={() => setActiveTab("overview")}
         >
-          Vue d&apos;ensemble
+          <LayoutDashboard size={18} aria-hidden="true" />
+          <span>Vue d&apos;ensemble</span>
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === "participants"}
           className={`${styles.tab_btn} ${activeTab === "participants" ? styles.active : ""}`}
           onClick={() => setActiveTab("participants")}
         >
-          Participants
+          <Users size={18} aria-hidden="true" />
+          <span>Participants</span>
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === "scanner"}
           className={`${styles.tab_btn} ${activeTab === "scanner" ? styles.active : ""}`}
           onClick={() => setActiveTab("scanner")}
         >
-          Contrôle des billets
+          <QrCode size={18} aria-hidden="true" />
+          <span>Contrôle billets</span>
         </button>
         {user.role === "ADMIN" && (
           <button
+            role="tab"
+            aria-selected={activeTab === "refunds"}
             className={`${styles.tab_btn} ${activeTab === "refunds" ? styles.active : ""}`}
             onClick={() => setActiveTab("refunds")}
           >
-            Remboursements
+            <RotateCcw size={18} aria-hidden="true" />
+            <span>Remboursements</span>
           </button>
         )}
       </div>

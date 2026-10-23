@@ -8,6 +8,7 @@ import { NotificationProvider } from "@/components/Notification/NotificationProv
 import PushNotificationManager from "@/components/Notification/PushNotificationManager";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
+import AppSplashScreen from "@/components/AppSplashScreen";
 import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
@@ -77,6 +78,7 @@ export default async function RootLayout({
         <AuthProvider initialUser={currentUser}>
           <NotificationProvider>
             <Providers>
+              <AppSplashScreen />
               <NavbarWrapper currentUser={isLoggedIn} />
 
               <div

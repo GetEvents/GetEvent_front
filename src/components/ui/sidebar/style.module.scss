@@ -335,21 +335,39 @@ $border-color: #e2e8f0;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          width: 52px !important;
-          height: 52px !important;
+          width: 50px !important;
+          height: 50px !important;
           border-radius: 50% !important;
           color: $text-muted !important;
-          transition: all 0.2s ease !important;
+          transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease !important;
+          touch-action: manipulation !important;
+          -webkit-tap-highlight-color: transparent !important;
 
           svg {
-            width: 32px !important;
-            height: 32px !important;
+            width: 26px !important;
+            height: 26px !important;
+            transition: transform 0.15s ease !important;
           }
 
-          &:hover,
-          &.active {
+          &:hover {
             background: $bg-active !important;
             color: $primary !important;
+          }
+
+          &:active {
+            transform: scale(0.86) !important;
+            background: rgba(37, 99, 235, 0.12) !important;
+            color: $primary !important;
+          }
+
+          &.active {
+            background: #eff6ff !important;
+            color: #2563eb !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.14) !important;
+
+            svg {
+              transform: scale(1.08) !important;
+            }
           }
         }
       }
