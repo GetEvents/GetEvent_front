@@ -54,7 +54,9 @@ describe("WelcomePage", () => {
 
     expect(getByText(container, /Plateforme de gestion/)).toBeTruthy();
     expect(getByText(container, /Billetterie intelligente/)).toBeTruthy();
-    expect(container.querySelector('a[href="/events/create"]')).toBeTruthy();
+    expect(
+      container.querySelector('a[href="/events/createvent"]'),
+    ).toBeTruthy();
     expect(container.querySelector('a[href="/events"]')).toBeTruthy();
 
     await unmount();

@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useRef, useState, React } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Lock, Rocket, Star, Ticket, Zap } from "lucide-react";
 import FAQSection from "../FAQ";
 import FeaturesSection from "../Features";
 import ImpactSection from "../Impact";
@@ -140,15 +141,15 @@ export default function Home() {
               ref={ctaRef}
               className={`${styles.ctaGroup} ${isCtaVisible ? styles.ctaVisible : ""}`}
             >
-              <Link href="/events/create" className={styles.primaryBtn}>
+              <Link href="/events/createvent" className={styles.primaryBtn}>
                 <span className={styles.btnIcon}>
-                  <i className="fa-solid fa-rocket" aria-hidden="true" />
+                  <Rocket size={18} aria-hidden="true" />
                 </span>
                 Créer mon événement
               </Link>
               <Link href="/events" className={styles.secondaryBtn}>
                 <span className={styles.btnIcon}>
-                  <i className="fa-solid fa-ticket" aria-hidden="true" />
+                  <Ticket size={18} aria-hidden="true" />
                 </span>
                 Rejoindre un événement
               </Link>
@@ -185,19 +186,19 @@ export default function Home() {
             >
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>
-                  <i className="fa-solid fa-star" aria-hidden="true" />
+                  <Star size={16} aria-hidden="true" />
                 </span>
                 <span>4.8/5</span>
               </div>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>
-                  <i className="fa-solid fa-lock" aria-hidden="true" />
+                  <Lock size={16} aria-hidden="true" />
                 </span>
                 <span>Paiement sécurisé</span>
               </div>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>
-                  <i className="fa-solid fa-bolt" aria-hidden="true" />
+                  <Zap size={16} aria-hidden="true" />
                 </span>
                 <span>Temps réel</span>
               </div>

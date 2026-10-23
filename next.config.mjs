@@ -3,7 +3,7 @@ const nextConfig = {
   output: "standalone",
   reactCompiler: true,
   images: {
-    qualities: [75, 90, 100],
+    qualities: [75, 85],
     remotePatterns: [
       {
         protocol: "https",
@@ -24,6 +24,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "5mb",
     },
+  },
+  async redirects() {
+    return [
+      {
+        source: "/events/create",
+        destination: "/events/createvent",
+        permanent: true,
+      },
+    ];
   },
 };
 

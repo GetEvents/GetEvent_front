@@ -4,6 +4,19 @@ import style from "./style.module.scss";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/Input/input";
 import { useEffect, useRef, useState } from "react";
+import {
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  Eye,
+  Globe,
+  LockOpen,
+  MapPin,
+  Pencil,
+  Sparkles,
+  Ticket,
+  Users,
+} from "lucide-react";
 import { useCreateEvent, useEvent, useUpdateEvent } from "@/hooks/useEvents";
 import { initMapAuto } from "@/utils/autocomplet";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
@@ -238,7 +251,15 @@ const CreateEvent = ({ id }) => {
             {currentStep === 1 && (
               <div>
                 <h3 className="mb-3">
-                  <i className="fa-solid fa-pen-to-square" aria-hidden="true" />{" "}
+                  <Pencil
+                    size={18}
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      marginRight: "6px",
+                    }}
+                  />
                   Général
                 </h3>
                 <p className="text-muted mb-4">
@@ -302,10 +323,15 @@ const CreateEvent = ({ id }) => {
                     rows="5"
                   />
                   <p className={style.descriptionHint}>
-                    <i
-                      className="fa-solid fa-wand-magic-sparkles"
+                    <Sparkles
+                      size={16}
                       aria-hidden="true"
-                    />{" "}
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "middle",
+                        marginRight: "6px",
+                      }}
+                    />
                     Une bonne description aide les participants à comprendre
                     votre événement
                   </p>
@@ -313,7 +339,15 @@ const CreateEvent = ({ id }) => {
                 {!id && (
                   <div className={style.localizationHeader}>
                     <h5 className={style.locTitle}>
-                      <i className="fa-solid fa-ticket" aria-hidden="true" />{" "}
+                      <Ticket
+                        size={16}
+                        aria-hidden="true"
+                        style={{
+                          display: "inline-block",
+                          verticalAlign: "middle",
+                          marginRight: "6px",
+                        }}
+                      />
                       Billetterie
                     </h5>
                     <div className={style.toggleContainer}>
@@ -431,7 +465,15 @@ const CreateEvent = ({ id }) => {
             {currentStep === 2 && (
               <div>
                 <h3 className="mb-3">
-                  <i className="fa-solid fa-calendar-days" aria-hidden="true" />{" "}
+                  <CalendarDays
+                    size={18}
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      marginRight: "6px",
+                    }}
+                  />
                   Logistique de l&apos;événement
                 </h3>
                 <p className="text-muted mb-4">
@@ -439,7 +481,15 @@ const CreateEvent = ({ id }) => {
                 </p>
 
                 <h5 className="mt-4 mb-3">
-                  <i className="fa-solid fa-calendar-days" aria-hidden="true" />{" "}
+                  <CalendarDays
+                    size={16}
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      marginRight: "6px",
+                    }}
+                  />
                   Temporalité
                 </h5>
                 <div className={style.formodifdiv}>
@@ -491,10 +541,15 @@ const CreateEvent = ({ id }) => {
 
                 <div className={style.localizationHeader}>
                   <h5 className={style.locTitle}>
-                    <i
-                      className="fa-solid fa-location-dot"
+                    <MapPin
+                      size={16}
                       aria-hidden="true"
-                    />{" "}
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "middle",
+                        marginRight: "6px",
+                      }}
+                    />
                     Localisation
                   </h5>
                   <div className={style.toggleContainer}>
@@ -558,7 +613,15 @@ const CreateEvent = ({ id }) => {
             {currentStep === 3 && (
               <div>
                 <h3 className="mb-3">
-                  <i className="fa-solid fa-circle-check" aria-hidden="true" />{" "}
+                  <CheckCircle2
+                    size={18}
+                    aria-hidden="true"
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "middle",
+                      marginRight: "6px",
+                    }}
+                  />
                   Confirmation
                 </h3>
                 <p className="text-muted mb-4">
@@ -566,7 +629,15 @@ const CreateEvent = ({ id }) => {
                 </p>
                 <div className={style.confirmMessage}>
                   <p>
-                    <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                    <Check
+                      size={16}
+                      aria-hidden="true"
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "middle",
+                        marginRight: "6px",
+                      }}
+                    />
                     Toutes les informations sont à jour dans le résumé
                     ci-dessous
                   </p>
@@ -598,7 +669,15 @@ const CreateEvent = ({ id }) => {
                       <div className={style.recapItem}>
                         <span className={style.label}>Image:</span>
                         <p className={`${style.value} ${style.success}`}>
-                          <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                          <Check
+                            size={16}
+                            aria-hidden="true"
+                            style={{
+                              display: "inline-block",
+                              verticalAlign: "middle",
+                              marginRight: "6px",
+                            }}
+                          />
                           {eventImage.name}
                         </p>
                         {imagePreviewUrl && (
@@ -621,18 +700,28 @@ const CreateEvent = ({ id }) => {
                       <p className={style.value}>
                         {form.isOnline ? (
                           <>
-                            <i
-                              className="fa-solid fa-globe"
+                            <Globe
+                              size={16}
                               aria-hidden="true"
-                            />{" "}
+                              style={{
+                                display: "inline-block",
+                                verticalAlign: "middle",
+                                marginRight: "6px",
+                              }}
+                            />
                             En ligne
                           </>
                         ) : (
                           <>
-                            <i
-                              className="fa-solid fa-location-dot"
+                            <MapPin
+                              size={16}
                               aria-hidden="true"
-                            />{" "}
+                              style={{
+                                display: "inline-block",
+                                verticalAlign: "middle",
+                                marginRight: "6px",
+                              }}
+                            />
                             En présentiel
                           </>
                         )}
@@ -728,7 +817,15 @@ const CreateEvent = ({ id }) => {
                     className={`btn btn-success ${style.btnSubmit}`}
                     disabled={pending}
                   >
-                    <i className="fa-solid fa-check" aria-hidden="true" />{" "}
+                    <Check
+                      size={18}
+                      aria-hidden="true"
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "middle",
+                        marginRight: "6px",
+                      }}
+                    />
                     {id ? "Modifier" : "Créer l'événement"}
                   </Button>
                 )}
@@ -753,7 +850,15 @@ const CreateEvent = ({ id }) => {
                       />
                       <div className={style.livePreviewBadge}>
                         <span>
-                          <i className="fa-solid fa-eye" aria-hidden="true" />{" "}
+                          <Eye
+                            size={16}
+                            aria-hidden="true"
+                            style={{
+                              display: "inline-block",
+                              verticalAlign: "middle",
+                              marginRight: "6px",
+                            }}
+                          />
                           Aperçu en direct
                         </span>
                       </div>
@@ -803,10 +908,7 @@ const CreateEvent = ({ id }) => {
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
                         <span className={style.recapInfoIcon}>
-                          <i
-                            className="fa-solid fa-calendar-days"
-                            aria-hidden="true"
-                          />
+                          <CalendarDays size={16} aria-hidden="true" />
                         </span>
                         <h6 className={style.recapInfoTitle}>Date & Heure</h6>
                       </div>
@@ -835,10 +937,7 @@ const CreateEvent = ({ id }) => {
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
                         <span className={style.recapInfoIcon}>
-                          <i
-                            className="fa-solid fa-location-dot"
-                            aria-hidden="true"
-                          />
+                          <MapPin size={16} aria-hidden="true" />
                         </span>
                         <h6 className={style.recapInfoTitle}>Lieu</h6>
                       </div>
@@ -855,10 +954,7 @@ const CreateEvent = ({ id }) => {
                   <div className={style.recapInfoBlock}>
                     <div className={style.recapInfoHeader}>
                       <span className={style.recapInfoIcon}>
-                        <i
-                          className="fa-solid fa-lock-open"
-                          aria-hidden="true"
-                        />
+                        <LockOpen size={16} aria-hidden="true" />
                       </span>
                       <h6 className={style.recapInfoTitle}>
                         Type d&apos;accès
@@ -872,7 +968,7 @@ const CreateEvent = ({ id }) => {
                     <div className={style.recapInfoBlock}>
                       <div className={style.recapInfoHeader}>
                         <span className={style.recapInfoIcon}>
-                          <i className="fa-solid fa-users" aria-hidden="true" />
+                          <Users size={16} aria-hidden="true" />
                         </span>
                         <h6 className={style.recapInfoTitle}>Capacité</h6>
                       </div>

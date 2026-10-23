@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
 import styles from "./NotificationProvider.module.scss";
 import React from "react";
 
@@ -18,10 +19,15 @@ const TYPE_STYLES = {
   info: styles.info,
 };
 
-const ICONS = {
-  success: "fa-circle-check",
-  error: "fa-circle-xmark",
-  info: "fa-circle-info",
+const renderIcon = (type) => {
+  switch (type) {
+    case "success":
+      return <CheckCircle size={18} aria-hidden="true" />;
+    case "error":
+      return <AlertCircle size={18} aria-hidden="true" />;
+    default:
+      return <Info size={18} aria-hidden="true" />;
+  }
 };
 
 export function NotificationProvider({ children }) {
@@ -69,12 +75,7 @@ export function NotificationProvider({ children }) {
             role="status"
             aria-live="polite"
           >
-            <span className={styles.icon}>
-              <i
-                className={`fa-solid ${ICONS[notification.type] || ICONS.info}`}
-                aria-hidden="true"
-              />
-            </span>
+            <span className={styles.icon}>{renderIcon(notification.type)}</span>
             <p className={styles.message}>{notification.message}</p>
             <button
               type="button"
@@ -82,7 +83,7 @@ export function NotificationProvider({ children }) {
               className={styles.closeButton}
               aria-label="Fermer la notification"
             >
-              <i className="fa-solid fa-xmark" aria-hidden="true" />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         ))}

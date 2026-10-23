@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Check, X } from "lucide-react";
 import {
   deleteNotification,
   markAllNotificationsAsRead,
@@ -171,7 +172,7 @@ export default function NotificationModal({
                           onClick={() => handleMarkAsRead(notification.id)}
                           title="Marquer comme lue"
                         >
-                          <i className="fa-solid fa-check" aria-hidden="true" />
+                          <Check size={16} aria-hidden="true" />
                         </button>
                       )}
                       <button
@@ -180,7 +181,7 @@ export default function NotificationModal({
                         onClick={() => handleDelete(notification.id)}
                         title="Supprimer"
                       >
-                        <i className="fa-solid fa-xmark" aria-hidden="true" />
+                        <X size={16} aria-hidden="true" />
                       </button>
                     </div>
                   </article>

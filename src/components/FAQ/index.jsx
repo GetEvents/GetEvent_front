@@ -1,23 +1,24 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { CalendarDays, CircleHelp, Wrench } from "lucide-react";
 import styles from "./FAQ.module.scss";
 
 const faqCategories = [
   {
     id: 1,
     name: "Général",
-    icon: "fa-circle-question",
+    icon: CircleHelp,
   },
   {
     id: 2,
     name: "Événements",
-    icon: "fa-calendar-days",
+    icon: CalendarDays,
   },
   {
     id: 4,
     name: "Support",
-    icon: "fa-screwdriver-wrench",
+    icon: Wrench,
   },
 ];
 
@@ -119,14 +120,17 @@ export default function FAQSection() {
 
         {/* Categories */}
         <div className={styles.categories}>
-          {faqCategories.map((category) => (
-            <div key={category.id} className={styles.categoryBadge}>
-              <span>
-                <i className={`fa-solid ${category.icon}`} aria-hidden="true" />
-              </span>
-              {category.name}
-            </div>
-          ))}
+          {faqCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <div key={category.id} className={styles.categoryBadge}>
+                <span>
+                  <Icon size={16} aria-hidden="true" />
+                </span>
+                {category.name}
+              </div>
+            );
+          })}
         </div>
 
         {/* FAQ Items */}

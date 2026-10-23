@@ -1,10 +1,35 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import styles from "./style.module.scss";
 import Link from "next/link";
-import Chart from "chart.js/auto";
+import { TrendingUp, Users } from "lucide-react";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  BarController,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  DoughnutController,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  BarController,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  DoughnutController,
+);
 import { eventQueries, useDeleteEvent } from "@/hooks/useEvents";
 
 import {
@@ -21,7 +46,11 @@ import {
   useRefunds,
 } from "@/hooks/usePayout";
 import DelectModal from "@/components/DelectModal";
-import TicketQRCodeLecteur from "@/app/events/[id]/TicketQRCodeLecteur";
+
+const TicketQRCodeLecteur = dynamic(
+  () => import("@/app/events/[id]/TicketQRCodeLecteur"),
+  { ssr: false },
+);
 
 // --- STYLES/ICONS ---
 const ICONS = {
@@ -1131,7 +1160,7 @@ export default function Dashboard({ count = null }) {
     const ctxBar = chartRefBar.current.getContext("2d");
     const ctxPie = chartRefDoughnut.current.getContext("2d");
 
-    const barChart = new Chart(ctxBar, {
+    const barChart = new ChartJS(ctxBar, {
       type: "bar",
       data: {
         labels: chartData.labels,
@@ -1160,7 +1189,7 @@ export default function Dashboard({ count = null }) {
       },
     });
 
-    const pieChart = new Chart(ctxPie, {
+    const pieChart = new ChartJS(ctxPie, {
       type: "doughnut",
       data: {
         labels: chartData.labels,
@@ -1319,7 +1348,15 @@ export default function Dashboard({ count = null }) {
         <div className={styles.charts_section}>
           <div className={styles.chart_card}>
             <h3>
-              <i className="fa-solid fa-chart-line" aria-hidden="true" />{" "}
+              <TrendingUp
+                size={18}
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  marginRight: "6px",
+                }}
+              />
               Revenus par événement
             </h3>
             <div className={styles.chart_wrapper}>
@@ -1329,8 +1366,16 @@ export default function Dashboard({ count = null }) {
 
           <div className={styles.chart_card}>
             <h3>
-              <i className="fa-solid fa-users" aria-hidden="true" /> Répartition
-              des participants
+              <Users
+                size={18}
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  verticalAlign: "middle",
+                  marginRight: "6px",
+                }}
+              />{" "}
+              Répartition des participants
             </h3>
             <div className={styles.chart_wrapper}>
               <canvas ref={chartRefDoughnut}></canvas>

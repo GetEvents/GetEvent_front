@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
 import { savePushSubscriptionAction } from "@/actions/notification";
 import styles from "./PushNotificationManager.module.scss";
 
@@ -125,7 +126,7 @@ export default function PushNotificationManager({
     >
       <div className={styles.content}>
         <div className={styles.icon} aria-hidden="true">
-          <i className="fa-solid fa-bell" />
+          <Bell size={20} />
         </div>
         <div className={styles.text}>
           <h3 className={styles.title}>Activer les notifications</h3>
