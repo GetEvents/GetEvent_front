@@ -184,6 +184,18 @@ function isGuestOnlyRoute(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { nextUrl, cookies } = request;
   const pathname = nextUrl.pathname;
+
+  // Bypass immédiat pour les assets statiques et PWA (évite les 500 et les latences inutiles)
+  if (
+    pathname === "/sw.js" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/manifest.json" ||
+    pathname.startsWith("/images/") ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|css|js)$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   const token = cookies.get("token")?.value;
   const refreshToken = cookies.get("refreshToken")?.value;
   const isProtected = isProtectedRoute(pathname);
@@ -237,6 +249,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|sw.js|manifest.webmanifest|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|css|js)).*)",
   ],
 };
