@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.5](https://github.com/GetEvents/GetEvent_front/compare/v0.17.4...v0.17.5) (2026-10-23)
+
+
+### Bug Fixes
+
+* améliorer la gestion du cache et des requêtes dans le service wo… ([acf96ae](https://github.com/GetEvents/GetEvent_front/commit/acf96ae59a733a64b9eb1f64a5cb52004217ca18))
+* améliorer la gestion du cache et des requêtes dans le service worker; ajouter un composant de chargement; mettre à jour le manifeste et les styles globaux ([b8a0ada](https://github.com/GetEvents/GetEvent_front/commit/b8a0adac73abbd2adeb6834c14e4284dbf08ee60))
+
 ## [0.17.4](https://github.com/GetEvents/GetEvent_front/compare/v0.17.3...v0.17.4) (2026-10-23)
 
 
