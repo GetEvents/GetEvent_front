@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   /* Brand colors */
   --app-color-primary: #3b82f6;
   --app-color-primary-hover: #2563eb;
@@ -28,8 +28,8 @@
   --app-color-info: #0ea5e9;
 
   /* Typography */
-  --app-font-family-sans: var(--font-geist-sans), Arial, sans-serif;
-  --app-font-family-mono: var(--font-geist-mono), monospace;
+  --app-font-family-sans: Arial, Helvetica, sans-serif;
+  --app-font-family-mono: monospace;
   --app-font-size-xs: 0.75rem;
   --app-font-size-sm: 0.875rem;
   --app-font-size-base: 1rem;

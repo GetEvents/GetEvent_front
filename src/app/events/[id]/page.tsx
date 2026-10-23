@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -43,6 +45,41 @@ interface EventDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({
+  params,
+}: EventDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const event = await getEventById(id);
+
+  if (!event) {
+    return {
+      title: "Événement introuvable - GetEvent",
+    };
+  }
+
+  const title = `${event.title} - GetEvent`;
+  const description =
+    event.description?.slice(0, 160) ||
+    "Découvrez et participez à cet événement sur GetEvent.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: event.image ? [{ url: event.image }] : [],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: event.image ? [event.image] : [],
+    },
+  };
+}
+
 export default async function EventDetailPage({
   params,
 }: EventDetailPageProps) {
@@ -80,14 +117,17 @@ export default async function EventDetailPage({
 
   return (
     <main className={styles.container}>
-      <section
-        className={styles.hero}
-        style={{
-          backgroundImage: `url("${safeImage(event.image)}")`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-      >
+      <section className={styles.hero}>
+        {event.image && (
+          <Image
+            src={event.image}
+            alt={event.title}
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+        )}
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <div className={styles.heroInner}>
