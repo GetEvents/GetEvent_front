@@ -193,7 +193,8 @@
 .btn_primary,
 .btn_success,
 .btn_disabled,
-.btn_danger {
+.btn_danger,
+.btn_logout {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -235,6 +236,19 @@
   border: 1px solid #cbd5e1;
   background: #e5e7eb;
   color: #64748b;
+}
+
+.btn_logout {
+  border: 1px solid #dce3ec;
+  background: #f8fafc;
+  color: #334155;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #cbd5e1;
+    background: #edf2f7;
+    color: #0f172a;
+  }
 }
 
 .card_danger {
@@ -414,8 +428,16 @@
   }
 }
 
+.mobileOnlyLogoutCard {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .page {
     margin-bottom: 5rem;
+  }
+
+  .mobileOnlyLogoutCard {
+    display: block;
   }
 }

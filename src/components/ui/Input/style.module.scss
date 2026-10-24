@@ -1,9 +1,12 @@
-﻿/* Input Component Styles - Modern Design */
+/* Input Component Styles - Modern Design */
 .parent {
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   label {
     font-weight: var(--app-font-weight-semibold);
@@ -16,6 +19,9 @@
 
   input {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 0.9rem 1rem;
     border: 1px solid #94a3b8;
     border-radius: var(--app-radius-md);
@@ -50,6 +56,26 @@
     }
 
     &[type="date"],
+    &[type="time"],
+    &[type="datetime-local"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      min-height: 48px;
+      line-height: normal;
+
+      &::-webkit-date-and-time-value {
+        text-align: left;
+        min-height: 1.4em;
+        margin: 0;
+      }
+    }
+
     &[type="email"],
     &[type="password"],
     &[type="text"] {
@@ -59,6 +85,9 @@
 
   select {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 0.9rem 1rem;
     border: 1px solid #94a3b8;
     border-radius: var(--app-radius-md);
@@ -109,6 +138,9 @@
 
   textarea {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 0.9rem 1rem;
     border: 1px solid #94a3b8;
     border-radius: var(--app-radius-md);
