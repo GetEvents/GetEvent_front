@@ -2,6 +2,13 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.19.1](https://github.com/GetEvents/GetEvent_front/compare/v0.19.0...v0.19.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* ajouter des types pour les paramètres de la fonction onConfirm dans TicketPurchaseModal ([19ed92b](https://github.com/GetEvents/GetEvent_front/commit/19ed92b068319c4d3fdb7642a3896670dd4cb024))
+
 ## [0.19.0](https://github.com/GetEvents/GetEvent_front/compare/v0.18.0...v0.19.0) (2026-10-24)
 
 
