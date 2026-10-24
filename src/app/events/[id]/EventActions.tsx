@@ -185,7 +185,7 @@ export default function EventActions({
         <TicketPurchaseModal
           isOpen={isPurchaseModalOpen}
           onClose={() => setIsPurchaseModalOpen(false)}
-          onConfirm={(qty) => handleJoin(qty)}
+          onConfirm={(qty: number) => handleJoin(qty)}
           event={
             event || {
               id: eventId,
@@ -220,7 +220,7 @@ export default function EventActions({
       <TicketPurchaseModal
         isOpen={isPurchaseModalOpen}
         onClose={() => setIsPurchaseModalOpen(false)}
-        onConfirm={(qty) => handleJoin(qty)}
+        onConfirm={(qty: number) => handleJoin(qty)}
         event={
           event || {
             id: eventId,
