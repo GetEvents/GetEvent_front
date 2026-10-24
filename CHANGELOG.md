@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.19.0](https://github.com/GetEvents/GetEvent_front/compare/v0.18.0...v0.19.0) (2026-10-24)
+
+
+### Features
+
+* enhance event filtering and sorting options ([01e2e38](https://github.com/GetEvents/GetEvent_front/commit/01e2e38743b21758b9685a63408a21d5683f57f0))
+* enhance event filtering and sorting options ([4dcd71f](https://github.com/GetEvents/GetEvent_front/commit/4dcd71fbbcc049413a66c784b7b636f974a795f0))
+
 ## [0.18.0](https://github.com/GetEvents/GetEvent_front/compare/v0.17.5...v0.18.0) (2026-10-23)
 
 
