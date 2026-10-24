@@ -53,7 +53,7 @@ const Sidebar = ({ visible }) => {
     items.push(
       {
         href: "/participations",
-        title: "Mes participations",
+        title: "Billets",
         shortTitle: "Billets",
         icon: <TicketCheck size={22} aria-hidden="true" />,
       },

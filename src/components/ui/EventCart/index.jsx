@@ -58,6 +58,7 @@ export default function EventCard({
   state,
   show,
   handleClose,
+  emptyMessage,
 }) {
   const router = useRouter();
   const deleteEventMutation = useDeleteEvent();
@@ -493,10 +494,14 @@ export default function EventCard({
       ) : (
         <section id="page_404" className={styles.erreur}>
           <p>
-            Il n&apos;y a encore aucun événement... Et si{" "}
-            <span>le prochain grand moment</span> venait de vous ? Soyez{" "}
-            <span>l&apos;initiateur</span> et créez un événement inoubliable dès
-            maintenant !
+            {emptyMessage || (
+              <>
+                Il n&apos;y a encore aucun événement... Et si{" "}
+                <span>le prochain grand moment</span> venait de vous ? Soyez{" "}
+                <span>l&apos;initiateur</span> et créez un événement inoubliable
+                dès maintenant !
+              </>
+            )}
           </p>
         </section>
       )}

@@ -83,6 +83,10 @@ vi.mock("@/hooks/useEvents", () => ({
   }),
 }));
 
+vi.mock("@/hooks/useParticipants", () => ({
+  useTicketsByUser: () => ({ data: [] }),
+}));
+
 vi.mock("@/utils/autocomplet", () => ({
   initMapAuto: vi.fn(),
 }));
