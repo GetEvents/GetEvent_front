@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { QrCode } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Ticket, { TicketSkeleton } from "@/components/ui/Ticket";
@@ -14,7 +15,26 @@ export default function ParticipationsPage() {
     user?.id,
     !authLoading && Boolean(user),
   );
-  const tickets = ticketsQuery.data || [];
+  const ticketsData = ticketsQuery.data;
+  const tickets = useMemo(() => ticketsData || [], [ticketsData]);
+
+  // Grouper les billets par événement
+  const groupedTickets = useMemo(() => {
+    const map = new Map<
+      number | string,
+      { event: (typeof tickets)[0]["event"]; tickets: typeof tickets }
+    >();
+    for (const t of tickets) {
+      const eventId = t.event?.id;
+      if (!eventId) continue;
+      if (!map.has(eventId)) {
+        map.set(eventId, { event: t.event, tickets: [] });
+      }
+      map.get(eventId)!.tickets.push(t);
+    }
+    return Array.from(map.values());
+  }, [tickets]);
+
   const refundsQuery = useQuery({
     queryKey: ["payments", "refunds", "mine", user?.id],
     queryFn: getMyRefunds,
@@ -43,7 +63,7 @@ export default function ParticipationsPage() {
           </div>
           <div
             className={style.event_badge}
-            aria-label={`${tickets.length} billets`}
+            aria-label={`${tickets.length} billets au total`}
           >
             <span className={style.badge_number}>{tickets.length}</span>
             <span className={style.badge_text}>
@@ -68,7 +88,7 @@ export default function ParticipationsPage() {
           <div className={`${style.state} ${style.error}`}>
             Impossible de charger vos billets.
           </div>
-        ) : tickets.length === 0 ? (
+        ) : groupedTickets.length === 0 ? (
           <div className={style.state}>
             <QrCode aria-hidden="true" />
             <h2>Aucun billet pour le moment</h2>
@@ -76,8 +96,8 @@ export default function ParticipationsPage() {
           </div>
         ) : (
           <div className={style.ticket_grid}>
-            {tickets.map((ticket) => (
-              <Ticket key={ticket.id} ticket={ticket} />
+            {groupedTickets.map((group) => (
+              <Ticket key={group.event.id} tickets={group.tickets} />
             ))}
           </div>
         )}

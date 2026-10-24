@@ -64,6 +64,7 @@ interface UnsubscribeParticipantParam extends IdTokenParam {
 interface EventTokenParam {
   eventId: number;
   token: string;
+  quantity?: number;
 }
 
 interface QrCodeTokenParam {
@@ -617,9 +618,10 @@ export const participations = {
    * S'inscrire à un événement
    * @param {number} eventId
    */
-  create: async ({ eventId, token }: EventTokenParam) => {
+  create: async ({ eventId, quantity = 1, token }: EventTokenParam) => {
     const body = {
       eventId: eventId,
+      quantity: quantity,
     };
 
     return apiRequest("POST", "/participations/", {

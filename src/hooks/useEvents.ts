@@ -77,7 +77,10 @@ export const eventMutations = {
     }),
   join: () =>
     mutationOptions({
-      mutationFn: (eventId: number) => joinEvent(eventId),
+      mutationFn: (param: number | { eventId: number; quantity?: number }) => {
+        if (typeof param === "number") return joinEvent(param, 1);
+        return joinEvent(param.eventId, param.quantity ?? 1);
+      },
     }),
   leave: () =>
     mutationOptions({

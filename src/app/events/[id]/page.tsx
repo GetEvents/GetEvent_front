@@ -295,7 +295,10 @@ export default async function EventDetailPage({
                 )}
 
                 {currentTicket?.qrCode && (
-                  <TicketQRCode value={currentTicket.qrCode} />
+                  <TicketQRCode
+                    value={currentTicket.qrCode}
+                    status={currentTicket.status}
+                  />
                 )}
 
                 <div className={styles.features}>
@@ -319,6 +322,7 @@ export default async function EventDetailPage({
                   paymentRequired={event.paymentRequired}
                   isExpired={isExpired}
                   isFull={remainingPlaces === 0}
+                  event={event}
                 />
 
                 <div className={styles.organizerInfo}>

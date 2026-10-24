@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CirclePlus, LogOut, Pencil, Trash2 } from "lucide-react";
 import { useDeleteEvent, useJoinEvent, useLeaveEvent } from "@/hooks/useEvents";
 import DelectModal from "@/components/DelectModal";
+import TicketPurchaseModal from "@/components/ui/TicketPurchaseModal";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 import styles from "./style.module.scss";
 
@@ -18,6 +19,7 @@ interface EventActionsProps {
   paymentRequired: boolean;
   isExpired: boolean;
   isFull: boolean;
+  event?: any;
 }
 
 export default function EventActions({
@@ -29,6 +31,7 @@ export default function EventActions({
   paymentRequired,
   isExpired,
   isFull,
+  event,
 }: EventActionsProps) {
   const router = useRouter();
   const { notify } = useNotification() as {
@@ -37,6 +40,7 @@ export default function EventActions({
   };
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const joinMutation = useJoinEvent();
   const leaveMutation = useLeaveEvent();
   const deleteMutation = useDeleteEvent();
@@ -45,16 +49,38 @@ export default function EventActions({
     leaveMutation.isPending ||
     deleteMutation.isPending;
 
-  const handleJoin = () =>
-    joinMutation.mutate(eventId, {
-      onSuccess: (result) => {
-        if (result.error) return notify(result.message, "error");
-        notify(result.message, result.paymentUrl ? "info" : "success");
-        if (result.paymentUrl) return window.location.assign(result.paymentUrl);
-        router.refresh();
+  const handleJoin = (quantity: number = 1) =>
+    joinMutation.mutate(
+      { eventId, quantity },
+      {
+        onSuccess: (result) => {
+          setIsPurchaseModalOpen(false);
+          if (result.error) {
+            const isAlready = result.message
+              ?.toLowerCase()
+              .includes("déjà inscrit");
+            return notify(
+              result.message || "Vous êtes déjà inscrit à cet événement !",
+              isAlready ? "info" : "error",
+            );
+          }
+          notify(result.message, result.paymentUrl ? "info" : "success");
+          if (result.paymentUrl)
+            return window.location.assign(result.paymentUrl);
+          router.refresh();
+        },
+        onError: (err: any) => {
+          const msg = err?.message || "";
+          const isAlready = msg.toLowerCase().includes("déjà inscrit");
+          notify(
+            isAlready
+              ? "Vous êtes déjà inscrit à cet événement !"
+              : msg || "Impossible de vous inscrire.",
+            isAlready ? "info" : "error",
+          );
+        },
       },
-      onError: () => notify("Impossible de vous inscrire.", "error"),
-    });
+    );
 
   const handleLeave = () => {
     if (!ticketId) return;
@@ -121,14 +147,25 @@ export default function EventActions({
   if (isRegistered)
     return (
       <>
-        <button
-          type="button"
-          className={`${styles.button} ${styles.secondary}`}
-          onClick={() => setIsLeaveModalOpen(true)}
-          disabled={isPending}
-        >
-          <LogOut /> Se désinscrire de l&apos;événement
-        </button>
+        <div className={styles.actionButtons}>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.success}`}
+            onClick={() => setIsPurchaseModalOpen(true)}
+            disabled={isPending || isExpired || isFull}
+          >
+            <CirclePlus /> Réserver d&apos;autres places
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.secondary}`}
+            onClick={() => setIsLeaveModalOpen(true)}
+            disabled={isPending}
+          >
+            <LogOut /> Se désinscrire de l&apos;événement
+          </button>
+        </div>
+
         <DelectModal
           isOpen={isLeaveModalOpen}
           onClose={() => setIsLeaveModalOpen(false)}
@@ -144,24 +181,55 @@ export default function EventActions({
           confirmLabel="Se désinscrire"
           loadingLabel="Désinscription..."
         />
+
+        <TicketPurchaseModal
+          isOpen={isPurchaseModalOpen}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          onConfirm={(qty) => handleJoin(qty)}
+          event={
+            event || {
+              id: eventId,
+              title: eventTitle,
+              paymentRequired,
+            }
+          }
+          isLoading={joinMutation.isPending}
+          alreadyRegisteredCount={1}
+        />
       </>
     );
 
   return (
-    <button
-      type="button"
-      className={`${styles.button} ${styles.success}`}
-      onClick={handleJoin}
-      disabled={isPending || isExpired || isFull}
-    >
-      <CirclePlus />
-      {isPending
-        ? "Inscription..."
-        : isExpired
-          ? "Événement terminé"
-          : isFull
-            ? "Événement complet"
-            : "S'inscrire à l'événement"}
-    </button>
+    <>
+      <button
+        type="button"
+        className={`${styles.button} ${styles.success}`}
+        onClick={() => setIsPurchaseModalOpen(true)}
+        disabled={isPending || isExpired || isFull}
+      >
+        <CirclePlus />
+        {isPending
+          ? "Inscription..."
+          : isExpired
+            ? "Événement terminé"
+            : isFull
+              ? "Événement complet"
+              : "S'inscrire / Réserver des places"}
+      </button>
+
+      <TicketPurchaseModal
+        isOpen={isPurchaseModalOpen}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        onConfirm={(qty) => handleJoin(qty)}
+        event={
+          event || {
+            id: eventId,
+            title: eventTitle,
+            paymentRequired,
+          }
+        }
+        isLoading={joinMutation.isPending}
+      />
+    </>
   );
 }
