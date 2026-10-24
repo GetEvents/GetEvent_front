@@ -12,6 +12,7 @@ import type { Event, EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
 import { useEvents } from "@/hooks/useEvents";
+import { useTicketsByUser } from "@/hooks/useParticipants";
 import { initMapAuto } from "@/utils/autocomplet";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import style from "./style.module.scss";
@@ -62,9 +63,9 @@ export default function Welcome() {
   const [notificationCount, setNotificationCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [timelineFilter, setTimelineFilter] = useState<"upcoming" | "past">(
-    "upcoming",
-  );
+  const [timelineFilter, setTimelineFilter] = useState<
+    "upcoming" | "past" | "participating"
+  >("upcoming");
   const [sortFilter, setSortFilter] =
     useState<EventFilters["filter"]>("recent");
   const [location, setLocation] = useState("");
@@ -150,18 +151,84 @@ export default function Welcome() {
 
   const [currentTime] = useState(Date.now);
 
-  const upcomingEvents = useMemo(
-    () => eventList.filter((event) => !isEventExpired(event, currentTime)),
-    [eventList, currentTime],
+  const userTicketsQuery = useTicketsByUser(
+    user?.id,
+    Boolean(user?.id) && isAuthenticated,
   );
+
+  const registeredEventIds = useMemo(() => {
+    if (!isAuthenticated || !user?.id) return new Set<number>();
+    const tickets = userTicketsQuery.data || [];
+    const ids = new Set<number>();
+    for (const t of tickets) {
+      if (t.status !== "CANCELLED" && t.event?.id) {
+        ids.add(Number(t.event.id));
+      }
+    }
+    return ids;
+  }, [isAuthenticated, user, userTicketsQuery.data]);
+
+  const upcomingEvents = useMemo(() => {
+    return eventList.filter((event) => {
+      if (isEventExpired(event, currentTime)) return false;
+      if (!isAuthenticated || !user?.id) return true;
+      if (registeredEventIds.has(Number(event.id))) return false;
+      if (Array.isArray(event.tickets)) {
+        const isRegistered = event.tickets.some(
+          (t) =>
+            t.status !== "CANCELLED" &&
+            Number(t.userId || (t.user as { id?: number })?.id) ===
+              Number(user.id),
+        );
+        if (isRegistered) return false;
+      }
+      return true;
+    });
+  }, [eventList, currentTime, registeredEventIds, isAuthenticated, user]);
 
   const pastEvents = useMemo(
     () => eventList.filter((event) => isEventExpired(event, currentTime)),
     [eventList, currentTime],
   );
 
+  const participatingEvents = useMemo(() => {
+    if (!isAuthenticated || !user?.id) return [];
+    const tickets = userTicketsQuery.data || [];
+    const map = new Map<number, Event>();
+    for (const t of tickets) {
+      if (t.status === "CANCELLED") continue;
+      const ev = t.event;
+      if (ev && ev.id && !map.has(ev.id)) {
+        const fullEvent = eventList.find((e) => e.id === ev.id) || ev;
+        map.set(ev.id, fullEvent as Event);
+      }
+    }
+    return Array.from(map.values());
+  }, [isAuthenticated, user, userTicketsQuery.data, eventList]);
+
+  const displayedParticipatingEvents = useMemo(() => {
+    let list = participatingEvents;
+    if (activeFilter && activeFilter !== "all") {
+      list = list.filter((e) => e.category === activeFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (e) =>
+          e.title?.toLowerCase().includes(q) ||
+          e.location?.toLowerCase().includes(q) ||
+          e.description?.toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [participatingEvents, activeFilter, searchQuery]);
+
   const displayedEvents =
-    timelineFilter === "past" ? pastEvents : upcomingEvents;
+    timelineFilter === "past"
+      ? pastEvents
+      : timelineFilter === "participating"
+        ? displayedParticipatingEvents
+        : upcomingEvents;
 
   const totalPages = Math.max(
     1,
@@ -384,18 +451,28 @@ export default function Welcome() {
           <div className={style.sectionHeader}>
             <div>
               <h2 className={style.sectionTitle}>
-                {timelineFilter === "past"
-                  ? "Événements passés"
-                  : "Événements à venir"}
+                {timelineFilter === "participating"
+                  ? "Mes participations"
+                  : timelineFilter === "past"
+                    ? "Événements passés"
+                    : "Événements à venir"}
               </h2>
               <p className={style.sectionSubtitle}>
                 {loading
                   ? "Recherche des meilleures expériences..."
-                  : `${displayedEvents.length} événement${
-                      displayedEvents.length > 1 ? "s" : ""
-                    } ${timelineFilter === "past" ? "terminé" : "à venir"}${
-                      displayedEvents.length > 1 ? "s" : ""
-                    }`}
+                  : timelineFilter === "participating"
+                    ? displayedEvents.length === 0
+                      ? "Vous ne participez à aucun événement pour le moment."
+                      : `${displayedEvents.length} événement${
+                          displayedEvents.length > 1 ? "s" : ""
+                        } auquel${
+                          displayedEvents.length > 1 ? "s" : ""
+                        } vous participez`
+                    : `${displayedEvents.length} événement${
+                        displayedEvents.length > 1 ? "s" : ""
+                      } ${timelineFilter === "past" ? "terminé" : "à venir"}${
+                        displayedEvents.length > 1 ? "s" : ""
+                      }`}
               </p>
             </div>
             <div className={style.headerActions}>
@@ -410,7 +487,8 @@ export default function Welcome() {
                     setCurrentPage(1);
                   }}
                 >
-                  À venir
+                  <span className={style.tabLabelDesktop}>À venir</span>
+                  <span className={style.tabLabelMobile}>À venir</span>
                   <span className={style.timelineCount}>
                     {upcomingEvents.length}
                   </span>
@@ -425,11 +503,34 @@ export default function Welcome() {
                     setCurrentPage(1);
                   }}
                 >
-                  Événements passés
+                  <span className={style.tabLabelDesktop}>
+                    Événements passés
+                  </span>
+                  <span className={style.tabLabelMobile}>Passés</span>
                   <span className={style.timelineCount}>
                     {pastEvents.length}
                   </span>
                 </button>
+                {(isAuthenticated || Boolean(user)) && (
+                  <button
+                    type="button"
+                    className={`${style.timelineBtn} ${
+                      timelineFilter === "participating" ? style.active : ""
+                    }`}
+                    onClick={() => {
+                      setTimelineFilter("participating");
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <span className={style.tabLabelDesktop}>
+                      Mes participations
+                    </span>
+                    <span className={style.tabLabelMobile}>Inscrits</span>
+                    <span className={style.timelineCount}>
+                      {participatingEvents.length}
+                    </span>
+                  </button>
+                )}
               </div>
 
               <div className={style.sortSelectWrapper}>
@@ -474,6 +575,15 @@ export default function Welcome() {
             state={effectiveFeedback}
             show={Boolean(effectiveFeedback)}
             handleClose={() => setFeedback(null)}
+            emptyMessage={
+              timelineFilter === "participating" ? (
+                <>
+                  Vous n&apos;êtes inscrit à aucun événement pour le moment.
+                  <br />
+                  Explorez les événements à venir et réservez vos places !
+                </>
+              ) : undefined
+            }
           />
 
           {displayedEvents.length > EVENTS_PER_PAGE && (
