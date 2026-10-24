@@ -351,26 +351,17 @@
   }
 }
 
-.deck_header {
+.status_row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: center;
   margin-bottom: 0.85rem;
-  padding: 0 0.25rem;
 }
 
-.deck_header_right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.deck_pill {
+.status_pill_used {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.8rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -379,75 +370,33 @@
   font-weight: 800;
 
   svg {
-    width: 15px;
-    height: 15px;
-  }
-}
-
-.status_badge_used {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  color: #15803d;
-  font-size: 0.72rem;
-  font-weight: 800;
-
-  svg {
-    width: 13px;
-    height: 13px;
-  }
-}
-
-.status_badge_valid {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #4b5563;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.single_header_status {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.validation_banner_used {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 0 auto 0.85rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: 12px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
-  font-size: 0.82rem;
-  font-weight: 700;
-
-  svg {
-    width: 17px;
-    height: 17px;
-    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
     color: #16a34a;
   }
 }
 
-.ticket_ref {
+.status_pill_valid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #374151;
   font-size: 0.78rem;
   font-weight: 700;
-  color: #6b7280;
+}
+
+.pill_divider {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.pill_ref {
   font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
 
 .carousel_wrapper {
@@ -600,27 +549,11 @@
 
 .qr_code_used {
   border-color: #16a34a !important;
-  background: #f0fdf4 !important;
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
 
   svg {
-    opacity: 0.85;
+    opacity: 0.88;
   }
-}
-
-.qr_stamp {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.65rem;
-  padding: 0.35rem 0.85rem;
-  border-radius: 8px;
-  background: #16a34a;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
 }
 .qr_unavailable {
   padding: 2rem 1rem;

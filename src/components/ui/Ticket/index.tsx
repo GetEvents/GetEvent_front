@@ -21,7 +21,6 @@ import {
   Layers,
   MapPin,
   QrCode,
-  Ticket as TicketIcon,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -96,11 +95,15 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
   const event = currentTicket?.event;
 
   const validatedCount = useMemo(
-    () => ticketList.filter((t) => t.status === "USED").length,
+    () =>
+      ticketList.filter((t) => t.status && t.status.toUpperCase() === "USED")
+        .length,
     [ticketList],
   );
   const allValidated = totalTickets > 0 && validatedCount === totalTickets;
-  const isCurrentValidated = currentTicket?.status === "USED";
+  const isCurrentValidated = Boolean(
+    currentTicket?.status && currentTicket.status.toUpperCase() === "USED",
+  );
 
   const handlePrev = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalTickets - 1));
@@ -145,7 +148,11 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
   }
 
   const handleOpenModal = () => {
-    setCurrentIndex(0);
+    // Si certains billets ne sont pas encore validés, ouvrir directement sur le premier à scanner
+    const firstPendingIndex = ticketList.findIndex(
+      (t) => t.status?.toUpperCase() !== "USED",
+    );
+    setCurrentIndex(firstPendingIndex >= 0 ? firstPendingIndex : 0);
     setIsModalOpen(true);
   };
 
@@ -178,49 +185,43 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
         </p>
         <h2 id={`ticket-title-${event.id}`}>{event.title}</h2>
 
-        {totalTickets > 1 ? (
-          <div className={styles.deck_header}>
-            <span className={styles.deck_pill}>
-              <TicketIcon aria-hidden="true" />
-              Place {currentIndex + 1} sur {totalTickets}
-            </span>
-            <div className={styles.deck_header_right}>
-              {isCurrentValidated ? (
-                <span className={styles.status_badge_used}>
-                  <CheckCircle2 aria-hidden="true" />
-                  Déjà validé
-                </span>
-              ) : (
-                <span className={styles.status_badge_valid}>
-                  Prêt à scanner
-                </span>
+        {/* Badge d'état unique, épuré et raffiné */}
+        <div className={styles.status_row}>
+          {isCurrentValidated ? (
+            <span className={styles.status_pill_used}>
+              <CheckCircle2 aria-hidden="true" />
+              <span>Validé</span>
+              {totalTickets > 1 && (
+                <>
+                  <span className={styles.pill_divider}>·</span>
+                  <span>
+                    Place {currentIndex + 1}/{totalTickets}
+                  </span>
+                </>
               )}
-              <span className={styles.ticket_ref}>
+              <span className={styles.pill_divider}>·</span>
+              <span className={styles.pill_ref}>
                 #{String(currentTicket.id).padStart(4, "0")}
               </span>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.single_header_status}>
-            {isCurrentValidated ? (
-              <span className={styles.status_badge_used}>
-                <CheckCircle2 aria-hidden="true" />
-                Billet déjà validé à l’entrée
+            </span>
+          ) : (
+            <span className={styles.status_pill_valid}>
+              <span>Prêt à scanner</span>
+              {totalTickets > 1 && (
+                <>
+                  <span className={styles.pill_divider}>·</span>
+                  <span>
+                    Place {currentIndex + 1}/{totalTickets}
+                  </span>
+                </>
+              )}
+              <span className={styles.pill_divider}>·</span>
+              <span className={styles.pill_ref}>
+                #{String(currentTicket.id).padStart(4, "0")}
               </span>
-            ) : (
-              <span className={styles.status_badge_valid}>
-                Billet valide · Prêt à scanner
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* {isCurrentValidated && (
-          <div className={styles.validation_banner_used}>
-            <CheckCircle2 aria-hidden="true" />
-            <span>Ce billet a déjà été validé à l’entrée</span>
-          </div>
-        )} */}
+            </span>
+          )}
+        </div>
 
         {/* Carousel de cartes */}
         <div
@@ -251,11 +252,6 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
                   marginSize={2}
                   title={`QR code place ${currentIndex + 1} sur ${totalTickets}`}
                 />
-                {isCurrentValidated && (
-                  <div className={styles.qr_stamp}>
-                    <span>DÉJÀ VALIDÉ</span>
-                  </div>
-                )}
               </div>
             ) : (
               <p className={styles.qr_unavailable}>
@@ -337,10 +333,10 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
         </div>
         <p className={styles.modal_hint}>
           {isCurrentValidated
-            ? "Ce billet a déjà été validé à l’entrée et ne peut plus être réutilisé."
-            : totalTickets > 1
-              ? "Glissez ou cliquez sur le bouton pour scanner chaque participant."
-              : "Présentez ce QR code à l’entrée de l’événement."}
+            ? currentTicket.validatedAt
+              ? `Entrée validée le ${formatDate(currentTicket.validatedAt)} à ${formatTime(currentTicket.validatedAt)}`
+              : "Entrée enregistrée pour ce billet"
+            : "Présentez ce QR code à l’entrée de l’événement."}
         </p>
       </section>
     </div>
@@ -419,6 +415,15 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
                 <div className={styles.stub_validated}>
                   <CheckCircle2 aria-hidden="true" />
                   <span className={styles.stub_val_text}>VALIDÉ</span>
+                </div>
+              ) : validatedCount > 0 ? (
+                <div className={styles.stub_multi}>
+                  <span className={styles.stub_qty}>
+                    {validatedCount}/{totalTickets}
+                  </span>
+                  <span className={styles.stub_label}>
+                    validé{validatedCount > 1 ? "s" : ""}
+                  </span>
                 </div>
               ) : totalTickets > 1 ? (
                 <div className={styles.stub_multi}>
