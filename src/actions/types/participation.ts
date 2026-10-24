@@ -23,6 +23,7 @@ export type ParticipationTicket = {
   event: Event;
   qrCode: string;
   status?: TicketStatus;
+  validatedAt?: string | null;
 };
 
 export type ParticipationTicketRecord = Partial<EventTicket> & {

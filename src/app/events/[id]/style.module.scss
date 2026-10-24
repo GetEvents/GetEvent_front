@@ -1077,3 +1077,35 @@
     }
   }
 }
+
+.registeredNoticeCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  color: #065f46;
+
+  svg {
+    color: #059669;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .registeredNoticeTitle {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    margin: 0;
+    color: #065f46;
+  }
+
+  .registeredNoticeSubtitle {
+    font-size: 0.8125rem;
+    margin: 2px 0 0 0;
+    color: #047857;
+  }
+}

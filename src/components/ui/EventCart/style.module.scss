@@ -157,6 +157,26 @@
   }
 }
 
+.badgeRegistered {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(16, 185, 129, 0.95);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+
+  svg {
+    stroke-width: 2.5;
+  }
+}
+
 .badgeStatus {
   display: inline-flex;
   align-items: center;
@@ -266,7 +286,7 @@
   }
 }
 
-// Pied de carte : Action & CTA
+// Pied de carte : Détails (Œil) & Action principale (Participer)
 .eventactin {
   padding: 12px 18px 16px 18px;
   display: flex;
@@ -274,6 +294,40 @@
   gap: 10px;
   border-top: 1px solid #f1f5f9;
   background: #ffffff;
+}
+
+.leftActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.eyeBtn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .editdelect {
@@ -308,45 +362,63 @@
   }
 }
 
-.ctaDetailsBtn {
+.ctaPrimaryBtn {
   flex: 1;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 16px;
   border-radius: 12px;
-  background: #0f172a;
+  background: #2563eb;
   color: #ffffff;
-  border: 1px solid transparent;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
   transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+  white-space: nowrap;
 
-  .ctaArrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    transition: all 0.25s ease;
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32);
   }
 
-  &:hover {
-    background: #2563eb;
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
 
-    .ctaArrow {
-      background: #ffffff;
-      color: #2563eb;
-      transform: translate(2px, -2px);
+  &.registered {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    box-shadow: none;
+
+    svg {
+      color: #059669;
+      stroke-width: 2.5;
     }
+
+    &:hover {
+      background: #d1fae5;
+      color: #047857;
+      border-color: #6ee7b7;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+  }
+
+  &.disabled,
+  &:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
   }
 }
 
@@ -421,10 +493,19 @@
     border-top: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
+    gap: 8px;
+
+    .skeletonEye {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      flex-shrink: 0;
+    }
 
     .skeletonBtn {
       height: 38px;
-      width: 100%;
+      flex: 1;
       border-radius: 12px;
       background: #f1f5f9;
     }
