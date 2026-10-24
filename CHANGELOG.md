@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.20.0](https://github.com/GetEvents/GetEvent_front/compare/v0.19.1...v0.20.0) (2026-10-24)
+
+
+### Features
+
+* ajouter la gestion des billets de participation et améliorer l'… ([b6f20c6](https://github.com/GetEvents/GetEvent_front/commit/b6f20c610b27f38a111bc45e68ebcbc3db8c656d))
+* ajouter la gestion des billets de participation et améliorer l'affichage des événements ([2b9568e](https://github.com/GetEvents/GetEvent_front/commit/2b9568e850bc50e89b990c9ad63157875ad2242b))
+
 ## [0.19.1](https://github.com/GetEvents/GetEvent_front/compare/v0.19.0...v0.19.1) (2026-10-24)
 
 
