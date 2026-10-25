@@ -31,6 +31,16 @@ const Sidebar = ({ visible }) => {
     email: user?.email || "",
   };
 
+  const isEventDetailPage = useMemo(() => {
+    if (!pathname) return false;
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length === 2 && segments[0] === "events") {
+      const reserved = ["my-events", "createvent", "editEvent", "test"];
+      return !reserved.includes(segments[1]);
+    }
+    return false;
+  }, [pathname]);
+
   const menuItems = useMemo(() => {
     const items = [
       {
@@ -84,7 +94,9 @@ const Sidebar = ({ visible }) => {
 
   return (
     <aside
-      className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}
+      className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""} ${
+        isEventDetailPage ? styles.hideOnMobile : ""
+      }`}
       id="menu_left"
     >
       <div className={styles.sidebarHeader}>
