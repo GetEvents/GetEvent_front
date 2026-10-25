@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  ArrowLeft,
   CalendarDays,
   Check,
+  CheckCircle2,
   Info,
   MapPin,
   MessageCircle,
@@ -98,11 +100,14 @@ export default async function EventDetailPage({
   const activeTickets = tickets.filter(
     (ticket) => ticket.status !== "CANCELLED",
   );
-  const currentTicket = activeTickets.find(
-    (ticket) => ticket.userId === currentUser?.id,
-  );
+  const userTickets = currentUser
+    ? activeTickets.filter((ticket) => ticket.userId === currentUser.id)
+    : [];
+  const userTicketsCount = userTickets.length;
+  const isRegistered = userTicketsCount > 0;
+  const currentTicket = userTickets[0];
   const canAccessMessages = Boolean(
-    currentUser && tokenAuth && (currentTicket || isOwner),
+    currentUser && tokenAuth && (isRegistered || isOwner),
   );
   const remainingPlaces = Math.max(0, event.capacity - activeTickets.length);
   const eventEnd = getEventEnd(event.endDate, event.endTime);
@@ -118,7 +123,7 @@ export default async function EventDetailPage({
   return (
     <main className={styles.container}>
       <section className={styles.hero}>
-        {event.image && (
+        {event.image ? (
           <Image
             src={event.image}
             alt={event.title}
@@ -127,27 +132,40 @@ export default async function EventDetailPage({
             sizes="100vw"
             style={{ objectFit: "cover" }}
           />
+        ) : (
+          <div className={styles.heroFallback} />
         )}
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <div className={styles.heroInner}>
-            <span className={styles.categoryBadge}>
-              <Tag />
-              {event.category || "Événement"}
-            </span>
+            <div className={styles.heroTopRow}>
+              <Link href="/events" className={styles.heroBackBtn}>
+                <ArrowLeft size={16} aria-hidden="true" />
+                <span>Retour aux événements</span>
+              </Link>
+              <span className={styles.categoryBadge}>
+                <Tag size={14} aria-hidden="true" />
+                {event.category || "Événement"}
+              </span>
+            </div>
             <h1>{event.title}</h1>
             <div className={styles.heroBadges}>
               <span className={styles.badge}>
-                <CalendarDays />
-                {formatDate(event.startDate)} - {formatDate(event.endDate)}
+                <CalendarDays size={18} aria-hidden="true" />
+                <span>
+                  {formatDate(event.startDate)} - {formatDate(event.endDate)}
+                </span>
               </span>
               <span className={styles.badge}>
-                <MapPin />
-                {event.location}
+                <MapPin size={18} aria-hidden="true" />
+                <span>{event.location}</span>
               </span>
               <span className={styles.badge}>
-                <Users />
-                {tickets.length} participant(s)
+                <Users size={18} aria-hidden="true" />
+                <span>
+                  {activeTickets.length} participant
+                  {activeTickets.length > 1 ? "s" : ""}
+                </span>
               </span>
             </div>
           </div>
@@ -157,26 +175,54 @@ export default async function EventDetailPage({
       <div className={styles.content}>
         <div className={styles.grid}>
           <div className={styles.mainContent}>
+            {isRegistered && (
+              <div className={styles.registeredBanner}>
+                <div className={styles.registeredBannerIcon}>
+                  <CheckCircle2 size={24} aria-hidden="true" />
+                </div>
+                <div className={styles.registeredBannerText}>
+                  <p className={styles.registeredBannerTitle}>
+                    Vous participez à cet événement !
+                  </p>
+                  <p className={styles.registeredBannerSubtitle}>
+                    {userTicketsCount > 1
+                      ? `Vous avez ${userTicketsCount} places réservées. Retrouvez vos billets et QR codes d'accès.`
+                      : "Votre place est réservée. Présentez votre QR code d'accès à l'entrée."}
+                  </p>
+                </div>
+                <Link
+                  href="/participations"
+                  className={styles.registeredBannerBtn}
+                >
+                  <span>Mes billets ({userTicketsCount})</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            )}
+
             <section className={styles.card}>
               <header className={styles.cardHeader}>
                 <h2>
-                  <MapPin />
-                  Localisation
+                  <Info aria-hidden="true" />À propos de l&apos;événement
                 </h2>
               </header>
               <div className={styles.cardBody}>
-                <EventMap title={event.title} location={event.location} />
+                <p className={styles.eventDescription}>
+                  {event.description ||
+                    "Aucune description renseignée pour cet événement."}
+                </p>
               </div>
             </section>
 
             <section className={styles.card}>
               <header className={styles.cardHeader}>
                 <h2>
-                  <Info />À propos
+                  <MapPin aria-hidden="true" />
+                  Localisation & Accès
                 </h2>
               </header>
               <div className={styles.cardBody}>
-                <p>{event.description}</p>
+                <EventMap title={event.title} location={event.location} />
               </div>
             </section>
 
@@ -274,31 +320,49 @@ export default async function EventDetailPage({
                 <h3>Billetterie</h3>
               </header>
               <div className={styles.sidebarBody}>
-                {!currentTicket?.qrCode && (
+                {!isRegistered && (
                   <div
                     className={`${styles.priceSection} ${
                       event.paymentRequired ? "" : styles.free
                     }`}
                   >
-                    <p className={styles.priceLabel}>Pass standard</p>
+                    <p className={styles.priceLabel}>
+                      Accès à l&apos;événement
+                    </p>
                     <h2 className={styles.priceAmount}>
                       {event.paymentRequired
-                        ? `${event.paymentPrice || 0} FCFA`
+                        ? `${new Intl.NumberFormat("fr-FR").format(event.paymentPrice || 0)} FCFA`
                         : "Gratuit"}
                     </h2>
                     <p className={styles.priceNote}>
                       {event.paymentRequired
                         ? "Prix par participant"
-                        : "Inscription libre"}
+                        : "Inscription libre et gratuite"}
                     </p>
                   </div>
                 )}
 
-                {currentTicket?.qrCode && (
-                  <TicketQRCode
-                    value={currentTicket.qrCode}
-                    status={currentTicket.status}
-                  />
+                {isRegistered && currentTicket?.qrCode && (
+                  <div className={styles.ticketBoxWrapper}>
+                    <TicketQRCode
+                      value={currentTicket.qrCode}
+                      status={currentTicket.status}
+                    />
+                    {userTicketsCount > 1 && (
+                      <div className={styles.multiTicketsNotice}>
+                        <p>
+                          Vous disposez de{" "}
+                          <strong>{userTicketsCount} billets</strong> au total.
+                        </p>
+                        <Link
+                          href="/participations"
+                          className={styles.multiTicketsLink}
+                        >
+                          Voir tous mes billets & QR codes →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 <div className={styles.features}>
@@ -309,7 +373,7 @@ export default async function EventDetailPage({
                     <Check /> Accès à l&apos;événement
                   </span>
                   <span className={styles.feature}>
-                    <Check /> Billet personnel
+                    <Check /> Billet personnel avec QR code
                   </span>
                 </div>
 
@@ -317,16 +381,17 @@ export default async function EventDetailPage({
                   eventId={event.id}
                   eventTitle={event.title}
                   isOwner={isOwner}
-                  isRegistered={Boolean(currentTicket)}
+                  isRegistered={isRegistered}
                   ticketId={currentTicket?.id}
                   paymentRequired={event.paymentRequired}
                   isExpired={isExpired}
                   isFull={remainingPlaces === 0}
                   event={event}
+                  userTicketsCount={userTicketsCount}
                 />
 
                 <div className={styles.organizerInfo}>
-                  <p className={styles.labelOrg}>Organisateur</p>
+                  <p className={styles.labelOrg}>Organisé par</p>
                   <div className={styles.organizerDetailsAvatar}>
                     <div
                       className={styles.organizerAvatar}
@@ -347,7 +412,15 @@ export default async function EventDetailPage({
                       )}
                     </div>
                     <div className={styles.organizerDetails}>
-                      <p className={styles.organizerName}>{organizerName}</p>
+                      <div className={styles.organizerNameRow}>
+                        <p className={styles.organizerName}>{organizerName}</p>
+                        <span
+                          className={styles.verifiedOrganizerBadge}
+                          title="Organisateur vérifié"
+                        >
+                          <Check size={11} aria-hidden="true" />
+                        </span>
+                      </div>
                       {organizer?.email && (
                         <p className={styles.organizerEmail}>
                           {organizer.email}

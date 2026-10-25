@@ -40,6 +40,11 @@
   gap: 2rem;
 }
 
+.header_text {
+  flex: 1;
+  min-width: 0;
+}
+
 .eyebrow {
   margin: 0 0 0.65rem;
   font-size: 0.75rem;
@@ -63,24 +68,31 @@
 }
 
 .event_badge {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-width: 110px;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border: 1px solid #333;
   border-radius: 18px;
   background: #111;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .badge_number {
   font-size: 2rem;
   font-weight: 900;
+  line-height: 1;
 }
 
 .badge_text {
   color: #aaa;
   font-size: 0.75rem;
   text-transform: uppercase;
+  margin-top: 0.35rem;
+  letter-spacing: 0.04em;
 }
 
 .content_section {
@@ -192,22 +204,64 @@
 
   .header_content {
     align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .event_badge {
+    min-width: 90px;
+    padding: 0.75rem 1rem;
   }
 }
 
 @media (max-width: 560px) {
-  .header_section,
+  .header_section {
+    padding: 2rem 1rem 1.75rem;
+  }
+
   .content_section {
     padding-right: 1rem;
     padding-left: 1rem;
   }
 
   .header_content {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .eyebrow {
+    margin-bottom: 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  .main_title {
+    font-size: clamp(1.85rem, 8vw, 2.4rem);
+    line-height: 1.05;
+  }
+
+  .description {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    line-height: 1.35;
   }
 
   .event_badge {
-    min-width: 90px;
+    min-width: 68px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 14px;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  .badge_number {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  .badge_text {
+    font-size: 0.62rem;
+    margin-top: 0.2rem;
   }
 
   .refund_card {
