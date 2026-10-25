@@ -300,6 +300,10 @@ $border-color: #e2e8f0;
     overflow: visible !important;
     z-index: 10005 !important;
 
+    &.hideOnMobile {
+      display: none !important;
+    }
+
     .sidebarHeader,
     .sidebarNav {
       display: none !important;
