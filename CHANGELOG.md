@@ -2,6 +2,14 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.0](https://github.com/GetEvents/GetEvent_front/compare/v0.20.0...v0.21.0) (2026-10-25)
+
+
+### Features
+
+* ajouter la logique pour masquer la barre latérale sur les pages de détails d'événements ([7825404](https://github.com/GetEvents/GetEvent_front/commit/7825404312e3ff218dadeb741a1f79b48f5a88b1))
+* ajouter la logique pour masquer la barre latérale sur les pages… ([897f9fe](https://github.com/GetEvents/GetEvent_front/commit/897f9fe77c4f48e68accc344c8cb1babb7f2dd53))
+
 ## [0.20.0](https://github.com/GetEvents/GetEvent_front/compare/v0.19.1...v0.20.0) (2026-10-24)
 
 
