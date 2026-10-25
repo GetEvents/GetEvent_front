@@ -54,7 +54,7 @@ export default function ParticipationsPage() {
     <main className={style.parent_container}>
       <header className={style.header_section}>
         <div className={style.header_content}>
-          <div>
+          <div className={style.header_text}>
             <p className={style.eyebrow}>Votre portefeuille</p>
             <h1 className={style.main_title}>Mes billets</h1>
             <p className={style.description}>

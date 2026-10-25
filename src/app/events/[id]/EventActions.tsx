@@ -20,6 +20,7 @@ interface EventActionsProps {
   isExpired: boolean;
   isFull: boolean;
   event?: any;
+  userTicketsCount?: number;
 }
 
 export default function EventActions({
@@ -32,6 +33,7 @@ export default function EventActions({
   isExpired,
   isFull,
   event,
+  userTicketsCount = 0,
 }: EventActionsProps) {
   const router = useRouter();
   const { notify } = useNotification() as {
@@ -110,6 +112,10 @@ export default function EventActions({
       onError: () => notify("Impossible de supprimer l'événement.", "error"),
     });
 
+  const formattedPrice = paymentRequired
+    ? `${new Intl.NumberFormat("fr-FR").format(event?.paymentPrice || 0)} FCFA`
+    : "Gratuit";
+
   if (isOwner)
     return (
       <>
@@ -133,6 +139,23 @@ export default function EventActions({
             <Trash2 /> Supprimer l&apos;événement
           </button>
         </div>
+
+        {/* Barre fixe sur mobile */}
+        <div className={styles.mobileStickyBar}>
+          <div className={styles.mobileStickyBarPrice}>
+            <span className={styles.stickyPriceLabel}>Votre événement</span>
+            <span className={styles.stickyPriceValue}>Organisateur</span>
+          </div>
+          <div className={styles.mobileStickyBarBtnWrap}>
+            <Link
+              href={isExpired ? "#" : `/events/editEvent/${eventId}`}
+              className={`${styles.button} ${styles.primary} ${styles.stickyBtn} ${isExpired ? styles.disabled : ""}`}
+            >
+              <Pencil size={16} /> Modifier
+            </Link>
+          </div>
+        </div>
+
         <DelectModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
@@ -166,6 +189,28 @@ export default function EventActions({
           </button>
         </div>
 
+        {/* Barre fixe sur mobile */}
+        <div className={styles.mobileStickyBar}>
+          <div className={styles.mobileStickyBarPrice}>
+            <span className={styles.stickyPriceLabel}>
+              {userTicketsCount > 1
+                ? `${userTicketsCount} places réservées`
+                : "Place réservée"}
+            </span>
+            <span className={styles.stickyPriceValue}>Inscrit ✓</span>
+          </div>
+          <div className={styles.mobileStickyBarBtnWrap}>
+            <button
+              type="button"
+              className={`${styles.button} ${styles.success} ${styles.stickyBtn}`}
+              onClick={() => setIsPurchaseModalOpen(true)}
+              disabled={isPending || isExpired || isFull}
+            >
+              <CirclePlus size={16} /> + Places
+            </button>
+          </div>
+        </div>
+
         <DelectModal
           isOpen={isLeaveModalOpen}
           onClose={() => setIsLeaveModalOpen(false)}
@@ -194,7 +239,7 @@ export default function EventActions({
             }
           }
           isLoading={joinMutation.isPending}
-          alreadyRegisteredCount={1}
+          alreadyRegisteredCount={userTicketsCount || 1}
         />
       </>
     );
@@ -216,6 +261,27 @@ export default function EventActions({
               ? "Événement complet"
               : "S'inscrire / Réserver des places"}
       </button>
+
+      {/* Barre fixe sur mobile */}
+      <div className={styles.mobileStickyBar}>
+        <div className={styles.mobileStickyBarPrice}>
+          <span className={styles.stickyPriceLabel}>
+            {paymentRequired ? "Tarif / place" : "Entrée"}
+          </span>
+          <span className={styles.stickyPriceValue}>{formattedPrice}</span>
+        </div>
+        <div className={styles.mobileStickyBarBtnWrap}>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.success} ${styles.stickyBtn}`}
+            onClick={() => setIsPurchaseModalOpen(true)}
+            disabled={isPending || isExpired || isFull}
+          >
+            <CirclePlus size={16} />
+            {isExpired ? "Terminé" : isFull ? "Complet" : "Réserver"}
+          </button>
+        </div>
+      </div>
 
       <TicketPurchaseModal
         isOpen={isPurchaseModalOpen}
