@@ -79,8 +79,15 @@ export const notifications = {
   /**
    * Supprimer une souscription push
    */
-  unsubscribePush: async (endpoint: string) => {
+  unsubscribePush: async ({
+    endpoint,
+    token,
+  }: {
+    endpoint: string;
+    token: string;
+  }) => {
     return apiRequest("POST", "/notifications/push/unsubscribe", {
+      headers: { Authorization: `Bearer ${token}` },
       body: { endpoint },
     });
   },

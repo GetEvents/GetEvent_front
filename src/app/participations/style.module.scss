@@ -1,270 +1,212 @@
+@use "../../styles/design" as ds;
+
+// Page « Mes billets » — design affiche, pleine largeur comme le tableau de
+// bord : en-tête sombre avec compteur géant, puis grille de billets.
+
 .parent_container {
   width: 100%;
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background: #f3f3f1;
-  color: #111;
+  padding: 1.25rem 1rem 5rem;
+  background: var(--ge-paper);
+  color: var(--ge-ink);
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 5rem;
+  }
 }
 
-.header_section {
-  position: relative;
-  overflow: hidden;
-  padding: clamp(2rem, 6vw, 4.5rem) 2rem;
-  background: #050505;
-  color: #fff;
+// ---- En-tête -----------------------------------------------------------------
 
-  &::after {
-    position: absolute;
-    right: -8rem;
-    bottom: -15rem;
-    width: 30rem;
-    height: 30rem;
-    border: 1px solid #333;
-    border-radius: 50%;
-    box-shadow:
-      0 0 0 4rem #0c0c0c,
-      0 0 0 8rem #151515;
-    content: "";
+.header_section {
+  @include ds.panel-dark;
+  margin-bottom: 1.75rem;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(0, 179, 255, 0.22), transparent 45%),
+    var(--ge-night);
+
+  @media (min-width: 768px) {
+    padding: 2.5rem;
   }
 }
 
 .header_content {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  width: min(1180px, 100%);
-  margin: 0 auto;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .header_text {
-  flex: 1;
   min-width: 0;
 }
 
 .eyebrow {
-  margin: 0 0 0.65rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  @include ds.kicker(var(--ge-sky));
+  margin-bottom: 0.75rem;
 }
 
 .main_title {
-  margin: 0;
-  font-size: clamp(2.4rem, 7vw, 5rem);
-  font-weight: 900;
-  letter-spacing: -0.06em;
-  line-height: 0.95;
+  @include ds.display(clamp(2rem, 6vw, 4rem));
+  margin: 0 0 0.75rem;
 }
 
 .description {
-  max-width: 540px;
-  margin: 1rem 0 0;
-  color: #bcbcbc;
+  max-width: 32rem;
+  margin: 0;
+  color: var(--ge-night-muted);
 }
 
+// Compteur de billets façon affiche.
 .event_badge {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 110px;
-  padding: 1rem 1.25rem;
-  border: 1px solid #333;
-  border-radius: 18px;
-  background: #111;
-  text-align: center;
   flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .badge_number {
-  font-size: 2rem;
-  font-weight: 900;
-  line-height: 1;
+  @include ds.display(clamp(3rem, 9vw, 6rem));
+  @include ds.outline-text(var(--ge-cyan), 2px);
+  line-height: 0.85;
 }
 
 .badge_text {
-  color: #aaa;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  margin-top: 0.35rem;
-  letter-spacing: 0.04em;
+  @include ds.label(var(--ge-night-muted));
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
 }
 
+// ---- Billets -----------------------------------------------------------------
+
 .content_section {
-  width: min(1180px, 100%);
-  margin: 0 auto;
-  padding: clamp(2rem, 5vw, 4rem) 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
 .ticket_grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
-}
 
-.state {
-  display: flex;
-  min-height: 300px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  border: 1px dashed #bbb;
-  border-radius: 24px;
-  color: #666;
-  text-align: center;
-
-  h2,
-  p {
-    margin: 0;
+  @media (min-width: 700px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// États vide / erreur
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3.5rem 1.5rem;
+  border: 1px dashed rgba(17, 17, 19, 0.25);
+  border-radius: var(--ge-radius-card);
+  color: var(--ge-ink-muted);
+  text-align: center;
+
   svg {
-    width: 42px;
-    height: 42px;
-    color: #111;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.7rem;
+    border-radius: 50%;
+    background: var(--ge-ink);
+    color: var(--ge-cyan);
+  }
+
+  h2 {
+    @include ds.display(clamp(1.2rem, 3vw, 1.6rem));
+    margin: 0;
+    color: var(--ge-ink);
+  }
+
+  p {
+    margin: 0;
   }
 }
 
 .error {
-  color: #a31515;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.06);
+  color: #991b1b;
+  font-weight: 700;
 }
 
-.refunds_section {
-  margin-top: 3rem;
+// ---- Remboursements ----------------------------------------------------------
 
+.refunds_section {
   h2 {
+    @include ds.display(clamp(1.3rem, 3vw, 1.9rem));
     margin: 0 0 1rem;
-    font-size: 1.5rem;
   }
 }
 
 .refunds_list {
-  display: grid;
-  gap: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .refund_card {
+  @include ds.card;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #d7d7d2;
-  border-radius: 14px;
-  background: #ffffff;
+  padding: 1rem 1.25rem;
 
-  h3,
+  h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
   p {
     margin: 0;
+    color: var(--ge-ink-muted);
+    font-size: 0.88rem;
   }
 
-  p {
-    margin-top: 0.25rem;
-    color: #666;
+  strong {
+    @include ds.display(1.2rem);
+    white-space: nowrap;
   }
 
-  span {
-    padding: 0.35rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 800;
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr auto;
+
+    > div {
+      grid-column: 1 / -1;
+    }
   }
 }
 
+.refund_pending,
+.refund_completed,
+.refund_failed,
+.refund_rejected {
+  @include ds.chip(light);
+  white-space: nowrap;
+}
+
 .refund_pending {
-  background: #fef3c7;
+  background: rgba(245, 158, 11, 0.15);
   color: #92400e;
 }
 
 .refund_completed {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
 }
 
 .refund_failed,
 .refund_rejected {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-@media (max-width: 800px) {
-  .parent_container {
-    margin-bottom: 5rem;
-  }
-
-  .ticket_grid {
-    grid-template-columns: 1fr;
-  }
-
-  .header_content {
-    align-items: flex-start;
-    gap: 1.25rem;
-  }
-
-  .event_badge {
-    min-width: 90px;
-    padding: 0.75rem 1rem;
-  }
-}
-
-@media (max-width: 560px) {
-  .header_section {
-    padding: 2rem 1rem 1.75rem;
-  }
-
-  .content_section {
-    padding-right: 1rem;
-    padding-left: 1rem;
-  }
-
-  .header_content {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .eyebrow {
-    margin-bottom: 0.4rem;
-    font-size: 0.7rem;
-  }
-
-  .main_title {
-    font-size: clamp(1.85rem, 8vw, 2.4rem);
-    line-height: 1.05;
-  }
-
-  .description {
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    line-height: 1.35;
-  }
-
-  .event_badge {
-    min-width: 68px;
-    padding: 0.5rem 0.65rem;
-    border-radius: 14px;
-    flex-shrink: 0;
-    align-self: flex-start;
-  }
-
-  .badge_number {
-    font-size: 1.4rem;
-    line-height: 1;
-  }
-
-  .badge_text {
-    font-size: 0.62rem;
-    margin-top: 0.2rem;
-  }
-
-  .refund_card {
-    grid-template-columns: 1fr;
-  }
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
 }

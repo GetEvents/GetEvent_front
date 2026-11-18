@@ -1,0 +1,272 @@
+// =============================================================================
+// Design « affiche » de GetEvent — mixins partagés.
+//
+// Base claire + blocs sombres, accent cyan. Les valeurs viennent des variables
+// CSS --ge-* (src/styles/variables.css). Utilisation dans un module SCSS :
+//
+//   @use "../../styles/design" as ds;   // chemin relatif au fichier
+//
+//   .title  { @include ds.display(3rem); }
+//   .button { @include ds.button(primary); }
+//   .chip   { @include ds.chip(light); }
+//   .block  { @include ds.panel-dark; }
+// =============================================================================
+
+// ---- Typographie ------------------------------------------------------------
+
+// Grand titre d'affiche : Archivo élargie, très grasse, en majuscules.
+@mixin display($size: clamp(2.2rem, 7vw, 5rem)) {
+  font-family: var(--ge-font-display);
+  font-size: $size;
+  font-stretch: 125%;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+// Texte en lettres contourées (à combiner avec display).
+@mixin outline-text($color: currentColor, $width: 1.5px) {
+  color: transparent;
+  -webkit-text-stroke: $width $color;
+}
+
+// Petit sur-titre en majuscules espacées.
+@mixin kicker($color: var(--ge-cyan)) {
+  margin: 0 0 1rem;
+  color: $color;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+// Libellé fort en majuscules (étape, date, statut…).
+@mixin label($color: var(--ge-cyan)) {
+  color: $color;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// ---- Accessibilité ----------------------------------------------------------
+
+@mixin focus-ring($color: var(--ge-cyan)) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: 3px;
+  }
+}
+
+// ---- Boutons ----------------------------------------------------------------
+//
+// Variantes :
+//   primary        noir plein (sur fond clair)
+//   white          blanc plein (sur bloc sombre)
+//   accent         cyan plein
+//   outline-dark   contour noir (sur fond clair)
+//   outline-light  contour blanc (sur bloc sombre)
+
+@mixin button($variant: primary, $size: md) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: var(--ge-radius-control);
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  @if $size == sm {
+    padding: 0.65rem 0.95rem;
+    font-size: 0.72rem;
+  } @else if $size == lg {
+    padding: 1.15rem 1.7rem;
+    font-size: 0.92rem;
+  } @else {
+    padding: 0.95rem 1.35rem;
+    font-size: 0.82rem;
+  }
+
+  @if $variant == primary {
+    background: var(--ge-ink);
+    color: #ffffff;
+
+    &:hover {
+      background: var(--ge-blue);
+    }
+  } @else if $variant == white {
+    background: #ffffff;
+    color: var(--ge-ink);
+
+    &:hover {
+      background: var(--ge-sky);
+    }
+  } @else if $variant == accent {
+    background: var(--ge-cyan);
+    color: var(--ge-ink);
+
+    &:hover {
+      background: var(--ge-sky);
+    }
+  } @else if $variant == outline-dark {
+    border-color: rgba(17, 17, 19, 0.35);
+    background: transparent;
+    color: var(--ge-ink);
+
+    &:hover {
+      border-color: var(--ge-ink);
+      background: rgba(17, 17, 19, 0.05);
+    }
+  } @else if $variant == outline-light {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: transparent;
+    color: var(--ge-night-ink);
+
+    &:hover {
+      border-color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  @include focus-ring;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// ---- Étiquettes -------------------------------------------------------------
+
+@mixin chip($tone: light) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  @if $tone == dark {
+    background: var(--ge-night-raised);
+    color: rgba(245, 245, 244, 0.82);
+  } @else if $tone == accent {
+    background: rgba(0, 179, 255, 0.14);
+    color: var(--ge-blue);
+  } @else {
+    background: rgba(17, 17, 19, 0.07);
+    color: var(--ge-ink);
+  }
+}
+
+// ---- Blocs et cartes --------------------------------------------------------
+
+// Grand bloc sombre (sections fortes sur la base claire).
+@mixin panel-dark {
+  border-radius: var(--ge-radius-panel);
+  background: var(--ge-night);
+  color: var(--ge-night-ink);
+  // « clip » et non « hidden » : un conteneur hidden reste défilable.
+  overflow: clip;
+}
+
+// Carte claire sur la base claire.
+@mixin card {
+  border: 1px solid var(--ge-line);
+  border-radius: var(--ge-radius-card);
+  background: var(--ge-paper-raised);
+  color: var(--ge-ink);
+}
+
+// Visuel « affiche » coloré. $tone : 0 cyan, 1 bleu nuit, 2 ciel, 3 papier.
+@mixin poster($tone: 0) {
+  position: relative;
+  border-radius: var(--ge-radius-card);
+  overflow: hidden;
+
+  @if $tone == 0 {
+    background: linear-gradient(140deg, var(--ge-cyan) 0%, var(--ge-blue) 100%);
+    color: #ffffff;
+  } @else if $tone == 1 {
+    background: linear-gradient(140deg, var(--ge-navy) 0%, var(--ge-blue) 100%);
+    color: #ffffff;
+  } @else if $tone == 2 {
+    background: linear-gradient(140deg, var(--ge-sky) 0%, var(--ge-cyan) 100%);
+    color: #0b1b2e;
+  } @else {
+    background: #f5f5f4;
+    color: var(--ge-ink);
+  }
+
+  // Trame de points discrète, effet « impression ».
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.18) 1px,
+      transparent 1px
+    );
+    background-size: 14px 14px;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+}
+
+// ---- Champs de formulaire ---------------------------------------------------
+
+@mixin field {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(17, 17, 19, 0.2);
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-paper-raised);
+  color: var(--ge-ink);
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: rgba(17, 17, 19, 0.45);
+  }
+
+  &:hover {
+    border-color: rgba(17, 17, 19, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--ge-ink);
+    box-shadow: 0 0 0 3px rgba(0, 179, 255, 0.25);
+  }
+}
+
+@mixin field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--ge-ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

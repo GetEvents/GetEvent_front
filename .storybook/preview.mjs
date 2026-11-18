@@ -1,4 +1,6 @@
 import "../src/app/globals.css";
+// Styles globaux importés aussi par app/layout.tsx.
+import "react-phone-number-input/style.css";
 
 /** @type { import('@storybook/nextjs-vite').Preview } */
 const preview = {

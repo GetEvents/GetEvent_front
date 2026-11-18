@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-phone-number-input/style.css";
 import Footer from "@/components/ui/Footer/Bar_page";
@@ -19,6 +19,14 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+// Police d'affiche du design : Archivo avec l'axe de largeur (wdth), utilisée
+// élargie à 125 % pour les grands titres en majuscules.
+const display = Archivo({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["wdth"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -73,7 +81,7 @@ export default async function RootLayout({
     >
       <body
         style={{ backgroundColor: "#ecedef" }}
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${display.variable} antialiased`}
       >
         <AuthProvider initialUser={currentUser}>
           <NotificationProvider>

@@ -7,7 +7,8 @@ import React from "react";
 export default function NavbarWrapper({ currentUser }) {
   const pathname = usePathname();
 
-  if (pathname === "/auth/login" || pathname === "/auth/register") {
+  // Les pages /auth ont leur propre mise en page (logo dans le bloc affiche).
+  if (pathname?.startsWith("/auth/")) {
     return null;
   }
 

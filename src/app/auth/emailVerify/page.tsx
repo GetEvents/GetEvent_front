@@ -24,7 +24,7 @@ function EmailVerifyContent() {
       const token = searchParams.get("token");
 
       if (!token) {
-        setError("Token de verification manquant.");
+        setError("Lien de vérification incomplet : le jeton est manquant.");
         return;
       }
 
@@ -53,15 +53,15 @@ function EmailVerifyContent() {
     <main className={styles.callbackPage}>
       <section className={styles.errorCard}>
         <h1 className={styles.errorTitle}>
-          {error ? "Confirmation impossible" : "Email confirme"}
+          {error ? "Confirmation impossible" : "E-mail confirmé"}
         </h1>
         <p className={styles.errorMessage}>
-          {error || message || "Votre adresse email a ete confirmee."}
+          {error || message || "Votre adresse e-mail a été confirmée."}
         </p>
         <ButtonComponent
           type="button"
           disabled={false}
-          label={error ? "Retour a l'inscription" : "Voir les evenements"}
+          label={error ? "Retour à l'inscription" : "Voir les événements"}
           onClick={() => router.push(error ? "/auth/register" : "/events")}
           className={styles.loginButton}
         />

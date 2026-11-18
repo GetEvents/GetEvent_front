@@ -1,240 +1,130 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
   BellRing,
   CalendarCheck2,
-  CheckCircle2,
   MessageCircle,
   Search,
 } from "lucide-react";
 import styles from "./Features.module.scss";
 
-const EVENT_FEATURES = [
-  "Planification avancée",
-  "Invitations automatiques",
-  "Suivi en temps réel",
-];
-
-const NOTIFICATION_FEATURES = [
-  "Notifications push",
-  "Emails automatiques",
-  "Alertes personnalisées",
-];
-
-const SEARCH_FEATURES = [
-  "Recherche globale",
-  "Filtrage avancé",
-  "Suggestions intelligentes",
-];
-
-const MESSAGING_FEATURES = [
-  "Messages instantanés",
-  "Conversations de groupe",
-  "Notifications temps réel",
-];
-
-const ANALYTICS_FEATURES = [
-  "Métriques détaillées",
-  "Tableaux de bord personnalisables",
-  "Rapports temps réel",
+// Chaque fonctionnalité occupe une case de la grille « bento ».
+// tone : dark (bloc anthracite), poster (dégradé cyan), light (carte claire).
+// size : wide (2 colonnes), full (toute la largeur). Ordre pensé pour une
+// grille de 3 colonnes sans trou : 2+1 / 1+2 / 3.
+const FEATURES = [
+  {
+    id: "creation",
+    icon: CalendarCheck2,
+    title: "Création d'événements",
+    text: "Créez, planifiez et gérez vos événements : date, lieu, capacité, tarif et suivi des participants.",
+    tags: ["Planification", "Billetterie", "Suivi en temps réel"],
+    tone: "dark",
+    size: "wide",
+  },
+  {
+    id: "notifications",
+    icon: BellRing,
+    title: "Notifications",
+    text: "Notifications push, emails automatiques et rappel deux jours avant l'événement.",
+    tags: ["Push", "Emails", "Rappels"],
+    tone: "poster",
+  },
+  {
+    id: "messagerie",
+    icon: MessageCircle,
+    title: "Messagerie",
+    text: "Un chat en temps réel par événement, entre l'organisateur et les participants.",
+    tags: ["Instantané", "Par événement"],
+    tone: "light",
+  },
+  {
+    id: "analytics",
+    icon: BarChart3,
+    title: "Tableau de bord",
+    text: "Suivez vos inscriptions, vos ventes et l'activité de vos événements depuis votre espace organisateur.",
+    tags: ["Inscriptions", "Ventes", "Solde"],
+    tone: "dark",
+    size: "wide",
+    chart: true,
+  },
+  {
+    id: "recherche",
+    icon: Search,
+    title: "Recherche",
+    text: "Trouvez un événement par mot-clé, ville ou catégorie, et triez par date ou par prix.",
+    tags: ["Mot-clé", "Ville", "Catégorie"],
+    tone: "light",
+    size: "full",
+  },
 ];
 
 export default function FeaturesSection() {
-  const sectionRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const sectionNode = sectionRef.current;
-    if (!sectionNode) return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-
-    observer.observe(sectionNode);
-    return () => observer.disconnect();
-  }, []);
-
-  const visibleClass = isVisible ? styles.visible : "";
-
   return (
-    <section ref={sectionRef} className={styles.featuresSection}>
-      <div className={styles.container}>
-        <header className={`${styles.header} ${visibleClass}`}>
-          <div className={styles.headerContent}>
-            <h2>Fonctionnalités</h2>
-            <p>
-              Tout ce dont vous avez besoin pour organiser efficacement vos
-              événements en un seul endroit.
-            </p>
-          </div>
+    <div className={styles.featuresSection}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.kicker}>Fonctionnalités</p>
+          <h2 className={styles.title}>
+            Tout en un.
+            <br />
+            <span className={styles.titleOutline}>Rien en trop.</span>
+          </h2>
+        </div>
+        <p className={styles.subtitle}>
+          Tout ce dont vous avez besoin pour organiser vos événements, au même
+          endroit.
+        </p>
+      </header>
 
-          {/* <div className={styles.pagination} aria-hidden="true">
-            <span className={styles.activeDot} />
-            <span />
-            <span />
-          </div> */}
-        </header>
+      <div className={styles.grid}>
+        {FEATURES.map((feature, index) => {
+          const Icon = feature.icon;
+          return (
+            <article
+              key={feature.id}
+              className={[
+                styles.card,
+                styles[feature.tone],
+                feature.size ? styles[feature.size] : "",
+              ].join(" ")}
+              style={{ "--i": index }}
+            >
+              <div className={styles.cardTop}>
+                <span className={styles.icon} aria-hidden="true">
+                  <Icon size={22} />
+                </span>
+                <span className={styles.number} aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
 
-        <div className={styles.grid}>
-          <article
-            className={`${styles.card} ${styles.mainCard} ${visibleClass}`}
-            style={{ "--delay": "80ms" }}
-          >
-            <div className={styles.cardTop}>
-              <span className={`${styles.iconBox} ${styles.primaryIcon}`}>
-                <CalendarCheck2 aria-hidden="true" />
-              </span>
-              <span className={styles.number}>1/5</span>
-            </div>
-
-            <h3>Création d&apos;Événements</h3>
-            <p className={styles.description}>
-              Créez, planifiez et gérez vos événements avec des outils
-              puissants. Suivi en temps réel, invitations automatiques et
-              gestion des participants simplifiée.
-            </p>
-
-            <ul className={`${styles.checkList} ${styles.eventCheckList}`}>
-              {EVENT_FEATURES.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article
-            className={`${styles.card} ${styles.notificationCard} ${visibleClass}`}
-            style={{ "--delay": "180ms" }}
-          >
-            <div className={styles.cardTop}>
-              <span className={`${styles.iconBox} ${styles.secondaryIcon}`}>
-                <BellRing aria-hidden="true" />
-              </span>
-              <span className={styles.number}>2/5</span>
-            </div>
-
-            <h3>Système de Notifications</h3>
-            <p className={styles.description}>
-              Restez informé en temps réel. Notifications push, emails
-              automatiques et alertes personnalisées pour tous vos événements.
-            </p>
-
-            <ul className={styles.checkList}>
-              {NOTIFICATION_FEATURES.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article
-            className={`${styles.card} ${styles.messagingCard} ${visibleClass}`}
-            style={{ "--delay": "280ms" }}
-          >
-            <div className={styles.cardTop}>
-              <span className={`${styles.iconBox} ${styles.neutralIcon}`}>
-                <MessageCircle aria-hidden="true" />
-              </span>
-              <span className={styles.number}>3/5</span>
-            </div>
-
-            <h3>Messagerie</h3>
-            <p className={styles.description}>
-              Communiquez instantanément via Socket.IO pour une réactivité
-              totale.
-            </p>
-
-            <ul className={styles.checkList}>
-              {MESSAGING_FEATURES.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article
-            className={`${styles.card} ${styles.searchCard} ${visibleClass}`}
-            style={{ "--delay": "330ms" }}
-          >
-            <div className={styles.cardTop}>
-              <span className={`${styles.iconBox} ${styles.searchIcon}`}>
-                <Search aria-hidden="true" />
-              </span>
-              <span className={styles.number}>4/5</span>
-            </div>
-
-            <h3>Recherche Intelligente</h3>
-            <p className={styles.description}>
-              Trouvez instantanément ce que vous cherchez. Recherche globale,
-              filtrage avancé et suggestions intelligentes.
-            </p>
-
-            <ul className={styles.checkList}>
-              {SEARCH_FEATURES.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article
-            className={`${styles.card} ${styles.analyticsCard} ${visibleClass}`}
-            style={{ "--delay": "380ms" }}
-          >
-            <div className={styles.analyticsContent}>
-              <div className={styles.analyticsCopy}>
-                <div className={styles.cardTop}>
-                  <span className={`${styles.iconBox} ${styles.successIcon}`}>
-                    <BarChart3 aria-hidden="true" />
-                  </span>
-                  <span className={styles.number}>5/5</span>
-                </div>
-
-                <h3>Analytics &amp; Tableau de Bord</h3>
-                <p className={styles.description}>
-                  Analysez vos performances avec des métriques détaillées.
-                  Tableaux de bord personnalisables et rapports en temps réel.
-                </p>
-
-                <ul
-                  className={`${styles.checkList} ${styles.analyticsCheckList}`}
-                >
-                  {ANALYTICS_FEATURES.map((feature) => (
-                    <li key={feature}>
-                      <CheckCircle2 aria-hidden="true" />
-                      {feature}
+              <div className={styles.cardBody}>
+                <h3 className={styles.cardTitle}>{feature.title}</h3>
+                <p className={styles.cardText}>{feature.text}</p>
+                <ul className={styles.tags} aria-label="Points clés">
+                  {feature.tags.map((tag) => (
+                    <li key={tag} className={styles.tag}>
+                      {tag}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className={styles.chart} aria-label="Aperçu des analytics">
-                <span className={styles.barOne} />
-                <span className={styles.barTwo} />
-                <span className={styles.barThree} />
-                <span className={styles.barFour} />
-              </div>
-            </div>
-          </article>
-        </div>
+              {feature.chart && (
+                <div className={styles.chart} aria-hidden="true">
+                  {[38, 62, 48, 80, 66, 95].map((height, barIndex) => (
+                    <span
+                      key={barIndex}
+                      className={styles.bar}
+                      style={{ "--h": `${height}%` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

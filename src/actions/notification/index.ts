@@ -64,5 +64,7 @@ export async function savePushSubscriptionAction(
 }
 
 export async function removePushSubscriptionAction(endpoint: string) {
-  return notifications.unsubscribePush(endpoint);
+  const token = await getToken();
+  if (!token) return { success: false, error: "Non authentifié." };
+  return notifications.unsubscribePush({ endpoint, token });
 }

@@ -1,27 +1,11 @@
 "use client";
-
-import React, { useState, useEffect, useRef } from "react";
-import { CalendarDays, CircleHelp, Wrench } from "lucide-react";
+import { useState } from "react";
+import { Plus } from "lucide-react";
 import styles from "./FAQ.module.scss";
 
-const faqCategories = [
-  {
-    id: 1,
-    name: "Général",
-    icon: CircleHelp,
-  },
-  {
-    id: 2,
-    name: "Événements",
-    icon: CalendarDays,
-  },
-  {
-    id: 4,
-    name: "Support",
-    icon: Wrench,
-  },
-];
+const CATEGORIES = ["Tout", "Général", "Événements", "Support"];
 
+// Contenu inchangé (réponses vérifiées lors de la refonte).
 const faqItems = [
   {
     id: 1,
@@ -76,117 +60,98 @@ const faqItems = [
 
 export default function FAQSection() {
   const [openItem, setOpenItem] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef(null);
+  const [category, setCategory] = useState("Tout");
 
-  useEffect(() => {
-    const sectionNode = sectionRef.current;
-    if (!sectionNode) return;
+  const visibleItems =
+    category === "Tout"
+      ? faqItems
+      : faqItems.filter((item) => item.category === category);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(sectionNode);
-    return () => observer.disconnect();
-  }, []);
-
-  function toggleItem(id) {
-    setOpenItem(openItem === id ? null : id);
-  }
+  const toggleItem = (id) => setOpenItem(openItem === id ? null : id);
 
   return (
-    <section ref={sectionRef} className={styles.faqSection} id="faq">
-      <div className={styles.maxContainer}>
-        {/* Header */}
-        <div
-          className={`${styles.header} ${isVisible ? styles.headerVisible : ""}`}
-        >
-          <span className={styles.subtitle}>Questions fréquentes</span>
+    <div className={styles.faqSection}>
+      <div className={styles.layout}>
+        <header className={styles.header}>
+          <p className={styles.kicker}>Questions fréquentes</p>
           <h2 className={styles.title}>
-            Vous avez des <span>questions</span> ?
+            Des
+            <br />
+            <span className={styles.titleOutline}>questions ?</span>
           </h2>
           <p className={styles.caption}>
-            Trouvez rapidement les réponses à vos questions les plus fréquentes.
-            Notre équipe est également là pour vous aider.
+            Les réponses aux questions les plus fréquentes. Notre équipe est
+            aussi là pour vous aider.
           </p>
-        </div>
 
-        {/* Categories */}
-        <div className={styles.categories}>
-          {faqCategories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <div key={category.id} className={styles.categoryBadge}>
-                <span>
-                  <Icon size={16} aria-hidden="true" />
-                </span>
-                {category.name}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* FAQ Items */}
-        <div className={styles.faqList}>
-          {faqItems.map((item, index) => {
-            const isOpen = openItem === item.id;
-            return (
-              <div
-                key={item.id}
-                className={`${styles.faqItem} ${isOpen ? styles.open : ""} ${isVisible ? styles.headerVisible : ""}`}
-                style={{ "--delay": `${index * 80}ms` }}
+          <div
+            className={styles.filters}
+            role="group"
+            aria-label="Filtrer les questions"
+          >
+            {CATEGORIES.map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={`${styles.filter} ${
+                  category === name ? styles.filterActive : ""
+                }`}
+                aria-pressed={category === name}
+                onClick={() => {
+                  setCategory(name);
+                  setOpenItem(null);
+                }}
               >
-                <button
-                  onClick={() => toggleItem(item.id)}
-                  className={styles.questionButton}
-                  aria-expanded={isOpen}
-                >
-                  <div className={styles.questionContent}>
-                    <span className={styles.itemCategory}>{item.category}</span>
-                    <h3 className={styles.questionText}>{item.question}</h3>
-                  </div>
+                {name}
+              </button>
+            ))}
+          </div>
+        </header>
 
-                  <div
-                    className={`${styles.iconToggle} ${isOpen ? styles.rotated : ""}`}
+        <ul className={styles.list}>
+          {visibleItems.map((item, index) => {
+            const isOpen = openItem === item.id;
+            const answerId = `faq-answer-${item.id}`;
+            return (
+              <li
+                key={item.id}
+                className={`${styles.item} ${isOpen ? styles.open : ""}`}
+              >
+                <h3 className={styles.questionHeading}>
+                  <button
+                    type="button"
+                    className={styles.question}
+                    aria-expanded={isOpen}
+                    aria-controls={answerId}
+                    onClick={() => toggleItem(item.id)}
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </button>
-
+                    <span className={styles.number} aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className={styles.questionText}>
+                      <span className={styles.itemCategory}>
+                        {item.category}
+                      </span>
+                      {item.question}
+                    </span>
+                    <span className={styles.toggle} aria-hidden="true">
+                      <Plus size={18} />
+                    </span>
+                  </button>
+                </h3>
                 <div
-                  className={`${styles.answerWrapper} ${isOpen ? styles.expanded : ""}`}
+                  id={answerId}
+                  role="region"
+                  className={styles.answerWrapper}
+                  hidden={!isOpen}
                 >
-                  <div className={styles.answerContent}>
-                    <div className={styles.answerInner}>
-                      <p>{item.answer}</p>
-                    </div>
-                  </div>
+                  <p className={styles.answer}>{item.answer}</p>
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
-    </section>
+    </div>
   );
 }

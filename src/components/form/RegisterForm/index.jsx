@@ -288,7 +288,7 @@ const Register = ({ id }) => {
   const prevStep = () => setStep(1);
 
   return (
-    <div className={style.forminscription}>
+    <div className={`${style.forminscription} ${id ? style.profileMode : ""}`}>
       <div
         className={`${id ? "" : style.container} ${id ? style.forminfoModif : style.forminfo}`}
       >

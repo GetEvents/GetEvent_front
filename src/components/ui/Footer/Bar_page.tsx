@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import styles from "./Footer.module.scss";
 
 interface FooterProps {
@@ -9,24 +10,28 @@ interface FooterProps {
 
 export default function Footer({ currentUser }: FooterProps) {
   const pathname = usePathname();
-  if (
-    pathname === "/auth/login" ||
-    pathname === "/auth/register" ||
-    currentUser
-  ) {
+  // Pas de pied de page sur les pages /auth (mise en page dédiée).
+  if (pathname?.startsWith("/auth/") || currentUser) {
     return null;
   }
 
   return (
     <footer className={styles.footer}>
       <div className={styles.maxContainer}>
+        <div className={styles.topRow}>
+          <p className={styles.brandTitle}>GetEvent</p>
+          <Link href="/events/createvent" className={styles.publishButton}>
+            Publier mon événement
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+
         <div className={styles.footerGrid}>
           <div className={styles.brandInfo}>
-            <p className={styles.brandTitle}>GetEvent</p>
             <p className={styles.brandText}>
-              La plateforme de gestion d&apos;événements qui simplifie
-              l&apos;organisation en équipe. Créez, planifiez et gérez vos
-              événements avec élégance et facilité.
+              La billetterie qui simplifie l&apos;organisation de vos événements
+              : publication, paiement Mobile Money, billets QR code et
+              messagerie.
             </p>
           </div>
 
@@ -34,13 +39,13 @@ export default function Footer({ currentUser }: FooterProps) {
             <h3>Produit</h3>
             <ul>
               <li>
+                <Link href="/events">Événements</Link>
+              </li>
+              <li>
                 <Link href="/#how-it-works">Comment ?</Link>
               </li>
               <li>
                 <Link href="/#features">Fonctionnalités</Link>
-              </li>
-              <li>
-                <Link href="/#impact">Impact</Link>
               </li>
               <li>
                 <Link href="/#faq">FAQ</Link>
@@ -68,6 +73,10 @@ export default function Footer({ currentUser }: FooterProps) {
           <p>© 2026 GetEvent. Tous droits réservés.</p>
         </div>
       </div>
+
+      <p className={styles.wordmark} aria-hidden="true">
+        GetEvent
+      </p>
     </footer>
   );
 }
