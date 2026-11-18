@@ -2,6 +2,16 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.22.0](https://github.com/GetEvents/GetEvent_front/compare/v0.21.0...v0.22.0) (2026-11-18)
+
+
+### Features
+
+* ajouter des en-têtes de sécurité pour renforcer la protection des pages ([768437f](https://github.com/GetEvents/GetEvent_front/commit/768437f18c904f114684d756e1566dc425fd8f6c))
+* ajouter une page 404 personnalisée et améliorer l'affichage des événements ([b6029ac](https://github.com/GetEvents/GetEvent_front/commit/b6029ac0d11ff5bf941fd858ee0c6691ffd83f7b))
+* améliorer la gestion de l'authentification et des redirections dans les pages d'événements et de connexion ([875748d](https://github.com/GetEvents/GetEvent_front/commit/875748d22cdde1e24a7364848a0c37f9a18d20c0))
+* **api:** add comprehensive API services for authentication, events, messages, notifications, participations, and payments ([efe90f4](https://github.com/GetEvents/GetEvent_front/commit/efe90f44b4760d01752c9288bf0f30b64fc732f6))
+
 ## [0.21.0](https://github.com/GetEvents/GetEvent_front/compare/v0.20.0...v0.21.0) (2026-10-25)
 
 
