@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Lock, Rocket, Star, Ticket, Zap } from "lucide-react";
+import { Lock, Rocket, Smartphone, Ticket, Zap } from "lucide-react";
 import FAQSection from "../FAQ";
 import FeaturesSection from "../Features";
 import ImpactSection from "../Impact";
@@ -17,50 +17,20 @@ const EVENT_TYPES = [
 ];
 
 export default function Home() {
-  const [isHeroVisible, setIsHeroVisible] = useState(false);
-  const [isCtaVisible, setIsCtaVisible] = useState(false);
-  const [isBadgesVisible, setIsBadgesVisible] = useState(false);
+  // Le hero est toujours au-dessus de la ligne de flottaison : il est visible
+  // dès le HTML rendu par le serveur, sans attendre le chargement du JavaScript
+  // (sur mobile, l'attente d'un IntersectionObserver laissait l'écran vide ~3 s).
+  const isHeroVisible = true;
+  const isCtaVisible = true;
+  const isBadgesVisible = true;
   const [activeEventIndex, setActiveEventIndex] = useState(0);
-  const [typedEvent, setTypedEvent] = useState("");
+  // Premier mot déjà écrit dans le HTML serveur : le titre est complet avant
+  // le chargement du JavaScript, puis l'animation reprend normalement.
+  const [typedEvent, setTypedEvent] = useState(EVENT_TYPES[0]);
   const [isDeleting, setIsDeleting] = useState(false);
   const heroRef = useRef(null);
   const ctaRef = useRef(null);
   const badgesRef = useRef(null);
-
-  useEffect(() => {
-    const observerOptions = { threshold: 0.2 };
-
-    const heroObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setIsHeroVisible(true);
-        heroObserver.disconnect();
-      }
-    }, observerOptions);
-
-    const ctaObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setIsCtaVisible(true);
-        ctaObserver.disconnect();
-      }
-    }, observerOptions);
-
-    const badgesObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setIsBadgesVisible(true);
-        badgesObserver.disconnect();
-      }
-    }, observerOptions);
-
-    if (heroRef.current) heroObserver.observe(heroRef.current);
-    if (ctaRef.current) ctaObserver.observe(ctaRef.current);
-    if (badgesRef.current) badgesObserver.observe(badgesRef.current);
-
-    return () => {
-      heroObserver.disconnect();
-      ctaObserver.disconnect();
-      badgesObserver.disconnect();
-    };
-  }, []);
 
   // Animation typewriter events
   useEffect(() => {
@@ -186,9 +156,9 @@ export default function Home() {
             >
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>
-                  <Star size={16} aria-hidden="true" />
+                  <Smartphone size={16} aria-hidden="true" />
                 </span>
-                <span>4.8/5</span>
+                <span>Mobile Money</span>
               </div>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>

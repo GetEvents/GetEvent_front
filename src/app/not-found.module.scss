@@ -1,0 +1,78 @@
+.page {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 8rem 1rem 4rem;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(37, 99, 235, 0.1),
+      transparent 30rem
+    ),
+    var(--app-color-surface, #f8fafc);
+  color: var(--app-color-text, #0f172a);
+}
+
+.card {
+  width: min(520px, 100%);
+  padding: 2.5rem 1.5rem;
+  border: 1px solid var(--app-color-border, #e2e8f0);
+  border-radius: 20px;
+  background: var(--app-color-white, #ffffff);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+  text-align: center;
+}
+
+.code {
+  margin: 0;
+  color: var(--app-color-primary, #3b82f6);
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.title {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.text {
+  margin: 0 auto 1.75rem;
+  max-width: 38ch;
+  color: var(--app-color-text-secondary, #475569);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.primary,
+.secondary {
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.primary {
+  background: var(--app-color-primary, #3b82f6);
+  color: var(--app-color-white, #ffffff);
+
+  &:hover {
+    background: var(--app-color-primary-hover, #2563eb);
+  }
+}
+
+.secondary {
+  border: 1px solid var(--app-color-border, #e2e8f0);
+  color: var(--app-color-text, #0f172a);
+
+  &:hover {
+    background: var(--app-color-surface-muted, #f1f5f9);
+  }
+}

@@ -394,7 +394,9 @@ export default function Welcome() {
                       alt=""
                       width={25}
                       height={25}
-                      priority={index < 3}
+                      // Les 4 catégories rapides sont visibles dès l'arrivée :
+                      // les charger toutes immédiatement (la 4e restait vide).
+                      priority={index < quickCategories.length}
                       quality={90}
                     />
                   </span>
@@ -470,8 +472,11 @@ export default function Welcome() {
                         } vous participez`
                     : `${displayedEvents.length} événement${
                         displayedEvents.length > 1 ? "s" : ""
-                      } ${timelineFilter === "past" ? "terminé" : "à venir"}${
-                        displayedEvents.length > 1 ? "s" : ""
+                      } ${
+                        // « à venir » est invariable : seul « terminé » s'accorde.
+                        timelineFilter === "past"
+                          ? `terminé${displayedEvents.length > 1 ? "s" : ""}`
+                          : "à venir"
                       }`}
               </p>
             </div>
