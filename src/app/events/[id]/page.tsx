@@ -388,6 +388,7 @@ export default async function EventDetailPage({
                   isFull={remainingPlaces === 0}
                   event={event}
                   userTicketsCount={userTicketsCount}
+                  isAuthenticated={Boolean(currentUser)}
                 />
 
                 <div className={styles.organizerInfo}>

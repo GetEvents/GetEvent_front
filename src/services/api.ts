@@ -445,11 +445,9 @@ export const events = {
    * Récupérer les détails d'un événement
    * @param {number} id
    */
-  getById: async ({ id, token }: IdTokenParam) => {
+  getById: async ({ id, token }: { id: number; token?: string | null }) => {
     return apiRequest("GET", `/events/getEventById?id=${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   },
 

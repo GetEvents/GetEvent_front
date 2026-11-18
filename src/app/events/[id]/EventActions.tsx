@@ -21,6 +21,7 @@ interface EventActionsProps {
   isFull: boolean;
   event?: any;
   userTicketsCount?: number;
+  isAuthenticated?: boolean;
 }
 
 export default function EventActions({
@@ -34,6 +35,7 @@ export default function EventActions({
   isFull,
   event,
   userTicketsCount = 0,
+  isAuthenticated = true,
 }: EventActionsProps) {
   const router = useRouter();
   const { notify } = useNotification() as {
@@ -50,6 +52,17 @@ export default function EventActions({
     joinMutation.isPending ||
     leaveMutation.isPending ||
     deleteMutation.isPending;
+
+  // Visiteur non connecté : on l'envoie se connecter puis revenir sur la fiche.
+  const openPurchaseModal = () => {
+    if (!isAuthenticated) {
+      router.push(
+        `/auth/login?from=${encodeURIComponent(`/events/${eventId}`)}`,
+      );
+      return;
+    }
+    setIsPurchaseModalOpen(true);
+  };
 
   const handleJoin = (quantity: number = 1) =>
     joinMutation.mutate(
@@ -174,7 +187,7 @@ export default function EventActions({
           <button
             type="button"
             className={`${styles.button} ${styles.success}`}
-            onClick={() => setIsPurchaseModalOpen(true)}
+            onClick={openPurchaseModal}
             disabled={isPending || isExpired || isFull}
           >
             <CirclePlus /> Réserver d&apos;autres places
@@ -203,7 +216,7 @@ export default function EventActions({
             <button
               type="button"
               className={`${styles.button} ${styles.success} ${styles.stickyBtn}`}
-              onClick={() => setIsPurchaseModalOpen(true)}
+              onClick={openPurchaseModal}
               disabled={isPending || isExpired || isFull}
             >
               <CirclePlus size={16} /> + Places
@@ -249,7 +262,7 @@ export default function EventActions({
       <button
         type="button"
         className={`${styles.button} ${styles.success}`}
-        onClick={() => setIsPurchaseModalOpen(true)}
+        onClick={openPurchaseModal}
         disabled={isPending || isExpired || isFull}
       >
         <CirclePlus />
@@ -274,7 +287,7 @@ export default function EventActions({
           <button
             type="button"
             className={`${styles.button} ${styles.success} ${styles.stickyBtn}`}
-            onClick={() => setIsPurchaseModalOpen(true)}
+            onClick={openPurchaseModal}
             disabled={isPending || isExpired || isFull}
           >
             <CirclePlus size={16} />
