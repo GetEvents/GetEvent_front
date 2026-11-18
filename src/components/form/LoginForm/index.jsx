@@ -6,7 +6,10 @@ import Link from "next/link";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 import { useLogin } from "@/hooks/useAuthMutations";
 
-const Login = () => {
+/**
+ * @param {{ redirectTo?: string }} props Page interne où revenir après connexion.
+ */
+const Login = ({ redirectTo } = {}) => {
   const loginMutation = useLogin();
   const { notify } = useNotification();
 
@@ -15,8 +18,9 @@ const Login = () => {
     loginMutation.mutate(new FormData(event.currentTarget), {
       onSuccess: (result) => {
         notify(result.message, result.error ? "error" : "success");
-        if (!result.error && result.redirect)
-          window.location.href = result.redirect;
+        // Après connexion, retour à la page demandée (ex. fiche événement).
+        if (!result.error && (redirectTo || result.redirect))
+          window.location.href = redirectTo || result.redirect;
       },
       onError: () => notify("Impossible de vous connecter.", "error"),
     });

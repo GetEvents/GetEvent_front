@@ -66,11 +66,17 @@ describe("useEvents query options", () => {
     await eventMutations.update().mutationFn!(data, undefined as any);
     await eventMutations.delete().mutationFn!(4, undefined as any);
     await eventMutations.join().mutationFn!(5, undefined as any);
+    await eventMutations.join().mutationFn!(
+      { eventId: 7, quantity: 3 },
+      undefined as any,
+    );
     await eventMutations.leave().mutationFn!(6, undefined as any);
     expect(actions.addEvent).toHaveBeenCalledWith(null, data);
     expect(actions.editEvent).toHaveBeenCalledWith(null, data);
     expect(actions.deleteEvent).toHaveBeenCalledWith(4);
-    expect(actions.joinEvent).toHaveBeenCalledWith(5);
+    // Un identifiant seul réserve une place ; l'objet précise la quantité.
+    expect(actions.joinEvent).toHaveBeenCalledWith(5, 1);
+    expect(actions.joinEvent).toHaveBeenCalledWith(7, 3);
     expect(actions.leaveEvent).toHaveBeenCalledWith(6);
   });
 });

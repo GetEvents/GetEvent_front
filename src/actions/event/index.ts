@@ -116,8 +116,11 @@ export async function getAllEvent(
   };
 }
 
+// La fiche d'un événement est publique : le jeton est transmis s'il existe
+// (le back renvoie alors les billets et le chat de l'utilisateur), sinon la
+// requête part en anonyme au lieu de rediriger vers la connexion.
 export async function getEventById(id: number | string): Promise<Event | null> {
-  const token = await requireToken();
+  const token = await getToken();
   const response = await events.getById({ id: Number(id), token });
   if (!response.success) return null;
   return (response.data as { event?: Event }).event || null;

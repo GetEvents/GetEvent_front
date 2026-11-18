@@ -38,10 +38,10 @@ export default function ImpactSection() {
 
       <div className={styles.container}>
         <header className={`${styles.header} ${visibleClass}`}>
-          <h2>Impact &amp; Résultats</h2>
+          <h2>Pourquoi GetEvent ?</h2>
           <p>
-            Des résultats qui parlent d&apos;eux-mêmes, transformant la manière
-            dont vous gérez l&apos;événementiel.
+            Ce que la plateforme fait concrètement pour vos événements, de la
+            réservation jusqu&apos;à l&apos;entrée.
           </p>
         </header>
 
@@ -59,19 +59,15 @@ export default function ImpactSection() {
                 className={styles.statIcon}
                 aria-hidden="true"
               />
-              <strong className={styles.heroValue}>75%</strong>
-              <h3>Temps économisé</h3>
+              <strong className={styles.heroValue}>QR</strong>
+              <h3>Billets numériques</h3>
               <p>
-                de réduction du temps d&apos;organisation grâce à nos outils
-                automatisés.
+                Chaque place réservée génère un billet avec un QR code unique,
+                validé à l&apos;entrée par l&apos;organisateur.
               </p>
             </div>
 
-            <div
-              className={styles.miniChart}
-              role="img"
-              aria-label="Progression du temps économisé"
-            >
+            <div className={styles.miniChart} aria-hidden="true">
               <span className={styles.shortBar} />
               <span className={styles.mediumBar} />
               <span className={styles.tallBar} />
@@ -90,9 +86,11 @@ export default function ImpactSection() {
               className={styles.statIcon}
               aria-hidden="true"
             />
-            <strong className={styles.heroValue}>90%</strong>
-            <h3>Engagement</h3>
-            <p>de taux de participation active sur la plateforme.</p>
+            <strong className={styles.heroValue}>XOF</strong>
+            <h3>Paiement local</h3>
+            <p>
+              Mobile Money (MTN, Moov, Celtiis) et carte bancaire via FedaPay.
+            </p>
           </article>
 
           <article
@@ -107,9 +105,9 @@ export default function ImpactSection() {
               className={styles.statIcon}
               aria-hidden="true"
             />
-            <strong className={styles.supportValue}>3x</strong>
-            <h3>Collaboration</h3>
-            <p>plus d&apos;efficacité en équipe</p>
+            <strong className={styles.supportValue}>Live</strong>
+            <h3>Messagerie</h3>
+            <p>Un chat en temps réel par événement avec les participants.</p>
           </article>
 
           <article
@@ -124,9 +122,9 @@ export default function ImpactSection() {
               className={styles.statIcon}
               aria-hidden="true"
             />
-            <strong className={styles.supportValue}>95%</strong>
-            <h3>Précision</h3>
-            <p>d&apos;événements réussis sans erreur</p>
+            <strong className={styles.supportValue}>J-2</strong>
+            <h3>Rappels</h3>
+            <p>Notifications et rappels automatiques avant l&apos;événement.</p>
           </article>
 
           <div className={styles.compactStack}>
@@ -143,8 +141,8 @@ export default function ImpactSection() {
                 aria-hidden="true"
               />
               <div>
-                <strong>5min</strong>
-                <p>Rapidité de création</p>
+                <strong>PWA</strong>
+                <p>Installable sur mobile</p>
               </div>
             </article>
 
@@ -161,8 +159,8 @@ export default function ImpactSection() {
                 aria-hidden="true"
               />
               <div>
-                <strong>100%</strong>
-                <p>Sécurité des données</p>
+                <strong>HTTPS</strong>
+                <p>Connexions chiffrées</p>
               </div>
             </article>
           </div>
