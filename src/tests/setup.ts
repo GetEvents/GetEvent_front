@@ -40,6 +40,15 @@ class IntersectionObserverMock implements IntersectionObserver {
 
 globalThis.IntersectionObserver = IntersectionObserverMock;
 
+// next/font/google n'existe qu'au build Next.js : sous Vitest, chaque police
+// renvoie une classe et une variable CSS vides.
+// Exports explicites (pas de Proxy : un Proxy répond aussi à « then » et
+// Vitest prendrait le module pour une promesse).
+vi.mock("next/font/google", () => {
+  const font = () => ({ className: "", variable: "", style: {} });
+  return { Archivo: font, Geist: font, Geist_Mono: font };
+});
+
 afterEach(() => {
   document.body.innerHTML = "";
   vi.restoreAllMocks();

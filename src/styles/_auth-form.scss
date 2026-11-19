@@ -1,0 +1,265 @@
+// =============================================================================
+// Styles communs des formulaires d'authentification (connexion, inscription).
+// Utilisation dans un module SCSS :  @use "…/styles/auth-form" as af;
+//                                    @include af.shell;
+// Les classes générées restent locales au module qui inclut le mixin.
+// =============================================================================
+
+@use "design" as ds;
+
+@mixin shell {
+  .forminscription {
+    width: 100%;
+    max-width: 460px;
+    color: var(--ge-ink);
+  }
+
+  .container,
+  .forminfo {
+    width: 100%;
+  }
+
+  // Barre du haut : retour + lien vers l'autre formulaire.
+  .formHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--ge-ink-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      color: var(--ge-ink);
+    }
+
+    @include ds.focus-ring;
+  }
+
+  .backArrow {
+    width: 16px;
+    height: 16px;
+  }
+
+  .createAccountButton {
+    @include ds.button(outline-dark, sm);
+  }
+
+  // Titre du formulaire.
+  .formact {
+    margin-bottom: 1.75rem;
+
+    h2 {
+      @include ds.display(clamp(1.9rem, 5vw, 2.8rem));
+      margin: 0 0 0.6rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--ge-ink-muted);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+  }
+
+  .googleButton {
+    @include ds.button(outline-dark);
+    width: 100%;
+    gap: 0.7rem;
+    background: var(--ge-paper-raised);
+    letter-spacing: 0.04em;
+  }
+
+  .googleIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .separator {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 1.5rem 0;
+  }
+
+  .separatorLine {
+    flex: 1;
+    height: 1px;
+    background: var(--ge-line);
+  }
+
+  .separatorText {
+    @include ds.label(var(--ge-ink-muted));
+    font-size: 0.7rem;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inputFull {
+    width: 100%;
+  }
+
+  .forgotPassword {
+    display: flex;
+    justify-content: flex-end;
+    margin: -0.25rem 0 1.5rem;
+
+    a {
+      color: var(--ge-blue);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+
+      &:hover {
+        color: var(--ge-ink);
+      }
+    }
+  }
+
+  .submitButton {
+    @include ds.button(primary, lg);
+    width: 100%;
+  }
+
+  .registerLink,
+  .loginLink {
+    margin: 1.5rem 0 0;
+    color: var(--ge-ink-muted);
+    font-size: 0.92rem;
+    text-align: center;
+
+    a {
+      color: var(--ge-ink);
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+
+      &:hover {
+        color: var(--ge-blue);
+      }
+    }
+  }
+}
+
+// Carte d'état (vérification d'e-mail, retour de connexion Google).
+@mixin status-card {
+  .callbackPage {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .errorCard {
+    width: 100%;
+    max-width: 460px;
+    color: var(--ge-ink);
+  }
+
+  .errorTitle {
+    @include ds.display(clamp(1.8rem, 5vw, 2.6rem));
+    margin: 0 0 0.9rem;
+  }
+
+  .errorMessage {
+    margin: 0 0 2rem;
+    color: var(--ge-ink-muted);
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  .loginButton {
+    @include ds.button(primary, lg);
+    width: 100%;
+  }
+}
+
+// Formulaires mot de passe oublié / nouveau mot de passe.
+@mixin recovery {
+  .container {
+    width: 100%;
+    max-width: 460px;
+    color: var(--ge-ink);
+  }
+
+  .backLink {
+    display: inline-flex;
+    margin-bottom: 2rem;
+    color: var(--ge-ink-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    &:hover {
+      color: var(--ge-ink);
+    }
+
+    @include ds.focus-ring;
+  }
+
+  .header {
+    margin-bottom: 1.75rem;
+
+    h1 {
+      @include ds.display(clamp(1.8rem, 5vw, 2.6rem));
+      margin: 0 0 0.75rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--ge-ink-muted);
+      line-height: 1.55;
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message {
+    margin: 0 0 1rem;
+    padding: 0.8rem 0.9rem;
+    border-left: 3px solid;
+    border-radius: var(--ge-radius-control);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .success {
+    border-color: var(--app-color-success, #10b981);
+    background: rgba(16, 185, 129, 0.08);
+    color: #065f46;
+  }
+
+  .error {
+    border-color: var(--app-color-danger, #ef4444);
+    background: rgba(239, 68, 68, 0.08);
+    color: #991b1b;
+  }
+
+  .submitButton {
+    @include ds.button(primary, lg);
+    width: 100%;
+  }
+}

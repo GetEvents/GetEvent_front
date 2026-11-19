@@ -68,6 +68,39 @@
   --app-transition-base: 300ms ease;
   --app-container-max-width: 1200px;
   --app-navbar-height: 72px;
+
+  /* ===========================================================
+     Design « affiche » (refonte 2026) — base claire + blocs sombres.
+     Utilisés via les mixins de src/styles/_design.scss.
+     =========================================================== */
+
+  /* Accent GetEvent (cyan → bleu) */
+  --ge-cyan: #00b3ff;
+  --ge-blue: #145ba2;
+  --ge-sky: #8fd2ff;
+  --ge-navy: #0e2f57;
+
+  /* Surfaces claires */
+  --ge-paper: #ecedef;
+  --ge-paper-raised: #ffffff;
+  --ge-ink: #111113;
+  --ge-ink-muted: #5b5b63;
+  --ge-line: rgba(17, 17, 19, 0.12);
+
+  /* Blocs sombres (anthracite) */
+  --ge-night: #1c1c1e;
+  --ge-night-raised: #262629;
+  --ge-night-ink: #f5f5f4;
+  --ge-night-muted: rgba(245, 245, 244, 0.62);
+  --ge-night-line: rgba(255, 255, 255, 0.12);
+
+  /* Formes : angles francs */
+  --ge-radius-control: 6px;
+  --ge-radius-card: 10px;
+  --ge-radius-panel: 16px;
+
+  /* Police d'affiche (Archivo élargie, chargée dans app/layout.tsx) */
+  --ge-font-display: var(--font-display), "Arial Black", sans-serif;
 }
 
 .dark {

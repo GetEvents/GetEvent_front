@@ -249,7 +249,7 @@ export default function SettingsPage() {
                       Paiements Stripe
                       {stripeComingSoon && (
                         <span className={styles.comingSoonBadge}>
-                          Fonctionnalite a venir
+                          Fonctionnalité à venir
                         </span>
                       )}
                     </h2>

@@ -1,0 +1,370 @@
+// Section « Comment ça marche ? » — style affiche / billetterie :
+// fond anthracite, grande typo élargie en majuscules, boutons anguleux,
+// cartes façon affiche et bandeau défilant.
+
+@use "../../styles/design" as ds;
+
+// Raccourcis locaux vers les variables du design.
+$bg-raised: var(--ge-night-raised);
+$line: var(--ge-night-line);
+$ink: var(--ge-night-ink);
+$muted: var(--ge-night-muted);
+$cyan: var(--ge-cyan);
+$sky: var(--ge-sky);
+
+// Typo d'affiche : mixin partagé.
+@mixin display($size) {
+  @include ds.display($size);
+}
+
+// Bande sombre pleine largeur ; le contenu reste centré dans .panel.
+.wrapper {
+  padding: 1.5rem 1rem;
+  background: var(--ge-night);
+  color: $ink;
+  overflow: clip;
+}
+
+.panel {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 2.5rem;
+  background: var(--ge-night);
+  color: $ink;
+  // « clip » et non « hidden » : un conteneur hidden reste défilable.
+  overflow: clip;
+
+  @media (min-width: 768px) {
+    padding: 4.5rem 3rem 3rem;
+  }
+}
+
+// ---- En-tête -----------------------------------------------------------------
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.kicker {
+  @include ds.kicker(var(--ge-sky));
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  @include display(clamp(2.1rem, 7.5vw, 5.4rem));
+  margin: 0 0 2.25rem;
+}
+
+.titleOutline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px $ink;
+}
+
+.headerRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 900px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.lead {
+  margin: 0;
+  max-width: 32rem;
+  color: $muted;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  line-height: 1.5;
+}
+
+// Onglets : boutons anguleux, blanc plein pour l'actif.
+.tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: 0.5rem;
+
+  @media (min-width: 900px) {
+    align-self: auto;
+  }
+}
+
+.tab {
+  @include ds.button(outline-light, sm);
+  padding: 0.85rem 1.2rem;
+}
+
+.tabActive {
+  @include ds.button(white, sm);
+  padding: 0.85rem 1.2rem;
+}
+
+// ---- Bandeau défilant --------------------------------------------------------
+
+.ticker {
+  margin: 0 -1.25rem 2.75rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid $line;
+  border-bottom: 1px solid $line;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+
+  @media (min-width: 768px) {
+    margin: 0 -3rem 3rem;
+  }
+}
+
+.tickerTrack {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: ticker 32s linear infinite;
+}
+
+.tickerSolid,
+.tickerOutline {
+  @include display(clamp(1.6rem, 4vw, 2.6rem));
+  white-space: nowrap;
+}
+
+.tickerSolid {
+  color: $ink;
+}
+
+.tickerOutline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(245, 245, 244, 0.55);
+}
+
+// ---- Cartes affiches ---------------------------------------------------------
+
+.body {
+  animation: fadeIn 0.4s ease both;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1000px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+
+  &:hover .poster {
+    transform: translateY(-4px);
+  }
+
+  &:hover .posterNumber {
+    transform: translateX(-6px);
+  }
+}
+
+// Le « visuel » de chaque étape, comme l'affiche d'un événement.
+.poster {
+  @include ds.poster(0);
+  container-type: inline-size;
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 4 / 3;
+  padding: 1rem 1.1rem;
+  transition: transform 0.3s ease;
+
+  // Une teinte d'affiche différente par étape (mixin partagé).
+  .card[data-tone="1"] & {
+    @include ds.poster(1);
+  }
+
+  .card[data-tone="2"] & {
+    @include ds.poster(2);
+  }
+
+  .card[data-tone="3"] & {
+    @include ds.poster(3);
+  }
+}
+
+.posterNumber {
+  // Taille relative à la largeur de la carte (container query) : le numéro
+  // remplit l'affiche sans jamais déborder, quelle que soit la grille.
+  @include display(clamp(3.5rem, 42cqi, 7rem));
+  position: relative;
+  z-index: 1;
+  line-height: 0.8;
+  transition: transform 0.3s ease;
+}
+
+.posterIcon {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(6px);
+
+  .card[data-tone="3"] & {
+    background: #111113;
+    color: #ffffff;
+  }
+}
+
+.info {
+  padding: 1rem 0.15rem 0;
+}
+
+// Équivalent de la date en couleur sur une carte d'événement.
+.stepLabel {
+  @include ds.label;
+  margin: 0 0 0.4rem;
+}
+
+.stepTitle {
+  margin: 0 0 0.45rem;
+  color: $ink;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.stepText {
+  margin: 0 0 0.9rem;
+  color: $muted;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  @include ds.chip(dark);
+}
+
+// ---- Appel à l'action --------------------------------------------------------
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.75rem;
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid $line;
+}
+
+.cta {
+  @include ds.button(white);
+
+  svg {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+.switchLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $muted;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    color: $ink;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $sky;
+    outline-offset: 3px;
+  }
+}
+
+// ---- Animations --------------------------------------------------------------
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    // La liste est dupliquée : décaler de la moitié boucle sans à-coup.
+    transform: translateX(calc(-50% - 1.25rem));
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tickerTrack,
+  .body,
+  .card {
+    animation: none;
+  }
+
+  .poster,
+  .posterNumber,
+  .tab,
+  .cta {
+    transition: none;
+  }
+}

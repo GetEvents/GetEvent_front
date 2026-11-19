@@ -31,4 +31,23 @@ describe("Button", () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  test("sans variante, garde uniquement la classe fournie", async () => {
+    const { container } = await render(
+      <Button label="Créer" className="maClasse" />,
+    );
+
+    expect(container.querySelector("button")?.className).toBe("maClasse");
+  });
+
+  test("avec une variante, ajoute les classes du design", async () => {
+    const { container } = await render(
+      <Button label="Créer" variant="primary" size="lg" block />,
+    );
+
+    // 3 classes : variante, taille et pleine largeur.
+    expect(
+      container.querySelector("button")?.className.split(" ").filter(Boolean),
+    ).toHaveLength(3);
+  });
 });

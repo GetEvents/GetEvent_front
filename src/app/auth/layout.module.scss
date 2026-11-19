@@ -1,32 +1,182 @@
+@use "../../styles/design" as ds;
+
+// Mise en page des pages /auth — design affiche.
+// Bureau : bloc sombre à gauche (45 %), formulaire à droite.
+// Mobile : bandeau sombre compact en haut, formulaire en dessous.
+
 .wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  // Mobile : le bandeau garde sa hauteur naturelle, le formulaire prend le reste.
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  background: var(--ge-paper);
+
+  @media (min-width: 1024px) {
+    grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+    grid-template-rows: none;
+  }
+}
+
+// ---- Bloc affiche ------------------------------------------------------------
+
+.poster {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  width: 100%;
-  background: var(--background);
+  gap: 1.5rem;
+  padding: 1.25rem 1.25rem 1.5rem;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(0, 179, 255, 0.18), transparent 45%),
+    var(--ge-night);
+  color: var(--ge-night-ink);
+  overflow: clip;
 
-  .navbar {
-    display: flex;
-    width: 100%;
-    // Ensure navbar doesn't push content too much if empty
-    &:empty {
-      display: none;
+  @media (min-width: 1024px) {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 2.5rem 3rem 0;
+  }
+}
+
+.logo {
+  display: inline-flex;
+  align-self: flex-start;
+
+  img {
+    width: 120px;
+    height: auto;
+    // Logo affiché en blanc sur le fond sombre.
+    filter: brightness(0) invert(1);
+
+    @media (min-width: 1024px) {
+      width: 160px;
     }
   }
 
-  .right__part {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 1rem;
+  @include ds.focus-ring(var(--ge-sky));
+}
 
-    .content {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.posterBody {
+  @media (min-width: 1024px) {
+    margin-top: auto;
+  }
+}
+
+.kicker {
+  @include ds.kicker(var(--ge-sky));
+  margin-bottom: 0.75rem;
+
+  @media (max-width: 1023px) {
+    display: none;
+  }
+}
+
+.title {
+  @include ds.display(clamp(1.6rem, 6vw, 4.2rem));
+  margin: 0;
+
+  @media (max-width: 1023px) {
+    font-size: clamp(1.4rem, 6.5vw, 2rem);
+  }
+}
+
+.titleOutline {
+  @include ds.outline-text(var(--ge-night-ink));
+}
+
+.perks {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--ge-night-muted);
+    font-weight: 600;
+  }
+
+  @media (min-width: 1024px) {
+    display: flex;
+  }
+}
+
+.perkIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--ge-night-raised);
+  color: var(--ge-cyan);
+}
+
+// Bandeau défilant des catégories (bureau uniquement).
+.ticker {
+  display: none;
+  margin: 2.5rem -3rem 0;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--ge-night-line);
+  overflow: hidden;
+
+  @media (min-width: 1024px) {
+    display: block;
+  }
+}
+
+.tickerTrack {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  animation: ticker 28s linear infinite;
+}
+
+.tickerSolid,
+.tickerOutline {
+  @include ds.display(1.6rem);
+  white-space: nowrap;
+}
+
+.tickerOutline {
+  @include ds.outline-text(rgba(245, 245, 244, 0.5), 1px);
+}
+
+// ---- Côté formulaire ---------------------------------------------------------
+
+.formSide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem 3rem;
+
+  @media (min-width: 1024px) {
+    padding: 3rem;
+  }
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 1rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tickerTrack {
+    animation: none;
   }
 }

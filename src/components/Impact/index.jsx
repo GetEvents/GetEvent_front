@@ -1,171 +1,69 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import styles from "./Impact.module.scss";
 
+// Atouts réels de la plateforme (vérifiés dans le code), présentés comme un
+// tableau d'affichage : une grande valeur, un titre, une explication.
+const STRENGTHS = [
+  {
+    value: "QR",
+    title: "Billets numériques",
+    text: "Chaque place réservée génère un billet avec un QR code unique, validé à l'entrée par l'organisateur.",
+  },
+  {
+    value: "XOF",
+    title: "Paiement local",
+    text: "Mobile Money (MTN, Moov, Celtiis) et carte bancaire via FedaPay.",
+  },
+  {
+    value: "Live",
+    title: "Messagerie",
+    text: "Un chat en temps réel par événement avec les participants.",
+  },
+  {
+    value: "J-2",
+    title: "Rappels",
+    text: "Notifications et rappel automatique deux jours avant l'événement.",
+  },
+  {
+    value: "PWA",
+    title: "Installable",
+    text: "GetEvent s'installe sur l'écran d'accueil du téléphone, comme une application.",
+  },
+  {
+    value: "HTTPS",
+    title: "Sécurisé",
+    text: "Connexions chiffrées, comptes protégés et accès contrôlés sur chaque action sensible.",
+  },
+];
+
 export default function ImpactSection() {
-  const sectionRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const sectionNode = sectionRef.current;
-    if (!sectionNode) return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-
-    observer.observe(sectionNode);
-    return () => observer.disconnect();
-  }, []);
-
-  const visibleClass = isVisible ? styles.visible : "";
-
   return (
-    <section ref={sectionRef} className={styles.impactSection}>
-      <div className={styles.backgroundEffects} aria-hidden="true">
-        <span className={styles.centerGlow} />
-        <span className={styles.topGlow} />
-        <span className={styles.bottomGlow} />
-      </div>
-
+    <div className={styles.impactSection}>
       <div className={styles.container}>
-        <header className={`${styles.header} ${visibleClass}`}>
-          <h2>Pourquoi GetEvent ?</h2>
-          <p>
+        <header className={styles.header}>
+          <p className={styles.kicker}>Pourquoi GetEvent ?</p>
+          <h2 className={styles.title}>
+            Pensé pour
+            <br />
+            <span className={styles.titleOutline}>le terrain.</span>
+          </h2>
+          <p className={styles.subtitle}>
             Ce que la plateforme fait concrètement pour vos événements, de la
             réservation jusqu&apos;à l&apos;entrée.
           </p>
         </header>
 
-        <div className={styles.grid}>
-          <article
-            className={`${styles.statCard} ${styles.timeCard} ${visibleClass}`}
-            style={{ "--delay": "80ms" }}
-          >
-            <div className={styles.timeCopy}>
-              <Image
-                src="/stopwatch.png"
-                alt=""
-                width={40}
-                height={40}
-                className={styles.statIcon}
-                aria-hidden="true"
-              />
-              <strong className={styles.heroValue}>QR</strong>
-              <h3>Billets numériques</h3>
-              <p>
-                Chaque place réservée génère un billet avec un QR code unique,
-                validé à l&apos;entrée par l&apos;organisateur.
-              </p>
+        <dl className={styles.board}>
+          {STRENGTHS.map((item) => (
+            <div key={item.value} className={styles.row}>
+              <dt className={styles.value}>{item.value}</dt>
+              <dd className={styles.detail}>
+                <span className={styles.rowTitle}>{item.title}</span>
+                <span className={styles.rowText}>{item.text}</span>
+              </dd>
             </div>
-
-            <div className={styles.miniChart} aria-hidden="true">
-              <span className={styles.shortBar} />
-              <span className={styles.mediumBar} />
-              <span className={styles.tallBar} />
-            </div>
-          </article>
-
-          <article
-            className={`${styles.statCard} ${styles.engagementCard} ${visibleClass}`}
-            style={{ "--delay": "170ms" }}
-          >
-            <Image
-              src="/increase.png"
-              alt=""
-              width={40}
-              height={40}
-              className={styles.statIcon}
-              aria-hidden="true"
-            />
-            <strong className={styles.heroValue}>XOF</strong>
-            <h3>Paiement local</h3>
-            <p>
-              Mobile Money (MTN, Moov, Celtiis) et carte bancaire via FedaPay.
-            </p>
-          </article>
-
-          <article
-            className={`${styles.statCard} ${styles.supportCard} ${visibleClass}`}
-            style={{ "--delay": "260ms" }}
-          >
-            <Image
-              src="/people.png"
-              alt=""
-              width={40}
-              height={40}
-              className={styles.statIcon}
-              aria-hidden="true"
-            />
-            <strong className={styles.supportValue}>Live</strong>
-            <h3>Messagerie</h3>
-            <p>Un chat en temps réel par événement avec les participants.</p>
-          </article>
-
-          <article
-            className={`${styles.statCard} ${styles.supportCard} ${visibleClass}`}
-            style={{ "--delay": "350ms" }}
-          >
-            <Image
-              src="/target.png"
-              alt=""
-              width={40}
-              height={40}
-              className={styles.statIcon}
-              aria-hidden="true"
-            />
-            <strong className={styles.supportValue}>J-2</strong>
-            <h3>Rappels</h3>
-            <p>Notifications et rappels automatiques avant l&apos;événement.</p>
-          </article>
-
-          <div className={styles.compactStack}>
-            <article
-              className={`${styles.statCard} ${styles.compactCard} ${visibleClass}`}
-              style={{ "--delay": "440ms" }}
-            >
-              <Image
-                src="/thunder.png"
-                alt=""
-                width={30}
-                height={30}
-                className={styles.statIcon}
-                aria-hidden="true"
-              />
-              <div>
-                <strong>PWA</strong>
-                <p>Installable sur mobile</p>
-              </div>
-            </article>
-
-            <article
-              className={`${styles.statCard} ${styles.compactCard} ${visibleClass}`}
-              style={{ "--delay": "530ms" }}
-            >
-              <Image
-                src="/lock.png"
-                alt=""
-                width={30}
-                height={30}
-                className={styles.statIcon}
-                aria-hidden="true"
-              />
-              <div>
-                <strong>HTTPS</strong>
-                <p>Connexions chiffrées</p>
-              </div>
-            </article>
-          </div>
-        </div>
+          ))}
+        </dl>
       </div>
-    </section>
+    </div>
   );
 }

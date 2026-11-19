@@ -164,7 +164,8 @@ const ICONS = {
   ),
 };
 
-const COLORS = ["#0b5ed7", "#17a2b8", "#28a745", "#ffc107", "#dc3545"];
+// Palette du design GetEvent (cyan, bleu, bleu nuit, ciel, encre).
+const COLORS = ["#00b3ff", "#145ba2", "#0e2f57", "#8fd2ff", "#111113"];
 
 const normalizeSearchValue = (value) =>
   String(value ?? "")
@@ -216,17 +217,7 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
             placeholder="Rechercher un événement..."
             aria-label="Rechercher un événement"
           />
-          <Link
-            href="/events/createvent"
-            className="btn btn-primary"
-            style={{
-              backgroundColor: "#0b5ed7",
-              color: "white",
-              padding: "0.4rem 1rem",
-              borderRadius: "8px",
-              textDecoration: "none",
-            }}
-          >
+          <Link href="/events/createvent" className={styles.create_btn}>
             + Créer
           </Link>
         </div>
@@ -256,16 +247,12 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
 
                 return (
                   <tr key={event.id}>
-                    <td style={{ fontWeight: 600, color: "#1a1a2e" }}>
-                      {event.title}
-                    </td>
+                    <td className={styles.event_title}>{event.title}</td>
                     <td>
                       <div>
                         {new Date(event.startDate).toLocaleDateString("fr-FR")}
                       </div>
-                      <div style={{ fontSize: "0.8rem", color: "#6c757d" }}>
-                        {event.location}
-                      </div>
+                      <div className={styles.event_meta}>{event.location}</div>
                     </td>
                     <td>{event.capacity || "N/A"}</td>
                     <td>
@@ -1174,8 +1161,8 @@ export default function Dashboard({ count = null }) {
           {
             label: "Revenus par événement (FCFA)",
             data: chartData.revenues,
-            backgroundColor: "rgba(11, 94, 215, 0.6)",
-            borderColor: "rgb(11, 94, 215)",
+            backgroundColor: "#00b3ff",
+            borderColor: "#00b3ff",
             borderWidth: 1,
             borderRadius: 8,
           },
@@ -1186,10 +1173,10 @@ export default function Dashboard({ count = null }) {
         maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
-          tooltip: { backgroundColor: "#1a1a2e" },
+          tooltip: { backgroundColor: "#111113" },
         },
         scales: {
-          y: { beginAtZero: true, grid: { color: "#f1f3f5" } },
+          y: { beginAtZero: true, grid: { color: "rgba(17, 17, 19, 0.08)" } },
           x: { grid: { display: false } },
         },
       },
@@ -1217,7 +1204,7 @@ export default function Dashboard({ count = null }) {
             position: "bottom",
             labels: { boxWidth: 12, padding: 15 },
           },
-          tooltip: { backgroundColor: "#1a1a2e" },
+          tooltip: { backgroundColor: "#111113" },
         },
         cutout: "70%",
       },

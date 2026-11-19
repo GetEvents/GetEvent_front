@@ -1,0 +1,36 @@
+@use "../../../styles/design" as ds;
+
+.primary {
+  @include ds.button(primary);
+}
+
+.white {
+  @include ds.button(white);
+}
+
+.accent {
+  @include ds.button(accent);
+}
+
+.outlineDark {
+  @include ds.button(outline-dark);
+}
+
+.outlineLight {
+  @include ds.button(outline-light);
+}
+
+// Tailles : surchargent l'espacement de la taille moyenne par défaut.
+.sm {
+  padding: 0.65rem 0.95rem;
+  font-size: 0.72rem;
+}
+
+.lg {
+  padding: 1.15rem 1.7rem;
+  font-size: 0.92rem;
+}
+
+.block {
+  width: 100%;
+}

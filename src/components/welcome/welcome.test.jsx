@@ -40,6 +40,11 @@ vi.mock("../EventTypes", () => ({
   default: () => <section>Types d&apos;evenements</section>,
 }));
 
+// HowItWorks charge une police via next/font/google, indisponible sous Vitest.
+vi.mock("../HowItWorks", () => ({
+  default: () => <section>Comment ça marche ?</section>,
+}));
+
 describe("WelcomePage", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -52,8 +57,8 @@ describe("WelcomePage", () => {
   it("affiche les appels a l'action principaux de la page d'accueil", async () => {
     const { container, unmount } = await render(<WelcomePage />);
 
-    expect(getByText(container, /Plateforme de gestion/)).toBeTruthy();
-    expect(getByText(container, /Billetterie intelligente/)).toBeTruthy();
+    expect(getByText(container, /Billetterie & gestion/)).toBeTruthy();
+    expect(getByText(container, /paiement Mobile Money/)).toBeTruthy();
     expect(
       container.querySelector('a[href="/events/createvent"]'),
     ).toBeTruthy();
@@ -66,6 +71,7 @@ describe("WelcomePage", () => {
     const { container, unmount } = await render(<WelcomePage />);
 
     expect(container.querySelector("#event-types")).toBeTruthy();
+    expect(container.querySelector("#how-it-works")).toBeTruthy();
     expect(container.querySelector("#features")).toBeTruthy();
     expect(container.querySelector("#impact")).toBeTruthy();
     expect(container.querySelector("#faq")).toBeTruthy();

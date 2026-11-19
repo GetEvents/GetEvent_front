@@ -1,443 +1,370 @@
+@use "../../styles/design" as ds;
+
+// Page « Paramètres du compte » — design affiche, pleine largeur comme le
+// tableau de bord : en-tête sombre, carte profil à gauche, réglages à droite.
+
 .page {
   width: 100%;
-  min-height: calc(100vh - 80px);
-  padding: 2rem 1.5rem 4rem;
-  background:
-    radial-gradient(circle at 85% 0%, rgba(7, 95, 167, 0.1), transparent 28rem),
-    #f5f7fa;
-  color: #1e293b;
+  min-height: 100vh;
+  background: var(--ge-paper);
+  color: var(--ge-ink);
+
+  @media (max-width: 768px) {
+    margin-bottom: 5rem;
+  }
 }
 
 .container {
-  width: min(100%, 1180px);
-  margin: 0 auto;
+  width: 100%;
+  padding: 1.25rem 1rem 4rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 4rem;
+  }
 }
 
+// ---- En-tête -----------------------------------------------------------------
+
 .header {
-  margin-bottom: 1.75rem;
-  padding: 1.6rem 1.75rem;
-  border: 1px solid rgba(7, 95, 167, 0.13);
-  border-radius: 16px;
-  background: linear-gradient(120deg, #ffffff 20%, #edf7ff 100%);
+  @include ds.panel-dark;
+  margin-bottom: 1.25rem;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(0, 179, 255, 0.2), transparent 45%),
+    var(--ge-night);
+
+  @media (min-width: 768px) {
+    padding: 2.5rem;
+  }
 
   h1 {
-    margin: 0 0 0.3rem;
-    color: #172033;
-    font-size: clamp(1.55rem, 3vw, 2rem);
-    font-weight: 700;
+    @include ds.display(clamp(1.7rem, 4.5vw, 3rem));
+    margin: 0 0 0.6rem;
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: var(--ge-night-muted);
   }
 }
 
+// ---- Mise en page ------------------------------------------------------------
+
 .content {
   display: grid;
-  grid-template-columns: minmax(240px, 0.75fr) minmax(0, 2fr);
-  align-items: start;
+  grid-template-columns: 1fr;
   gap: 1.25rem;
+  align-items: start;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
 }
 
 .profileColumn {
-  position: sticky;
-  top: 1.5rem;
+  @media (min-width: 900px) {
+    position: sticky;
+    top: 1.5rem;
+  }
 }
 
 .settingsColumn {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
 }
 
 .card {
-  min-width: 0;
+  @include ds.card;
   padding: 1.5rem;
-  border: 1px solid #dce3ec;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 10px 30px rgba(30, 41, 59, 0.06);
+
+  @media (min-width: 768px) {
+    padding: 1.75rem;
+  }
 }
+
+// Zone dangereuse : liseré rouge.
+.card_danger {
+  border-left: 4px solid var(--app-color-danger, #ef4444);
+}
+
+// Section bientôt disponible : atténuée.
+.paymentComingSoon {
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 14px,
+      rgba(17, 17, 19, 0.025) 14px 28px
+    ),
+    var(--ge-paper-raised);
+}
+
+// ---- Titres de section -------------------------------------------------------
 
 .sectionTitle {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ge-line);
 
   > svg {
-    width: 22px;
-    height: 22px;
     flex-shrink: 0;
-    margin-top: 0.1rem;
-    color: #075fa7;
+    width: 2.6rem;
+    height: 2.6rem;
+    padding: 0.65rem;
+    border-radius: 50%;
+    background: var(--ge-ink);
+    color: var(--ge-cyan);
   }
 
   h2 {
-    margin: 0;
-    color: #172033;
-    font-size: 1.15rem;
-    font-weight: 700;
-  }
-
-  p {
-    margin: 0.25rem 0 0;
-    color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-}
-
-.paymentRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #dce3ec;
-  border-radius: 8px;
-  background: #f8fafc;
-
-  h3 {
-    margin: 0 0 0.25rem;
-    color: #263246;
-    font-size: 1rem;
+    @include ds.display(clamp(1.1rem, 2.4vw, 1.45rem));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 0.35rem;
   }
 
   p {
     margin: 0;
-    color: #64748b;
-    font-size: 0.88rem;
-  }
-}
-
-.paymentComingSoon {
-  border-color: #d1d5db;
-  background: #f3f4f6;
-  color: #6b7280;
-
-  .sectionTitle {
-    > svg,
-    h2,
-    p {
-      color: #6b7280;
-    }
+    color: var(--ge-ink-muted);
+    font-size: 0.95rem;
   }
 
-  .paymentRow {
-    border-color: #d1d5db;
-    background: #e5e7eb;
-
-    h3,
-    p {
-      color: #6b7280;
-    }
-  }
-}
-
-.comingSoonBadge {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.65rem;
-  padding: 0.18rem 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  background: #e5e7eb;
-  color: #64748b;
-  font-size: 0.72rem;
-  font-weight: 700;
-  vertical-align: middle;
-}
-
-.passwordForm {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
-  gap: 1rem;
-
-  > button {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-}
-
-.form_group {
-  min-width: 0;
-
-  label {
-    display: block;
-    margin-bottom: 0.4rem;
-    color: #334155;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  input {
-    width: 100%;
-    min-height: 44px;
-    padding: 0.65rem 0.8rem;
-    border: 1px solid #bdc8d6;
-    border-radius: 8px;
-    outline: none;
-    color: #172033;
-    font: inherit;
-
-    &:focus {
-      border-color: #075fa7;
-      box-shadow: 0 0 0 3px rgba(7, 95, 167, 0.12);
-    }
-  }
-}
-
-.btn_primary,
-.btn_success,
-.btn_disabled,
-.btn_danger,
-.btn_logout {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  min-height: 42px;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-
-  svg {
-    width: 17px;
-    height: 17px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-  }
-}
-
-.btn_primary {
-  border: 1px solid #075fa7;
-  background: #075fa7;
-  color: #ffffff;
-
-  &:hover:not(:disabled) {
-    background: #064d87;
-  }
-}
-
-.btn_success {
-  border: 1px solid #15803d;
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.btn_disabled {
-  border: 1px solid #cbd5e1;
-  background: #e5e7eb;
-  color: #64748b;
-}
-
-.btn_logout {
-  border: 1px solid #dce3ec;
-  background: #f8fafc;
-  color: #334155;
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    border-color: #cbd5e1;
-    background: #edf2f7;
-    color: #0f172a;
-  }
-}
-
-.card_danger {
-  border-color: #fecaca;
-
-  .sectionTitle {
-    > svg,
-    h2 {
-      color: #b91c1c;
-    }
-  }
-}
-
-.btn_danger {
-  border: 1px solid #dc2626;
-  background: #ffffff;
-  color: #b91c1c;
-
-  &:hover:not(:disabled) {
-    background: #dc2626;
+  .card_danger & > svg {
+    background: var(--app-color-danger, #ef4444);
     color: #ffffff;
   }
 }
 
-.message_success,
-.message_error {
-  margin: 0 0 1rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  line-height: 1.45;
+.comingSoonBadge {
+  @include ds.chip(light);
+  font-family: inherit;
+  font-stretch: normal;
+  font-size: 0.62rem;
 }
 
+// ---- Paiements ---------------------------------------------------------------
+
+.paymentRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h3 {
+    @include ds.label(var(--ge-ink));
+    margin: 0 0 0.3rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--ge-ink-muted);
+    font-size: 0.92rem;
+  }
+}
+
+// ---- Formulaire mot de passe -------------------------------------------------
+
+.passwordForm {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1rem;
+  align-items: end;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+
+    button {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+  }
+}
+
+.form_group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+
+  label {
+    @include ds.field-label;
+  }
+
+  input {
+    @include ds.field;
+  }
+}
+
+// ---- Messages ----------------------------------------------------------------
+
+.message_error,
 .message_success {
-  border: 1px solid #86efac;
-  background: #f0fdf4;
-  color: #166534;
+  margin: 0 0 1.25rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid;
+  border-radius: var(--ge-radius-control);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .message_error {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
+  border-color: var(--app-color-danger, #ef4444);
+  background: rgba(239, 68, 68, 0.08);
   color: #991b1b;
 }
 
+.message_success {
+  border-color: var(--app-color-success, #10b981);
+  background: rgba(16, 185, 129, 0.08);
+  color: #065f46;
+}
+
+// ---- Boutons -----------------------------------------------------------------
+
+.btn_primary {
+  @include ds.button(primary);
+}
+
+.btn_success {
+  @include ds.button(primary);
+  background: var(--app-color-success, #10b981);
+
+  &:hover {
+    background: #059669;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.btn_disabled {
+  @include ds.button(outline-dark);
+  border-style: dashed;
+  color: var(--ge-ink-muted);
+
+  &:disabled {
+    opacity: 1;
+  }
+}
+
+.btn_logout {
+  @include ds.button(outline-dark);
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.btn_danger {
+  @include ds.button(primary);
+  background: var(--app-color-danger, #ef4444);
+
+  &:hover {
+    background: #dc2626;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// La déconnexion n'apparaît ici que sur mobile (ailleurs : barre latérale).
+.mobileOnlyLogoutCard {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+// ---- Squelettes --------------------------------------------------------------
+
 .skeletonHeader,
-.skeletonProfile,
 .skeletonTitle,
 .skeletonLine,
 .skeletonLineShort,
-.skeletonControl,
-.paymentSkeleton > div {
-  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
-  background-size: 220% 100%;
-  animation: settings-skeleton 1.4s ease-in-out infinite;
+.skeletonControl {
+  display: block;
+  border-radius: var(--ge-radius-control);
+  background: linear-gradient(
+    90deg,
+    rgba(17, 17, 19, 0.06) 0%,
+    rgba(17, 17, 19, 0.12) 50%,
+    rgba(17, 17, 19, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: settings-skeleton 1.5s ease-in-out infinite;
 }
 
 .skeletonHeader {
-  width: min(420px, 75%);
-  height: 62px;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
+  height: 8rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--ge-radius-panel);
+  background: var(--ge-night);
+  animation: none;
 }
 
 .skeletonProfile {
-  min-height: 260px;
+  min-height: 300px;
 }
 
 .skeletonCard {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+.paymentSkeleton > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 12rem;
 }
 
 .skeletonTitle {
-  width: 38%;
-  height: 22px;
-  border-radius: 6px;
+  width: 40%;
+  height: 1.3rem;
 }
 
-.skeletonLine,
-.skeletonLineShort {
-  width: 86%;
-  height: 13px;
-  border-radius: 999px;
+.skeletonLine {
+  width: 80%;
+  height: 0.9rem;
 }
 
 .skeletonLineShort {
-  display: block;
-  width: 58%;
+  width: 55%;
+  height: 0.9rem;
 }
 
 .skeletonControl {
-  display: block;
-  width: 145px;
-  height: 42px;
-  margin-top: auto;
-  border-radius: 8px;
-}
-
-.paymentSkeleton {
-  min-height: 78px;
-
-  > div {
-    display: grid;
-    width: min(280px, 55%);
-    gap: 0.7rem;
-    background: transparent;
-    animation: none;
-  }
+  width: 12rem;
+  height: 3rem;
 }
 
 @keyframes settings-skeleton {
   from {
-    background-position: 100% 0;
+    background-position: 200% 0;
   }
-
   to {
-    background-position: -100% 0;
+    background-position: -200% 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeletonHeader,
-  .skeletonProfile,
   .skeletonTitle,
   .skeletonLine,
   .skeletonLineShort,
   .skeletonControl {
     animation: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .content {
-    grid-template-columns: 1fr;
-  }
-
-  .profileColumn {
-    position: static;
-  }
-}
-
-@media (max-width: 640px) {
-  .page {
-    padding: 1.25rem 0.75rem 2.5rem;
-  }
-
-  .header h1 {
-    font-size: 1.45rem;
-  }
-
-  .card {
-    padding: 1rem;
-  }
-
-  .header {
-    padding: 1.25rem;
-    border-radius: 12px;
-  }
-
-  .passwordForm {
-    grid-template-columns: 1fr;
-
-    > button {
-      width: 100%;
-    }
-  }
-
-  .paymentRow {
-    align-items: stretch;
-    flex-direction: column;
-
-    button {
-      width: 100%;
-    }
-  }
-}
-
-.mobileOnlyLogoutCard {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .page {
-    margin-bottom: 5rem;
-  }
-
-  .mobileOnlyLogoutCard {
-    display: block;
   }
 }

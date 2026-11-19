@@ -1,56 +1,66 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Lock, Rocket, Smartphone, Ticket, Zap } from "lucide-react";
+import { ArrowUpRight, Lock, Smartphone, Zap } from "lucide-react";
 import FAQSection from "../FAQ";
 import FeaturesSection from "../Features";
 import ImpactSection from "../Impact";
 import EventTypesSection from "../EventTypes";
+import HowItWorksSection from "../HowItWorks";
 import styles from "./layout.module.scss";
 
+// Mots courts : en police d'affiche élargie, ils tiennent sur mobile.
 const EVENT_TYPES = [
   "concerts",
-  "shows",
-  "spectacles",
-  "matchs de football",
-  "événements gastronomiques",
+  "festivals",
+  "conférences",
+  "matchs",
+  "soirées",
+  "ateliers",
+];
+
+const TRUST_ITEMS = [
+  { icon: Smartphone, label: "Mobile Money" },
+  { icon: Lock, label: "Paiement sécurisé" },
+  { icon: Zap, label: "Temps réel" },
 ];
 
 export default function Home() {
-  // Le hero est toujours au-dessus de la ligne de flottaison : il est visible
-  // dès le HTML rendu par le serveur, sans attendre le chargement du JavaScript
-  // (sur mobile, l'attente d'un IntersectionObserver laissait l'écran vide ~3 s).
-  const isHeroVisible = true;
-  const isCtaVisible = true;
-  const isBadgesVisible = true;
   const [activeEventIndex, setActiveEventIndex] = useState(0);
   // Premier mot déjà écrit dans le HTML serveur : le titre est complet avant
   // le chargement du JavaScript, puis l'animation reprend normalement.
   const [typedEvent, setTypedEvent] = useState(EVENT_TYPES[0]);
   const [isDeleting, setIsDeleting] = useState(false);
-  const heroRef = useRef(null);
-  const ctaRef = useRef(null);
-  const badgesRef = useRef(null);
 
-  // Animation typewriter events
+  // Arrivée depuis une autre page sur /#how-it-works, /#faq… : Next.js tente
+  // de défiler avant que la page (derrière loading.tsx) soit affichée, et
+  // reste en haut. On défile donc vers l'ancre une fois la page montée.
   useEffect(() => {
-    if (!isHeroVisible) return;
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return undefined;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
+  // Animation « machine à écrire » du mot en couleur.
+  useEffect(() => {
     const currentEvent = EVENT_TYPES[activeEventIndex];
     let timeoutId;
 
     if (!isDeleting && typedEvent !== currentEvent) {
       timeoutId = setTimeout(() => {
         setTypedEvent(currentEvent.slice(0, typedEvent.length + 1));
-      }, 50);
+      }, 60);
     } else if (!isDeleting && typedEvent === currentEvent) {
       timeoutId = setTimeout(() => {
         setIsDeleting(true);
-      }, 1100);
+      }, 1400);
     } else if (isDeleting && typedEvent.length > 0) {
       timeoutId = setTimeout(() => {
         setTypedEvent((prev) => prev.slice(0, -1));
-      }, 55);
+      }, 45);
     } else {
       timeoutId = setTimeout(() => {
         setIsDeleting(false);
@@ -59,131 +69,67 @@ export default function Home() {
     }
 
     return () => clearTimeout(timeoutId);
-  }, [isHeroVisible, isDeleting, typedEvent, activeEventIndex]);
+  }, [isDeleting, typedEvent, activeEventIndex]);
 
   return (
     <div className={styles.welcomeContainer}>
       <div className={styles.heroContent}>
-        <div className={styles.heroSplit}>
-          {/* Left Column — Text Content */}
-          <div className={styles.heroTextCol}>
-            {/* Modern Glass Badge */}
-            <div className={styles.badgeWrap}>
-              <div
-                className={`${styles.glassBadge} ${isHeroVisible ? styles.badgeVisible : ""}`}
-              >
-                <span className={styles.dot}></span>
-                <span>
-                  Plateforme de gestion d&apos;événements nouvelle génération
-                </span>
-              </div>
-            </div>
+        <div className={styles.heroTextCol}>
+          <p className={styles.kicker}>
+            <span className={styles.dot} aria-hidden="true" />
+            Billetterie &amp; gestion d&apos;événements
+          </p>
 
-            {/* Hero Headlines */}
-            <div ref={heroRef} className={styles.heroHeadingWrap}>
-              <h1
-                className={`${styles.heroTitle} ${isHeroVisible ? styles.titleVisible : ""}`}
-              >
-                Créez, gérez et connectez vos
-                <br />
-                <span className={styles.eventCarousel} aria-live="polite">
-                  <span className={styles.eventItem}>{typedEvent}</span>
-                  <span
-                    className={styles.typingCursor}
-                    aria-hidden="false"
-                  ></span>
-                </span>
-              </h1>
-            </div>
+          <h1 className={styles.heroTitle}>
+            <span className={styles.titleLine}>Créez, gérez</span>
+            <span className={styles.titleLine}>et remplissez vos</span>
+            <span className={styles.typedLine}>
+              {/* Lecteurs d'écran : un libellé stable plutôt que l'animation. */}
+              <span className={styles.srOnly}>événements</span>
+              <span className={styles.typedWord} aria-hidden="true">
+                {typedEvent}
+              </span>
+              <span className={styles.typingCursor} aria-hidden="true" />
+            </span>
+          </h1>
 
-            {/* Persuasive Description */}
-            <div
-              className={`${styles.description} ${isHeroVisible ? styles.descriptionVisible : ""}`}
-            >
-              <p>
-                Billetterie intelligente + networking en temps réel pour des
-                événements sans friction.
-              </p>
-            </div>
+          <p className={styles.description}>
+            Billetterie, paiement Mobile Money, billets QR code et messagerie en
+            temps réel : tout pour des événements sans friction.
+          </p>
 
-            {/* Impactful CTAs */}
-            <div
-              ref={ctaRef}
-              className={`${styles.ctaGroup} ${isCtaVisible ? styles.ctaVisible : ""}`}
-            >
-              <Link href="/events/createvent" className={styles.primaryBtn}>
-                <span className={styles.btnIcon}>
-                  <Rocket size={18} aria-hidden="true" />
-                </span>
-                Créer mon événement
-              </Link>
-              <Link href="/events" className={styles.secondaryBtn}>
-                <span className={styles.btnIcon}>
-                  <Ticket size={18} aria-hidden="true" />
-                </span>
-                Rejoindre un événement
-              </Link>
-            </div>
-
-            {/* Search Bar */}
-            {/* <div className={`${styles.searchBarWrap} ${isCtaVisible ? styles.searchBarVisible : ""}`}>
-              <div className={styles.searchBar}>
-                <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Entrer un code d'événement"
-                  className={styles.searchInput}
-                  value={eventCode}
-                  onChange={(e) => setEventCode(e.target.value)}
-                />
-                <span className={styles.searchCode}>9A3-HXK</span>
-                <button className={styles.searchBtn} aria-label="Rechercher">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </button>
-              </div>
-            </div> */}
-
-            {/* Trust Badges */}
-            <div
-              ref={badgesRef}
-              className={`${styles.trustBadges} ${isBadgesVisible ? styles.badgesVisible : ""}`}
-            >
-              <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>
-                  <Smartphone size={16} aria-hidden="true" />
-                </span>
-                <span>Mobile Money</span>
-              </div>
-              <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>
-                  <Lock size={16} aria-hidden="true" />
-                </span>
-                <span>Paiement sécurisé</span>
-              </div>
-              <div className={styles.trustItem}>
-                <span className={styles.trustIcon}>
-                  <Zap size={16} aria-hidden="true" />
-                </span>
-                <span>Temps réel</span>
-              </div>
-            </div>
+          <div className={styles.ctaGroup}>
+            <Link href="/events/createvent" className={styles.primaryBtn}>
+              Créer mon événement
+              <ArrowUpRight size={18} aria-hidden="true" />
+            </Link>
+            <Link href="/events" className={styles.secondaryBtn}>
+              Rejoindre un événement
+            </Link>
           </div>
+
+          <ul className={styles.trustBadges}>
+            {TRUST_ITEMS.map(({ icon: Icon, label }) => (
+              <li key={label} className={styles.trustItem}>
+                <Icon size={14} aria-hidden="true" />
+                {label}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      {/* Content Sections */}
+      {/* Sections de contenu */}
       <div className={styles.contentSections}>
         <section id="event-types">
           <EventTypesSection />
         </section>
 
-        <section id="features" className={styles.featuresSectionBg}>
+        <section id="how-it-works">
+          <HowItWorksSection />
+        </section>
+
+        <section id="features">
           <FeaturesSection />
         </section>
 

@@ -1,238 +1,128 @@
-/* Input Component Styles - Modern Design */
+@use "../../../styles/design" as ds;
+
+// Champ de formulaire — design affiche : libellé en majuscules, champ blanc
+// aux angles francs, contour noir + halo cyan au focus.
+
 .parent {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   width: 100%;
-  max-width: 100%;
   min-width: 0;
-  box-sizing: border-box;
+  margin-bottom: 1rem;
 
   label {
-    font-weight: var(--app-font-weight-semibold);
-    color: var(--app-color-text);
-    margin-bottom: var(--app-space-2);
-    display: block;
-    font-size: 0.9rem;
-    letter-spacing: 0.3px;
+    @include ds.field-label;
+  }
+
+  input,
+  select,
+  textarea {
+    @include ds.field;
+    box-sizing: border-box;
+    min-width: 0;
+    font-size: 0.98rem;
+
+    &:disabled {
+      border-color: rgba(17, 17, 19, 0.12);
+      background: rgba(17, 17, 19, 0.04);
+      color: var(--ge-ink-muted);
+      cursor: not-allowed;
+    }
   }
 
   input {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 0.9rem 1rem;
-    border: 1px solid #94a3b8;
-    border-radius: var(--app-radius-md);
-    font-size: 0.95rem;
-    color: var(--app-color-text);
-    background: var(--app-color-white);
-    transition: all var(--app-transition-base);
-    font-family: var(--app-font-family-sans);
-    margin-top: 0.35rem;
-    margin-bottom: 0.75rem;
-
-    &::placeholder {
-      color: var(--app-color-placeholder);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--app-color-primary);
-      box-shadow: var(--app-shadow-focus);
-      background: var(--app-color-surface);
-    }
-
-    &:hover:not(:disabled) {
-      border-color: var(--app-color-border-hover);
-      background: var(--app-color-surface);
-    }
-
-    &:disabled {
-      background: var(--app-color-surface-muted);
-      color: var(--app-color-placeholder);
-      cursor: not-allowed;
-    }
-
     &[type="date"],
     &[type="time"],
     &[type="datetime-local"] {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
       display: block;
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-      min-height: 48px;
+      min-height: 50px;
       line-height: normal;
+      appearance: none;
 
       &::-webkit-date-and-time-value {
-        text-align: left;
         min-height: 1.4em;
         margin: 0;
+        text-align: left;
       }
     }
 
-    &[type="email"],
-    &[type="password"],
-    &[type="text"] {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    &[type="file"] {
+      padding: 0.7rem;
+      cursor: pointer;
+
+      // Styles écrits à la main : le mixin bouton ajoute des pseudo-classes
+      // (:focus-visible…) interdites après un pseudo-élément.
+      &::file-selector-button {
+        margin-right: 0.75rem;
+        padding: 0.6rem 0.9rem;
+        border: 0;
+        border-radius: var(--ge-radius-control);
+        background: var(--ge-ink);
+        color: #ffffff;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
     }
   }
 
   select {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 0.9rem 1rem;
-    border: 1px solid #94a3b8;
-    border-radius: var(--app-radius-md);
-    font-size: 0.95rem;
-    color: var(--app-color-text);
-    background: var(--app-color-white);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: var(--app-font-family-sans);
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    line-height: 1.2;
-    min-height: calc(0.9rem * 2 + 4px);
-    margin-top: 0.35rem;
-    margin-bottom: 0.75rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%2364748b' stroke-width='2.25'%3E%3Cpolyline points='5 7.5 10 12.5 15 7.5'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 18px;
+    min-height: 50px;
     padding-right: 2.5rem;
-
-    &:focus {
-      outline: none;
-      border-color: var(--app-color-primary);
-      box-shadow: var(--app-shadow-focus);
-      background: var(--app-color-surface);
-    }
-
-    &:hover {
-      border-color: var(--app-color-border-hover);
-      background: var(--app-color-surface);
-    }
-
-    &:disabled {
-      background: var(--app-color-surface-muted);
-      color: var(--app-color-placeholder);
-      cursor: not-allowed;
-    }
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23111113' stroke-width='2.25'%3E%3Cpolyline points='5 7.5 10 12.5 15 7.5'%3E%3C/polyline%3E%3C/svg%3E");
+    background-position: right 0.85rem center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    appearance: none;
+    cursor: pointer;
 
     option {
-      color: var(--app-color-text);
-      background: var(--app-color-white);
-      padding: 0.5rem;
-      line-height: 1.5;
+      color: var(--ge-ink);
+      background: #ffffff;
     }
   }
 
   textarea {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 0.9rem 1rem;
-    border: 1px solid #94a3b8;
-    border-radius: var(--app-radius-md);
-    font-size: 0.95rem;
-    color: var(--app-color-text);
-    background: var(--app-color-white);
-    transition: all 0.3s ease;
-    font-family: var(--app-font-family-sans);
+    min-height: 110px;
     resize: vertical;
-    min-height: 100px;
-    margin-top: 0.35rem;
-    margin-bottom: 0.75rem;
-
-    &::placeholder {
-      color: var(--app-color-placeholder);
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--app-color-primary);
-      box-shadow: var(--app-shadow-focus);
-      background: var(--app-color-surface);
-    }
-
-    &:hover:not(:disabled) {
-      border-color: var(--app-color-border-hover);
-      background: var(--app-color-surface);
-    }
   }
 
   input[type="submit"] {
-    background: linear-gradient(
-      135deg,
-      var(--app-color-primary) 0%,
-      var(--app-color-primary-hover) 100%
-    );
-    color: var(--app-color-white);
-    cursor: pointer;
-    border: none;
-    font-weight: 600;
-    padding: 0.9rem 1.5rem;
-    transition: all 0.3s ease;
+    @include ds.button(primary);
     width: auto;
-    border-radius: var(--app-radius-md);
-    font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-      background: linear-gradient(
-        135deg,
-        var(--app-color-primary-hover) 0%,
-        var(--app-color-primary-active) 100%
-      );
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
   }
 
   .passwordField {
     position: relative;
 
     input {
-      padding-right: 2.75rem;
+      padding-right: 3rem;
     }
   }
 
   .passwordToggle {
     position: absolute;
-    right: 0.75rem;
-    top: calc(50% - 0.375rem);
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    cursor: pointer;
-    padding: 0.2rem;
+    top: 50%;
+    right: 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0.35rem;
+    border: none;
+    border-radius: var(--ge-radius-control);
+    background: transparent;
+    color: var(--ge-ink-muted);
+    transform: translateY(-50%);
+    cursor: pointer;
 
     &:hover {
-      color: #374151;
+      color: var(--ge-ink);
     }
+
+    @include ds.focus-ring;
 
     svg {
       width: 20px;

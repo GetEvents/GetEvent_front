@@ -1,515 +1,364 @@
-// Container principal
+@use "../../../styles/design" as ds;
+
+// Cartes « affiche » des événements : grande image, date en couleur, titre,
+// lieu et étiquettes, comme une affiche de billetterie.
+
 .event_schow {
   width: 100%;
-  min-height: 36vh;
 }
 
-// Feedback alerts
+// ---- Bandeau de message (succès / erreur) ------------------------------------
+
 .btnDe {
-  padding: 1rem 1.25rem;
-  border-radius: 14px;
-  margin-bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
-  &.success {
-    background-color: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
-  }
-
-  &.error {
-    background-color: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-  }
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid;
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-paper-raised);
+  font-weight: 700;
 
   p {
     margin: 0;
   }
+
+  button {
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  &.success {
+    border-color: var(--app-color-success, #10b981);
+    color: #065f46;
+  }
+
+  &.error {
+    border-color: var(--app-color-danger, #ef4444);
+    color: #991b1b;
+  }
 }
 
-// Grille des événements
+// ---- Grille ------------------------------------------------------------------
+
 .events_schowdiv {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.85rem;
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0.5rem 0;
+  grid-template-columns: 1fr;
+  gap: 2.25rem 1.25rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-// Carte d'événement - Inspirée "Travel Guide Clean Card" (Image fondue sous les infos)
+// ---- Carte -------------------------------------------------------------------
+
 .events_schowdi {
-  position: relative;
-  background: #ffffff;
-  border-radius: 24px;
-  overflow: hidden;
-  border: none;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
+  min-width: 0;
 
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 35px -4px rgba(15, 23, 42, 0.12);
-
-    .events_image img {
-      transform: scale(1.05) translateZ(0);
-    }
-
-    .ctaArrow {
-      background: #0f172a;
-      color: #ffffff;
-      transform: translate(2px, -2px);
-    }
-
-    .eventTitle {
-      color: #2563eb;
-    }
+  &:hover .events_image img {
+    transform: scale(1.04);
   }
 }
 
-// Zone image plein cadre en haut avec dégradé de fondu naturel
+// Visuel : l'affiche de l'événement.
 .events_image {
   position: relative;
-  width: 100%;
-  height: 220px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--ge-radius-card);
+  background: var(--ge-night);
   overflow: hidden;
-  background-color: #ffffff;
-  border: none;
-  outline: none;
-
-  &::before,
-  &::after {
-    display: none !important;
-    content: none !important;
-  }
 
   img {
     object-fit: cover;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s ease;
   }
 }
 
-// Badges flottants sur l'image
 .badgeCategory {
+  @include ds.chip(dark);
   position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #0f172a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  letter-spacing: 0.3px;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  max-width: calc(100% - 9rem);
+  overflow: hidden;
+  background: rgba(17, 17, 19, 0.82);
+  color: #ffffff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badgesRight {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.35rem;
 }
 
-.badgePrice {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 12px;
-  border-radius: 9999px;
-  font-size: 0.78125rem;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  white-space: nowrap;
+.badgePrice,
+.badgeStatus,
+.badgeRegistered {
+  @include ds.chip(light);
+  background: #ffffff;
+}
 
-  &.free {
-    background: rgba(16, 185, 129, 0.95);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-  }
+.badgePrice.free {
+  background: var(--ge-cyan);
+  color: var(--ge-ink);
+}
 
-  &.paid {
-    background: rgba(15, 23, 42, 0.88);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+.badgeStatus.expired {
+  background: var(--ge-night);
+  color: rgba(245, 245, 244, 0.75);
 }
 
 .badgeRegistered {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(16, 185, 129, 0.95);
+  background: var(--app-color-success, #10b981);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
-
-  svg {
-    stroke-width: 2.5;
-  }
 }
 
-.badgeStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 9999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+// ---- Informations ------------------------------------------------------------
 
-  &.expired {
-    background: rgba(239, 68, 68, 0.95);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-  }
-}
-
-// Corps de carte : net, clair et toujours visible sous l'image
 .events_info {
-  position: relative;
-  padding: 16px 20px 14px 20px;
   display: flex;
-  flex-direction: column;
   flex: 1;
-  background: #ffffff;
-  border: none;
-  outline: none;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: none !important;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 0.1rem 0;
 }
 
+// Date et heure en couleur, comme sur une affiche.
 .dateTimeRow {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.8rem;
+}
+
+.metaItem {
+  @include ds.label(var(--ge-blue));
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  font-size: 0.8125rem;
-  color: #64748b;
-  font-weight: 600;
-  margin-bottom: 8px;
-
-  .metaItem {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-
-    svg {
-      color: #3b82f6;
-      flex-shrink: 0;
-    }
-  }
+  gap: 0.3rem;
+  font-size: 0.78rem;
 }
 
 .titleLink {
-  text-decoration: none;
   color: inherit;
-  display: block;
+  text-decoration: none;
+
+  &:hover .eventTitle {
+    color: var(--ge-blue);
+  }
+
+  @include ds.focus-ring;
 }
 
 .eventTitle {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.35;
-  margin: 0 0 8px 0;
   display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ge-ink);
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.25;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-height: 2.7em;
   transition: color 0.2s ease;
 }
 
-.locationRow {
+.locationRow,
+.organizerSnippet {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8125rem;
-  color: #64748b;
-  margin-bottom: 12px;
-
-  svg {
-    color: #059669;
-    flex-shrink: 0;
-  }
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--ge-ink-muted);
+  font-size: 0.9rem;
 
   span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-}
-
-.organizerSnippet {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin-top: auto;
 
   svg {
     flex-shrink: 0;
   }
 }
 
-// Pied de carte : Détails (Œil) & Action principale (Participer)
+.organizerSnippet {
+  font-size: 0.82rem;
+}
+
+// ---- Actions -----------------------------------------------------------------
+
 .eventactin {
-  padding: 12px 18px 16px 18px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-top: 1px solid #f1f5f9;
-  background: #ffffff;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .leftActions {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.eyeBtn {
-  width: 38px;
-  height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #0f172a;
-    border-color: #0f172a;
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
+  margin-right: auto;
 }
 
 .editdelect {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 0.35rem;
+}
 
-  .actionBtn {
-    width: 38px;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    background: #f1f5f9;
-    color: #475569;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s ease;
+.actionBtn,
+.eyeBtn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(17, 17, 19, 0.25);
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-paper-raised);
+  color: var(--ge-ink);
+  cursor: pointer;
 
-    &:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-    }
-
-    &.delete:hover {
-      background: #fee2e2;
-      color: #dc2626;
-    }
+  &:hover {
+    border-color: var(--ge-ink);
   }
+
+  &[aria-disabled="true"],
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @include ds.focus-ring;
+}
+
+.actionBtn.delete:hover:not(:disabled) {
+  border-color: var(--app-color-danger, #ef4444);
+  color: var(--app-color-danger, #ef4444);
 }
 
 .ctaPrimaryBtn {
-  flex: 1;
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 12px;
-  background: #2563eb;
-  color: #ffffff;
-  border: none;
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
-  white-space: nowrap;
-
-  &:hover:not(:disabled) {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32);
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.98);
-  }
+  @include ds.button(primary, sm);
+  padding: 0.75rem 1.1rem;
 
   &.registered {
-    background: #ecfdf5;
-    color: #059669;
-    border: 1px solid #a7f3d0;
-    box-shadow: none;
-
-    svg {
-      color: #059669;
-      stroke-width: 2.5;
-    }
+    background: var(--app-color-success, #10b981);
 
     &:hover {
-      background: #d1fae5;
-      color: #047857;
-      border-color: #6ee7b7;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+      background: #059669;
     }
   }
 
   &.disabled,
   &:disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
+    background: rgba(17, 17, 19, 0.15);
+    color: var(--ge-ink-muted);
   }
 }
 
-// État vide
+// ---- État vide ---------------------------------------------------------------
+
 .erreur {
+  padding: 3rem 1.5rem;
+  border: 1px dashed rgba(17, 17, 19, 0.25);
+  border-radius: var(--ge-radius-card);
   text-align: center;
-  padding: 4rem 1.5rem;
-  background: #ffffff;
-  border-radius: 24px;
-  max-width: 48rem;
-  margin: 2rem auto;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 
   p {
-    font-size: 1.125rem;
-    color: #475569;
-    line-height: 1.7;
+    max-width: 34rem;
+    margin: 0 auto;
+    color: var(--ge-ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
 
-    span {
-      font-weight: 700;
-      color: #2563eb;
-    }
+  span {
+    color: var(--ge-ink);
+    font-weight: 800;
   }
 }
 
-// Skeleton styles
+// ---- Squelette de chargement -------------------------------------------------
+
 .skeletonCard {
   pointer-events: none;
+}
 
-  .skeletonImage {
-    height: 230px;
-    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-    background-size: 200% 100%;
-    animation: event-skeleton 1.5s infinite;
-  }
+.skeletonImage,
+.skeletonMeta,
+.skeletonTitle,
+.skeletonLocation,
+.skeletonEye,
+.skeletonBtn {
+  border-radius: var(--ge-radius-control);
+  background: linear-gradient(
+    90deg,
+    rgba(17, 17, 19, 0.06) 0%,
+    rgba(17, 17, 19, 0.12) 50%,
+    rgba(17, 17, 19, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: event-skeleton 1.5s ease-in-out infinite;
+}
 
-  .skeletonContent {
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+.skeletonImage {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--ge-radius-card);
+}
 
-  .skeletonTitle,
-  .skeletonMeta,
-  .skeletonLocation {
-    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-    background-size: 200% 100%;
-    animation: event-skeleton 1.5s infinite;
-    border-radius: 8px;
-  }
+.skeletonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-top: 0.9rem;
+}
 
-  .skeletonTitle {
-    height: 20px;
-    width: 75%;
-  }
+.skeletonMeta {
+  width: 40%;
+  height: 0.8rem;
+}
 
-  .skeletonMeta {
-    height: 14px;
-    width: 50%;
-  }
+.skeletonTitle {
+  width: 85%;
+  height: 1.2rem;
+}
 
-  .skeletonLocation {
-    height: 14px;
-    width: 60%;
-  }
+.skeletonLocation {
+  width: 60%;
+  height: 0.9rem;
+}
 
-  .skeletonFooter {
-    margin-top: 10px;
-    padding-top: 12px;
-    border-top: 1px solid #f1f5f9;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.skeletonFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
 
-    .skeletonEye {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: #f1f5f9;
-      flex-shrink: 0;
-    }
+.skeletonEye {
+  width: 2.5rem;
+  height: 2.5rem;
+}
 
-    .skeletonBtn {
-      height: 38px;
-      flex: 1;
-      border-radius: 12px;
-      background: #f1f5f9;
-    }
-  }
+.skeletonBtn {
+  width: 7rem;
+  height: 2.5rem;
 }
 
 @keyframes event-skeleton {
@@ -518,5 +367,20 @@
   }
   to {
     background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .events_image img {
+    transition: none;
+  }
+
+  .skeletonImage,
+  .skeletonMeta,
+  .skeletonTitle,
+  .skeletonLocation,
+  .skeletonEye,
+  .skeletonBtn {
+    animation: none;
   }
 }
