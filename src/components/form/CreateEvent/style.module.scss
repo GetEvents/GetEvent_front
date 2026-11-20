@@ -69,6 +69,36 @@
   position: relative;
 }
 
+// Organisateur hors Bénin : interrupteur verrouillé sur « gratuit ».
+.toggleInput:disabled + .toggleLabel {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.salesCountryWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--app-color-warning, #f59e0b);
+  border-radius: var(--ge-radius-control);
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  font-size: 0.88rem;
+  line-height: 1.45;
+
+  svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
 .toggleInput {
   display: none;
 }

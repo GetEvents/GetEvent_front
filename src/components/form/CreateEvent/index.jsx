@@ -15,6 +15,7 @@ import {
   Pencil,
   Sparkles,
   Ticket,
+  TriangleAlert,
   Users,
 } from "lucide-react";
 import { useCreateEvent, useEvent, useUpdateEvent } from "@/hooks/useEvents";
@@ -22,6 +23,8 @@ import { initMapAuto } from "@/utils/autocomplet";
 import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
+import { useAuth } from "@/hooks/useAuth";
+import { canSellTickets } from "@/lib/payment-countries";
 const CreateEvent = ({ id }) => {
   const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const createMutation = useCreateEvent();
@@ -31,6 +34,10 @@ const CreateEvent = ({ id }) => {
   const pending = mutation.isPending;
   const eventQuery = useEvent(id ? Number(id) : 0);
   const router = useRouter();
+  const { user } = useAuth();
+  // Vente de billets réservée aux organisateurs des pays pris en charge
+  // (le backend refuse aussi un événement payant hors de ces pays).
+  const ticketSalesBlocked = !canSellTickets(user?.pays);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [eventImage, setEventImage] = useState(null);
@@ -355,8 +362,14 @@ const CreateEvent = ({ id }) => {
                         type="checkbox"
                         id="isFree"
                         name="isFree"
-                        checked={form.isFree}
+                        checked={ticketSalesBlocked || form.isFree}
                         onChange={handleInputChange}
+                        disabled={ticketSalesBlocked}
+                        aria-describedby={
+                          ticketSalesBlocked
+                            ? "ticket-sales-blocked"
+                            : undefined
+                        }
                         className={style.toggleInput}
                       />
                       <label htmlFor="isFree" className={style.toggleLabel}>
@@ -368,7 +381,22 @@ const CreateEvent = ({ id }) => {
                   </div>
                 )}
 
-                {!id && !form.isFree && (
+                {!id && ticketSalesBlocked && (
+                  <div
+                    id="ticket-sales-blocked"
+                    className={style.salesCountryWarning}
+                    role="note"
+                  >
+                    <TriangleAlert aria-hidden="true" />
+                    <p>
+                      La vente de billets n&apos;est disponible que pour les
+                      organisateurs basés au Bénin. Vous pouvez créer un
+                      événement gratuit.
+                    </p>
+                  </div>
+                )}
+
+                {!id && !ticketSalesBlocked && !form.isFree && (
                   <div className="mb-3">
                     <Input
                       label="Prix du billet (FCFA)"
