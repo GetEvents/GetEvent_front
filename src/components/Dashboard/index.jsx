@@ -224,7 +224,7 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table className={styles.modern_table}>
+        <table className={`${styles.modern_table} ${styles.events_table}`}>
           <thead>
             <tr>
               <th>Titre de l&apos;événement</th>
@@ -237,7 +237,11 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
           <tbody>
             {visibleEventsList.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
+                <td
+                  colSpan="5"
+                  className={styles.cell_empty}
+                  style={{ textAlign: "center" }}
+                >
                   Aucun événement trouvé
                 </td>
               </tr>
@@ -247,15 +251,21 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
 
                 return (
                   <tr key={event.id}>
-                    <td className={styles.event_title}>{event.title}</td>
-                    <td>
+                    <td
+                      className={`${styles.event_title} ${styles.cell_title}`}
+                    >
+                      {event.title}
+                    </td>
+                    <td className={styles.cell_date}>
                       <div>
                         {new Date(event.startDate).toLocaleDateString("fr-FR")}
                       </div>
                       <div className={styles.event_meta}>{event.location}</div>
                     </td>
-                    <td>{event.capacity || "N/A"}</td>
-                    <td>
+                    <td className={styles.cell_capacity}>
+                      {event.capacity || "N/A"}
+                    </td>
+                    <td className={styles.cell_status}>
                       <span
                         className={`${styles.badge} ${
                           status === "terminé"
@@ -266,7 +276,7 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
                         {status}
                       </span>
                     </td>
-                    <td>
+                    <td className={styles.cell_actions}>
                       <div className={styles.actions}>
                         <Link
                           href={`/events/${event.id}`}
@@ -495,7 +505,9 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
       )}
 
       <div style={{ overflowX: "auto" }}>
-        <table className={styles.modern_table}>
+        <table
+          className={`${styles.modern_table} ${styles.participants_table}`}
+        >
           <thead>
             <tr>
               <th>Participant</th>
@@ -508,7 +520,11 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
           <tbody>
             {filteredParticipants.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
+                <td
+                  colSpan="5"
+                  className={styles.cell_empty}
+                  style={{ textAlign: "center" }}
+                >
                   Aucun participant trouvé
                 </td>
               </tr>
@@ -524,7 +540,7 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
 
                 return (
                   <tr key={participant.id}>
-                    <td>
+                    <td className={styles.cell_person}>
                       <div className={styles.participant_info}>
                         <div className={styles.avatar}>
                           {(
@@ -543,14 +559,16 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
                         </div>
                       </div>
                     </td>
-                    <td>{participant.eventTitle}</td>
-                    <td>{ticketType}</td>
-                    <td>
+                    <td className={styles.cell_event}>
+                      {participant.eventTitle}
+                    </td>
+                    <td className={styles.cell_ticket}>{ticketType}</td>
+                    <td className={styles.cell_status}>
                       <span className={`${styles.badge} ${styles.status_paid}`}>
                         {status}
                       </span>
                     </td>
-                    <td>
+                    <td className={styles.cell_actions}>
                       <div className={styles.actions}>
                         <button
                           type="button"
@@ -602,7 +620,7 @@ function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
       )}
 
       <div style={{ overflowX: "auto" }}>
-        <table className={styles.modern_table}>
+        <table className={`${styles.modern_table} ${styles.stack_table}`}>
           <thead>
             <tr>
               <th>Participant</th>
@@ -616,7 +634,9 @@ function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
           <tbody>
             {refunds.length === 0 ? (
               <tr>
-                <td colSpan="6">Aucune demande de remboursement.</td>
+                <td colSpan="6" className={styles.cell_empty}>
+                  Aucune demande de remboursement.
+                </td>
               </tr>
             ) : (
               refunds.map((refund) => {
@@ -630,18 +650,20 @@ function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
 
                 return (
                   <tr key={refund.id}>
-                    <td>{participantName}</td>
-                    <td>{refund.ticket?.event?.title || "Événement"}</td>
-                    <td>
+                    <td data-label="Participant">{participantName}</td>
+                    <td data-label="Événement">
+                      {refund.ticket?.event?.title || "Événement"}
+                    </td>
+                    <td data-label="Montant">
                       {new Intl.NumberFormat("fr-FR", {
                         style: "currency",
                         currency: refund.currency || "XOF",
                         maximumFractionDigits: 0,
                       }).format(refund.amount)}
                     </td>
-                    <td>{refund.reason || "Aucun motif"}</td>
-                    <td>{refund.status}</td>
-                    <td>
+                    <td data-label="Motif">{refund.reason || "Aucun motif"}</td>
+                    <td data-label="Statut">{refund.status}</td>
+                    <td data-label="Traitement">
                       {refund.status === "PENDING" ? (
                         <div className={styles.refund_admin_actions}>
                           <input
@@ -1426,7 +1448,10 @@ export default function Dashboard({ count = null }) {
           onClick={() => setActiveTab("overview")}
         >
           <LayoutDashboard size={18} aria-hidden="true" />
-          <span>Vue d&apos;ensemble</span>
+          <span className={styles.tab_label}>Vue d&apos;ensemble</span>
+          <span className={styles.tab_label_short} aria-hidden="true">
+            Aperçu
+          </span>
         </button>
         <button
           role="tab"
@@ -1435,7 +1460,10 @@ export default function Dashboard({ count = null }) {
           onClick={() => setActiveTab("participants")}
         >
           <Users size={18} aria-hidden="true" />
-          <span>Participants</span>
+          <span className={styles.tab_label}>Participants</span>
+          <span className={styles.tab_label_short} aria-hidden="true">
+            Inscrits
+          </span>
         </button>
         <button
           role="tab"
@@ -1444,7 +1472,10 @@ export default function Dashboard({ count = null }) {
           onClick={() => setActiveTab("scanner")}
         >
           <QrCode size={18} aria-hidden="true" />
-          <span>Contrôle billets</span>
+          <span className={styles.tab_label}>Contrôle billets</span>
+          <span className={styles.tab_label_short} aria-hidden="true">
+            Contrôle
+          </span>
         </button>
         {user.role === "ADMIN" && (
           <button
@@ -1454,7 +1485,10 @@ export default function Dashboard({ count = null }) {
             onClick={() => setActiveTab("refunds")}
           >
             <RotateCcw size={18} aria-hidden="true" />
-            <span>Remboursements</span>
+            <span className={styles.tab_label}>Remboursements</span>
+            <span className={styles.tab_label_short} aria-hidden="true">
+              Remb.
+            </span>
           </button>
         )}
       </div>

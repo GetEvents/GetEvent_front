@@ -63,68 +63,102 @@
   line-height: 1.55;
 }
 
-// ---- Programmation -----------------------------------------------------------
+// ---- Liste défilante (« roue ») ----------------------------------------------
+// Sans fond : les types défilent sur la page ; celui au centre est agrandi
+// et allumé en cyan.
 
-.list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+$item-height: clamp(4.4rem, 12vw, 7rem);
+$wheel-height: calc(#{$item-height} * 5);
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 0.6rem 1.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+}
 
-  @media (min-width: 768px) {
-    gap: 0.9rem 2.5rem;
+// Deux lignes cyan qui encadrent la position centrale.
+.centerGuide {
+  position: absolute;
+  top: 50%;
+  right: 1.25rem;
+  left: 1.25rem;
+  height: $item-height;
+  border-top: 1px solid rgba(0, 179, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 179, 255, 0.35);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.wheel {
+  height: $wheel-height;
+  margin: 0;
+  // Marges haut/bas d'une demi-zone : le premier et le dernier type peuvent
+  // aussi venir au centre.
+  padding: calc((#{$wheel-height} - #{$item-height}) / 2) 1.25rem;
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  // Fondu en haut et en bas.
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 30%,
+    #000 70%,
+    transparent 100%
+  );
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ge-cyan);
+    outline-offset: -4px;
   }
 }
 
 .item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.6rem;
-  cursor: default;
-  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  justify-content: center;
+  gap: 0.9rem;
+  height: $item-height;
+  scroll-snap-align: center;
+  cursor: pointer;
+  // Estompé par défaut : contour clair, plus petit.
+  opacity: 0.4;
+  transform: scale(0.62);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 
-  &:hover .name {
-    color: var(--ge-cyan);
-    -webkit-text-stroke-color: var(--ge-cyan);
-  }
-
-  &:hover .icon {
-    filter: none;
-    opacity: 1;
-    transform: rotate(-8deg) scale(1.1);
+  &:hover {
+    opacity: 0.6;
   }
 }
 
 .name {
-  @include ds.display(clamp(1.7rem, 5.2vw, 3.6rem));
-  transition:
-    color 0.2s ease,
-    -webkit-text-stroke-color 0.2s ease;
-}
-
-// Un mot sur deux en contour, pour le rythme de l'affiche.
-.itemOutline .name {
+  @include ds.display(clamp(1.5rem, 6.4vw, 4.6rem));
   @include ds.outline-text(var(--ge-ink), 1.5px);
+  white-space: nowrap;
+  transition:
+    color 0.25s ease,
+    text-shadow 0.25s ease;
 }
 
 .icon {
   display: inline-grid;
   flex-shrink: 0;
   place-items: center;
-  width: clamp(1.75rem, 3.5vw, 2.6rem);
-  height: clamp(1.75rem, 3.5vw, 2.6rem);
-  // Icônes discrètes (niveaux de gris) qui se colorent au survol.
+  width: clamp(2rem, 4.5vw, 3rem);
+  height: clamp(2rem, 4.5vw, 3rem);
   filter: grayscale(1);
-  opacity: 0.55;
   transition:
-    filter 0.2s ease,
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    filter 0.25s ease,
+    transform 0.25s ease;
 
   img {
     width: 100%;
@@ -133,22 +167,62 @@
   }
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
+// Type au centre : allumé, plein, lumineux.
+.active {
+  opacity: 1;
+  transform: scale(1.18);
+
+  &:hover {
     opacity: 1;
-    transform: translateY(0);
+  }
+
+  .name {
+    color: var(--ge-cyan);
+    -webkit-text-stroke-color: var(--ge-cyan);
+    text-shadow:
+      0 0 18px rgba(0, 179, 255, 0.55),
+      0 0 44px rgba(0, 179, 255, 0.3);
+  }
+
+  .icon {
+    filter: drop-shadow(0 0 12px rgba(0, 179, 255, 0.6));
+    transform: rotate(-6deg) scale(1.1);
   }
 }
 
+// Compteur « 05 / 10 » en bas à droite (masqué sur mobile, où il
+// chevaucherait les types).
+.counter {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0;
+  pointer-events: none;
+
+  @media (max-width: 639px) {
+    display: none;
+  }
+}
+
+.counterCurrent {
+  @include ds.display(1.6rem);
+  color: var(--ge-cyan);
+}
+
+.counterTotal {
+  @include ds.label(var(--ge-ink-muted));
+  font-size: 0.75rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .item {
-    animation: none;
+  .wheel {
+    scroll-behavior: auto;
   }
 
+  .item,
   .name,
   .icon {
     transition: none;

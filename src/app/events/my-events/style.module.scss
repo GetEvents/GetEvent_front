@@ -138,7 +138,7 @@
   }
 
   .content {
-    padding: 1.5rem;
+    padding: 0;
   }
 }
 
@@ -162,5 +162,13 @@
 
   .content {
     padding: 1.5rem;
+  }
+}
+
+// Mobile : le tableau de bord gère lui-même ses marges (en-tête pleine
+// largeur). Placé en dernier pour passer après la règle 1024 px.
+@media (max-width: 767px) {
+  .content {
+    padding: 0;
   }
 }

@@ -8,6 +8,7 @@ import { useDeleteEvent, useJoinEvent, useLeaveEvent } from "@/hooks/useEvents";
 import DelectModal from "@/components/DelectModal";
 import TicketPurchaseModal from "@/components/ui/TicketPurchaseModal";
 import { useNotification } from "@/components/Notification/NotificationProvider";
+import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
 import styles from "./style.module.scss";
 
 interface EventActionsProps {
@@ -64,6 +65,10 @@ export default function EventActions({
     setIsPurchaseModalOpen(true);
   };
 
+  // Événement payant : modale de paiement GetEvent (formulaire FedaPay
+  // intégré). Après paiement, le navigateur part vers le retour backend.
+  const { startPayment, paymentModal } = usePaymentCheckout();
+
   const handleJoin = (quantity: number = 1) =>
     joinMutation.mutate(
       { eventId, quantity },
@@ -79,9 +84,14 @@ export default function EventActions({
               isAlready ? "info" : "error",
             );
           }
-          notify(result.message, result.paymentUrl ? "info" : "success");
           if (result.paymentUrl)
-            return window.location.assign(result.paymentUrl);
+            return startPayment(result, {
+              title: event?.title || eventTitle,
+              quantity,
+              unitPrice: event?.paymentPrice,
+              currency: event?.currency,
+            });
+          notify(result.message, "success");
           router.refresh();
         },
         onError: (err: any) => {
@@ -254,6 +264,7 @@ export default function EventActions({
           isLoading={joinMutation.isPending}
           alreadyRegisteredCount={userTicketsCount || 1}
         />
+        {paymentModal}
       </>
     );
 
@@ -309,6 +320,7 @@ export default function EventActions({
         }
         isLoading={joinMutation.isPending}
       />
+      {paymentModal}
     </>
   );
 }

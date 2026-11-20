@@ -79,6 +79,11 @@
 
 .createEventNavBtn {
   @include ds.button(primary, sm);
+
+  // Mobile : la création se fait depuis le bouton central de la barre du bas.
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .createEventLabel {
@@ -124,12 +129,19 @@
 
 // ---- Bande sombre : titre, recherche, catégories -----------------------------
 
+// La bande passe au-dessus de la liste : le menu « Filtres avancés » qui en
+// déborde ne doit pas être recouvert par la section des événements.
 .heroSection {
+  position: relative;
+  z-index: 30;
   padding: 0 1rem;
 }
 
 .heroContent {
   @include ds.panel-dark;
+  // panel-dark coupe le contenu qui dépasse (overflow: clip) : on le rouvre
+  // pour que le menu déroulant des filtres puisse sortir de la bande.
+  overflow: visible;
   max-width: 1240px;
   margin: 1rem auto 0;
   padding: 3rem 1.25rem 2.25rem;
@@ -186,6 +198,9 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  // Hauteur minimale commune : le champ « Ville » est remplacé par le composant
+  // Google <gmp-place-autocomplete> (20 px de haut), qui l'écrasait sur mobile.
+  min-height: 3.3rem;
   padding: 0 1rem;
   border: 1px solid transparent;
   border-radius: var(--ge-radius-control);
@@ -224,12 +239,16 @@
   }
 }
 
-.searchInput {
-  flex: 1.6;
-}
+// Proportions des champs uniquement en ligne (bureau) : en colonne (mobile),
+// « flex: 1 » ramènerait leur hauteur de base à 0 et écraserait le champ.
+@media (min-width: 768px) {
+  .searchInput {
+    flex: 1.6;
+  }
 
-.locationInput {
-  flex: 1;
+  .locationInput {
+    flex: 1;
+  }
 }
 
 .searchButton {
@@ -311,7 +330,8 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
-  z-index: 20;
+  // Au-dessus des cartes d'événements (sous la barre de navigation, z 100).
+  z-index: 50;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -394,11 +414,19 @@
   margin: 0;
 }
 
+// Onglets et tri sur une même ligne, à la même hauteur (stretch).
 .headerActions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 0.6rem;
+
+  // Petit écran : onglets puis tri, chacun sur toute la largeur.
+  @media (max-width: 899px) {
+    > * {
+      flex: 1 1 100%;
+    }
+  }
 }
 
 // Onglets À venir / Passés / Mes participations.
@@ -412,7 +440,9 @@
 
 .timelineBtn {
   display: inline-flex;
+  flex: 1 1 auto;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   padding: 0.6rem 0.8rem;
   border: 0;
@@ -476,6 +506,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  // Même hauteur que les onglets (49 px).
+  min-height: 3.05rem;
 }
 
 .sortIcon,
@@ -494,7 +526,12 @@
 }
 
 .sortSelect {
-  padding: 0.75rem 2.2rem 0.75rem 2.2rem;
+  // Toute la hauteur du conteneur : même taille que les onglets.
+  align-self: stretch;
+  height: auto;
+  width: 100%;
+  min-width: 12.5rem;
+  padding: 0 2.4rem 0 2.3rem;
   border: 1px solid rgba(17, 17, 19, 0.25);
   border-radius: var(--ge-radius-control);
   background: var(--ge-paper-raised);

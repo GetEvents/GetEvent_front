@@ -7,7 +7,7 @@ import { ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
 import { fetchGetNotifications } from "@/actions/notification";
-import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
+import { NEW_NOTIFICATION_EVENT } from "@/components/Notification/notification-events";
 import type { Event, EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,15 +20,15 @@ import style from "./style.module.scss";
 const EVENTS_PER_PAGE = 6;
 
 const categories = [
-  { id: "all", label: "Tous les événements", img: "/target.png" },
-  { id: "music", label: "Musique", img: "/musical-note.png" },
-  { id: "sport", label: "Sports", img: "/soccer-ball-variant.png" },
-  { id: "tech", label: "Technologie", img: "/laptop.png" },
-  { id: "food", label: "Gastronomie", img: "/vegetables.png" },
-  { id: "business", label: "Business", img: "/briefcase.png" },
-  { id: "art", label: "Art & Culture", img: "/palette.png" },
-  { id: "social", label: "Social", img: "/people.png" },
-  { id: "education", label: "Éducation", img: "/stack-of-books.png" },
+  { id: "all", label: "Tous les événements", img: "/icons/target.webp" },
+  { id: "music", label: "Musique", img: "/icons/musical-note.webp" },
+  { id: "sport", label: "Sports", img: "/icons/soccer-ball-variant.webp" },
+  { id: "tech", label: "Technologie", img: "/icons/laptop.webp" },
+  { id: "food", label: "Gastronomie", img: "/icons/vegetables.webp" },
+  { id: "business", label: "Business", img: "/icons/briefcase.webp" },
+  { id: "art", label: "Art & Culture", img: "/icons/palette.webp" },
+  { id: "social", label: "Social", img: "/icons/people.webp" },
+  { id: "education", label: "Éducation", img: "/icons/stack-of-books.webp" },
 ];
 
 const quickCategories = categories.slice(0, 4);
@@ -57,8 +57,7 @@ const isEventExpired = (event: Event, now: number): boolean => {
 };
 
 export default function Welcome() {
-  const googleMapsReady = useGoogleMaps(["places", "marker"]);
-  const { user, setUser, setToken, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,32 +90,58 @@ export default function Welcome() {
   const effectiveFeedback =
     feedback || (error ? { error: true, message: error.message } : null);
 
+  // Google Maps (~260 Ko, pour l'autocomplétion du lieu) n'est chargé
+  // qu'une fois la liste affichée, pour ne pas la ralentir.
+  const eventsReady = !isLoading;
+  const googleMapsReady = useGoogleMaps(["places", "marker"], {
+    enabled: eventsReady,
+  });
+
+  // L'utilisateur vient déjà du layout (AuthProvider) : pas de nouvel appel.
+  // Les notifications attendent la liste des événements, car Next.js
+  // exécute les actions serveur l'une après l'autre : elles passeraient
+  // sinon avant l'affichage des événements.
+  const userId = user?.id;
   useEffect(() => {
-    const loadUser = async () => {
-      const [userResponse, token] = await Promise.all([
-        getUser(),
-        getTokenFromCookie(),
-      ]);
+    if (!userId || !eventsReady) return undefined;
+    let active = true;
 
-      setUser(userResponse?.user || null);
-      setToken(token || null);
+    void fetchGetNotifications(20, 0).then((notificationResponse) => {
+      if (!active) return;
+      setNotifications(notificationResponse.notifications);
+      setNotificationCount(
+        notificationResponse.notifications.filter(
+          (notification) => !notification.isRead,
+        ).length,
+      );
+    });
 
-      if (token) {
-        const notificationResponse = await fetchGetNotifications(20, 0);
-        setNotifications(notificationResponse.notifications);
-        setNotificationCount(
-          notificationResponse.notifications.filter(
-            (notification) => !notification.isRead,
-          ).length,
-        );
-      }
+    return () => {
+      active = false;
     };
+  }, [userId, eventsReady]);
 
-    void loadUser();
-  }, [setToken, setUser]);
+  // Notification reçue en temps réel (voir RealtimeNotifications) : ajoutée
+  // en tête de liste et comptée comme non lue, sans recharger la page.
+  useEffect(() => {
+    const handleNew = (event: globalThis.Event) => {
+      const notification = (event as CustomEvent<Notification>).detail;
+      if (!notification?.id) return;
+      setNotifications((current) =>
+        current.some((item) => item.id === notification.id)
+          ? current
+          : [notification, ...current],
+      );
+      if (!notification.isRead) setNotificationCount((count) => count + 1);
+    };
+    window.addEventListener(NEW_NOTIFICATION_EVENT, handleNew);
+    return () => window.removeEventListener(NEW_NOTIFICATION_EVENT, handleNew);
+  }, []);
 
   const isSearching = isFetching;
-  const loading = isLoading || isFetching;
+  // Squelette seulement s'il n'y a encore aucune donnée : pendant un
+  // rafraîchissement en arrière-plan, la liste en cache reste affichée.
+  const loading = isLoading;
 
   useEffect(() => {
     if (!googleMapsReady) return;
@@ -151,9 +176,10 @@ export default function Welcome() {
 
   const [currentTime] = useState(Date.now);
 
+  // Billets de l'utilisateur : après la liste, pour la même raison.
   const userTicketsQuery = useTicketsByUser(
     user?.id,
-    Boolean(user?.id) && isAuthenticated,
+    Boolean(user?.id) && isAuthenticated && eventsReady,
   );
 
   const registeredEventIds = useMemo(() => {
@@ -397,7 +423,9 @@ export default function Welcome() {
                       // Les 4 catégories rapides sont visibles dès l'arrivée :
                       // les charger toutes immédiatement (la 4e restait vide).
                       priority={index < quickCategories.length}
-                      quality={90}
+                      // Icônes déjà réduites (public/icons, WebP 96 px) :
+                      // servies telles quelles, sans passer par l'optimiseur.
+                      unoptimized
                     />
                   </span>
                   {category.label}
@@ -439,7 +467,13 @@ export default function Welcome() {
                           ?.removeAttribute("open");
                       }}
                     >
-                      <Image src={category.img} alt="" width={20} height={20} />
+                      <Image
+                        src={category.img}
+                        alt=""
+                        width={20}
+                        height={20}
+                        unoptimized
+                      />
                       <span>{category.label}</span>
                     </button>
                   ))}

@@ -1,6 +1,12 @@
+// Page du formulaire d'événement : base claire, pleine largeur.
 .page {
   width: 100%;
   min-height: 100vh;
-  padding: var(--app-space-10) 1rem;
-  background: var(--app-color-surface);
+  // En bas : place pour la barre de navigation mobile (fixe).
+  padding: 1.25rem 1rem 8rem;
+  background: var(--ge-paper);
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 5rem;
+  }
 }

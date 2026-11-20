@@ -11,6 +11,13 @@ export default function AppSplashScreen() {
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
+    // Uniquement dans l'application installée (PWA) : sur le site, l'écran
+    // masquait la page pendant 1 s à chaque nouvelle session.
+    const isInstalledApp =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (!isInstalledApp) return;
+
     // Vérifier si l'application a déjà été ouverte dans cette session
     const hasLaunched = sessionStorage.getItem(STORAGE_KEY) === "true";
     if (hasLaunched) return;

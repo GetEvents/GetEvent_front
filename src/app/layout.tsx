@@ -6,6 +6,7 @@ import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import Sidebar from "@/components/ui/sidebar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import PushNotificationManager from "@/components/Notification/PushNotificationManager";
+import RealtimeNotifications from "@/components/Notification/RealtimeNotifications";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
 import AppSplashScreen from "@/components/AppSplashScreen";
@@ -13,7 +14,7 @@ import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
 import { cookies } from "next/headers";
-import { getUser } from "@/actions/auth/authActions";
+import { getCurrentUser } from "@/lib/server-data";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -66,7 +67,7 @@ export default async function RootLayout({
     const hasSession =
       Boolean(cookieStore.get("token")?.value) ||
       Boolean(cookieStore.get("refreshToken")?.value);
-    const userResponse = hasSession ? await getUser() : null;
+    const userResponse = hasSession ? await getCurrentUser() : null;
     currentUser = userResponse?.user || null;
   } catch {
     currentUser = null;
@@ -100,6 +101,7 @@ export default async function RootLayout({
               <Footer currentUser={isLoggedIn} />
               <PwaInstallPrompt />
               <PushNotificationManager isLoggedIn={isLoggedIn} />
+              <RealtimeNotifications userId={currentUser?.id ?? null} />
               <CookieConsent hasMobileSidebar={isLoggedIn} />
             </Providers>
           </NotificationProvider>

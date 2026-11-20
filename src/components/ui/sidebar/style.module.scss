@@ -195,7 +195,8 @@ $border-color: #e2e8f0;
 
 /* FOOTER */
 .mobileNav,
-.mobileNavLabel {
+.mobileNavLabel,
+.mobileCreate {
   display: none;
 }
 
@@ -410,6 +411,84 @@ $border-color: #e2e8f0;
             }
           }
         }
+      }
+
+      // Bouton « Créer » au centre (organisateurs) : rond cyan qui dépasse
+      // de la barre. Les autres liens sont resserrés pour lui faire place.
+      &.withCreate .mobileNav {
+        gap: 0.1rem !important;
+
+        // Même largeur pour tous les liens : le bouton central tombe
+        // exactement au milieu de la barre.
+        .mobileNavItem {
+          flex: 0 0 auto !important;
+          width: 62px !important;
+          min-width: 62px !important;
+          padding: 4px 0 !important;
+
+          .mobileNavIcon {
+            width: 44px !important;
+          }
+
+          .mobileNavLabel {
+            font-size: 0.66rem !important;
+          }
+        }
+      }
+
+      .mobileCreate {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 3px !important;
+        margin: -1.6rem 0.2rem 0 !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+        transition: transform 0.15s ease !important;
+
+        &:active {
+          transform: scale(0.92) !important;
+        }
+
+        &:focus-visible {
+          outline: none !important;
+
+          .mobileCreateIcon {
+            outline: 2px solid #ffffff !important;
+            outline-offset: 2px !important;
+          }
+        }
+      }
+
+      .mobileCreateIcon {
+        display: grid !important;
+        place-items: center !important;
+        width: 56px !important;
+        height: 56px !important;
+        // Anneau de la couleur de la barre : le rond semble « posé » dessus.
+        border: 4px solid rgba(15, 23, 42, 0.95) !important;
+        border-radius: 50% !important;
+        background: var(--ge-cyan, #00b3ff) !important;
+        color: var(--ge-ink, #111113) !important;
+        box-shadow: 0 8px 20px rgba(0, 179, 255, 0.45) !important;
+
+        svg {
+          stroke-width: 2.8px !important;
+        }
+      }
+
+      .mobileCreate.active .mobileCreateIcon {
+        background: #ffffff !important;
+      }
+
+      .mobileCreateLabel {
+        font-size: 0.7rem !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+        color: #ffffff !important;
+        white-space: nowrap !important;
       }
 
       .profileBox {

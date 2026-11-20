@@ -7,7 +7,8 @@
 // (pas de largeur maximale centrée).
 .dashboard_container {
   width: 100%;
-  padding: 1.25rem 1rem 5rem;
+  // En bas : place pour la barre de navigation mobile (fixe).
+  padding: 1.25rem 1rem 8rem;
   color: var(--ge-ink);
 
   @media (min-width: 768px) {
@@ -27,6 +28,14 @@
 
   @media (min-width: 768px) {
     padding: 2.5rem 2.5rem;
+  }
+
+  // Mobile : le fond sombre occupe toute la largeur et monte jusqu'en haut
+  // de l'écran (il annule les marges du conteneur), coins arrondis en bas.
+  @media (max-width: 767px) {
+    margin: -1.25rem -1rem 1.25rem;
+    padding: 2.5rem 1.25rem 2rem;
+    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
   }
 
   h1 {
@@ -58,6 +67,7 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border: 0;
@@ -88,6 +98,40 @@
   }
 
   @include ds.focus-ring;
+}
+
+// Libellé court (mobile) / long (ordinateur).
+.tab_label_short {
+  display: none;
+}
+
+// Mobile : onglets à parts égales, icône au-dessus d'un libellé court.
+@media (max-width: 767px) {
+  .tabs_nav {
+    overflow-x: visible;
+  }
+
+  .tab_btn {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+    padding: 0.6rem 0.25rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+  }
+
+  .tab_label {
+    display: none;
+  }
+
+  .tab_label_short {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .tab_content {
@@ -366,6 +410,167 @@
 .delete:hover:not(:disabled) {
   border-color: var(--app-color-danger, #ef4444);
   color: var(--app-color-danger, #ef4444);
+}
+
+// Base commune : sur mobile, un tableau devient une liste de cartes
+// (une ligne = une carte, sans en-tête de colonnes).
+@mixin stacked-rows {
+  thead {
+    display: none;
+  }
+
+  &,
+  tbody {
+    display: block;
+  }
+
+  tbody tr {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--ge-line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  tbody tr:hover td {
+    background: transparent;
+  }
+
+  td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+
+  .cell_empty {
+    grid-column: 1 / -1;
+    padding: 1.5rem 0;
+    text-align: center;
+  }
+}
+
+@media (max-width: 767px) {
+  // Événements :
+  //   [Titre ........ statut]
+  //   [Date · lieu          ]
+  //   [Capacité : N  actions]
+  .events_table {
+    @include stacked-rows;
+
+    tbody tr {
+      display: grid;
+      grid-template-areas:
+        "title status"
+        "date date"
+        "capacity actions";
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.45rem 0.75rem;
+    }
+
+    .cell_title {
+      grid-area: title;
+      overflow-wrap: anywhere;
+    }
+
+    .cell_date {
+      grid-area: date;
+      color: var(--ge-ink-muted);
+      font-size: 0.85rem;
+    }
+
+    .cell_capacity {
+      grid-area: capacity;
+      font-size: 0.85rem;
+
+      &::before {
+        @include ds.label(var(--ge-ink-muted));
+        content: "Capacité · ";
+        font-size: 0.66rem;
+      }
+    }
+
+    .cell_status {
+      grid-area: status;
+    }
+
+    .cell_actions {
+      grid-area: actions;
+    }
+  }
+
+  // Participants :
+  //   [Avatar Nom / email ......... retirer]
+  //   [Événement                          ]
+  //   [Type de billet            statut   ]
+  .participants_table {
+    @include stacked-rows;
+
+    tbody tr {
+      display: grid;
+      grid-template-areas:
+        "person actions"
+        "event event"
+        "ticket status";
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+    }
+
+    .cell_person {
+      grid-area: person;
+      min-width: 0;
+    }
+
+    .cell_event {
+      grid-area: event;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .cell_ticket {
+      grid-area: ticket;
+      color: var(--ge-ink-muted);
+      font-size: 0.85rem;
+    }
+
+    .cell_status {
+      grid-area: status;
+    }
+
+    .cell_actions {
+      grid-area: actions;
+    }
+  }
+
+  // Remboursements : chaque cellule sur sa ligne, précédée de son libellé.
+  .stack_table {
+    @include stacked-rows;
+
+    td + td {
+      margin-top: 0.5rem;
+    }
+
+    td[data-label]::before {
+      @include ds.label(var(--ge-ink-muted));
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.15rem;
+      font-size: 0.64rem;
+    }
+  }
+
+  // Recherche et « + Créer » sur toute la largeur.
+  .filters {
+    width: 100%;
+
+    input,
+    select {
+      flex: 1 1 10rem;
+      min-width: 0;
+    }
+  }
 }
 
 // Participants

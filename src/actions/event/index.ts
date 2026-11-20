@@ -204,7 +204,13 @@ export async function deleteEvent(id: number): Promise<EventActionState> {
 export async function joinEvent(
   id: number,
   quantity: number = 1,
-): Promise<EventActionState & { paymentUrl?: string }> {
+): Promise<
+  EventActionState & {
+    paymentUrl?: string;
+    paymentTransactionId?: number | string;
+    paymentReturnUrl?: string;
+  }
+> {
   const token = await requireToken();
   const response = await participations.create({
     eventId: id,
@@ -221,20 +227,28 @@ export async function joinEvent(
 
   const payload = response.data as {
     message?: string;
-    data?: { paymentUrl?: string };
+    data?: {
+      paymentUrl?: string;
+      paymentTransactionId?: number | string;
+      paymentReturnUrl?: string;
+    };
   };
   const paymentUrl = payload.data?.paymentUrl;
+  const paymentTransactionId = payload.data?.paymentTransactionId;
+  const paymentReturnUrl = payload.data?.paymentReturnUrl;
 
   return {
     error: false,
     message:
       payload.message ||
       (paymentUrl
-        ? "Redirection vers le paiement..."
+        ? "Ouverture du paiement..."
         : quantity > 1
           ? `${quantity} billets confirmés ! Retrouvez vos billets dans vos participations.`
           : "Inscription confirmée. Votre billet est disponible dans vos participations."),
     paymentUrl,
+    paymentTransactionId,
+    paymentReturnUrl,
   };
 }
 

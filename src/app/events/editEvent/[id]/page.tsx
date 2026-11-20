@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getEventById } from "@/actions/event";
-import { getUser } from "@/actions/auth/authActions";
+import { getCurrentUser, getEventDetails } from "@/lib/server-data";
 import CreateEvent from "@/components/form/CreateEvent";
 import styles from "./style.module.scss";
 
@@ -10,7 +9,10 @@ interface EditEventPageProps {
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
-  const [event, response] = await Promise.all([getEventById(id), getUser()]);
+  const [event, response] = await Promise.all([
+    getEventDetails(id),
+    getCurrentUser(),
+  ]);
 
   if (!event) notFound();
   if (!response?.user) redirect("/auth/login");

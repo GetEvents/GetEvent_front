@@ -30,7 +30,8 @@
       rgba(8, 12, 20, 0.12) 100%
     ),
     linear-gradient(180deg, rgba(0, 0, 0, 0.536) 0%, rgba(0, 0, 0, 0.645) 100%),
-    url("/heroImg.png");
+    // WebP (~10 fois plus léger que le PNG d'origine, même rendu).
+    url("/heroImg.webp");
   background-repeat: no-repeat;
   background-position: center right;
   background-size: cover;
@@ -51,7 +52,8 @@
         rgba(5, 9, 15, 0.88) 52%,
         rgba(5, 9, 15, 0.94) 100%
       ),
-      url("/heroImg.png");
+      // Version mobile, 800 px de large.
+      url("/heroImg-mobile.webp");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: 70% center;

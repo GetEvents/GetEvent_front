@@ -14,6 +14,7 @@ import style from "./style.module.scss";
 import Link from "next/link";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 import { useAuth } from "@/hooks/useAuth";
+import { canSellTickets } from "@/lib/payment-countries";
 import { useRegister, useUpdateProfile } from "@/hooks/useAuthMutations";
 
 const formatDate = (dateString) => {
@@ -110,9 +111,7 @@ const Register = ({ id }) => {
       );
   }, []);
   const organizerPaymentUnavailable =
-    defaultForm.role === "ORGANISATEUR" &&
-    Boolean(defaultForm.pays) &&
-    defaultForm.pays !== "BJ";
+    defaultForm.role === "ORGANISATEUR" && !canSellTickets(defaultForm.pays);
   const organizerContactMissing =
     defaultForm.role === "ORGANISATEUR" &&
     (!defaultForm.pays || !defaultForm.numero);
