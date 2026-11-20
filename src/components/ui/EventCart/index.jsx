@@ -17,6 +17,7 @@ import {
 import { useDeleteEvent, useJoinEvent } from "@/hooks/useEvents";
 import { useTicketsByUser } from "@/hooks/useParticipants";
 import { useNotification } from "@/components/Notification/NotificationProvider";
+import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
 import DelectModal from "../../DelectModal";
 import TicketPurchaseModal from "../TicketPurchaseModal";
 import styles from "./style.module.scss";
@@ -127,6 +128,10 @@ export default function EventCard({
     setPurchaseModalEvent(null);
   };
 
+  // Événement payant : modale de paiement GetEvent (formulaire FedaPay
+  // intégré). Après paiement, le navigateur part vers le retour backend.
+  const { startPayment, paymentModal } = usePaymentCheckout();
+
   const handleConfirmPurchase = (quantity) => {
     if (!purchaseModalEvent) return;
 
@@ -148,17 +153,22 @@ export default function EventCard({
             );
             return;
           }
+          if (result.paymentUrl) {
+            startPayment(result, {
+              title: event.title,
+              quantity,
+              unitPrice: event.paymentPrice,
+              currency: event.currency,
+            });
+            return;
+          }
           notify(
             result.message ||
               (quantity > 1
                 ? `${quantity} billets confirmés !`
                 : "Inscription confirmée !"),
-            result.paymentUrl ? "info" : "success",
+            "success",
           );
-          if (result.paymentUrl) {
-            window.location.assign(result.paymentUrl);
-            return;
-          }
           router.refresh();
         },
         onError: (err) => {
@@ -526,6 +536,7 @@ export default function EventCard({
             : 0
         }
       />
+      {paymentModal}
     </div>
   );
 }

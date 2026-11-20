@@ -124,12 +124,19 @@
 
 // ---- Bande sombre : titre, recherche, catégories -----------------------------
 
+// La bande passe au-dessus de la liste : le menu « Filtres avancés » qui en
+// déborde ne doit pas être recouvert par la section des événements.
 .heroSection {
+  position: relative;
+  z-index: 30;
   padding: 0 1rem;
 }
 
 .heroContent {
   @include ds.panel-dark;
+  // panel-dark coupe le contenu qui dépasse (overflow: clip) : on le rouvre
+  // pour que le menu déroulant des filtres puisse sortir de la bande.
+  overflow: visible;
   max-width: 1240px;
   margin: 1rem auto 0;
   padding: 3rem 1.25rem 2.25rem;
@@ -186,6 +193,9 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  // Hauteur minimale commune : le champ « Ville » est remplacé par le composant
+  // Google <gmp-place-autocomplete> (20 px de haut), qui l'écrasait sur mobile.
+  min-height: 3.3rem;
   padding: 0 1rem;
   border: 1px solid transparent;
   border-radius: var(--ge-radius-control);
@@ -224,12 +234,16 @@
   }
 }
 
-.searchInput {
-  flex: 1.6;
-}
+// Proportions des champs uniquement en ligne (bureau) : en colonne (mobile),
+// « flex: 1 » ramènerait leur hauteur de base à 0 et écraserait le champ.
+@media (min-width: 768px) {
+  .searchInput {
+    flex: 1.6;
+  }
 
-.locationInput {
-  flex: 1;
+  .locationInput {
+    flex: 1;
+  }
 }
 
 .searchButton {
@@ -311,7 +325,8 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
-  z-index: 20;
+  // Au-dessus des cartes d'événements (sous la barre de navigation, z 100).
+  z-index: 50;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
