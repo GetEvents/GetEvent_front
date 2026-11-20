@@ -16,7 +16,8 @@
 
 .container {
   width: 100%;
-  padding: 1.25rem 1rem 4rem;
+  // En bas : place pour la barre de navigation mobile (fixe).
+  padding: 1.25rem 1rem 8rem;
 
   @media (min-width: 768px) {
     padding: 2rem 1.5rem 4rem;
@@ -35,6 +36,14 @@
 
   @media (min-width: 768px) {
     padding: 2.5rem;
+  }
+
+  // Mobile : le fond sombre occupe toute la largeur et monte jusqu'en haut
+  // de l'écran (il annule les marges de la page), coins arrondis en bas.
+  @media (max-width: 767px) {
+    margin: -1.25rem -1rem 1.25rem;
+    padding: 2.5rem 1.25rem 2rem;
+    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
   }
 
   h1 {

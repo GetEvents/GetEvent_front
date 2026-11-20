@@ -135,6 +135,10 @@
   position: relative;
   z-index: 30;
   padding: 0 1rem;
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 }
 
 .heroContent {
@@ -148,6 +152,22 @@
 
   @media (min-width: 768px) {
     padding: 4rem 3rem 3rem;
+  }
+
+  // Mobile : la bande sombre occupe toute la largeur, sans marge au-dessus,
+  // coins arrondis en bas seulement.
+  @media (max-width: 767px) {
+    margin-top: 0;
+    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
+  }
+}
+
+// Visiteur (barre de navigation publique flottante) : sur mobile, la bande
+// remonte jusqu'en haut de l'écran, derrière la barre de navigation.
+.withPublicNavbar .heroContent {
+  @media (max-width: 767px) {
+    margin-top: -5.75rem;
+    padding-top: calc(3rem + 5.75rem);
   }
 }
 
