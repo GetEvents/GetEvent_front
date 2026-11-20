@@ -5,16 +5,16 @@ import Image from "next/image";
 import styles from "./EventTypes.module.scss";
 
 const eventTypes = [
-  { img: "/schedule.png", name: "Réunions" },
-  { img: "/graduation-hat.png", name: "Formations" },
-  { img: "/karaoke.png", name: "Conférences" },
-  { img: "/people.png", name: "Séminaires" },
-  { img: "/neural.png", name: "Networking" },
-  { img: "/trophy.png", name: "Cérémonies" },
-  { img: "/palette.png", name: "Expositions" },
-  { img: "/musical-note.png", name: "Concerts" },
-  { img: "/theatre.png", name: "Spectacles" },
-  { img: "/settings.png", name: "Ateliers" },
+  { img: "/icons/schedule.webp", name: "Réunions" },
+  { img: "/icons/graduation-hat.webp", name: "Formations" },
+  { img: "/icons/karaoke.webp", name: "Conférences" },
+  { img: "/icons/people.webp", name: "Séminaires" },
+  { img: "/icons/neural.webp", name: "Networking" },
+  { img: "/icons/trophy.webp", name: "Cérémonies" },
+  { img: "/icons/palette.webp", name: "Expositions" },
+  { img: "/icons/musical-note.webp", name: "Concerts" },
+  { img: "/icons/theatre.webp", name: "Spectacles" },
+  { img: "/icons/settings.webp", name: "Ateliers" },
 ];
 
 // Type affiché au centre à l'arrivée (milieu de la liste).
@@ -143,7 +143,13 @@ export default function EventTypesSection() {
                 onClick={() => centerItem(index)}
               >
                 <span className={styles.icon} aria-hidden="true">
-                  <Image src={event.img} alt="" width={44} height={44} />
+                  <Image
+                    src={event.img}
+                    alt=""
+                    width={44}
+                    height={44}
+                    unoptimized
+                  />
                 </span>
                 <span className={styles.name}>{event.name}</span>
               </li>

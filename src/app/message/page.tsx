@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
-import { getEventById } from "@/actions/event";
+import { getTokenFromCookie } from "@/actions/auth/authActions";
+import { getCurrentUser, getEventDetails } from "@/lib/server-data";
 import MessageClient from "./MessageClient";
 import styles from "./style.module.scss";
 
@@ -31,9 +31,9 @@ export default async function MessagePage({ searchParams }: MessagePageProps) {
   }
 
   const [userResponse, token, event] = await Promise.all([
-    getUser(),
+    getCurrentUser(),
     getTokenFromCookie(),
-    getEventById(eventId),
+    getEventDetails(eventId),
   ]);
 
   if (!userResponse?.user || !token) {

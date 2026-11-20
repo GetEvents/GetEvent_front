@@ -13,8 +13,8 @@ import {
   Tag,
   Users,
 } from "lucide-react";
-import { getEventById } from "@/actions/event";
-import { getTokenFromCookie, getUser } from "@/actions/auth/authActions";
+import { getCurrentUser, getEventDetails } from "@/lib/server-data";
+import { getTokenFromCookie } from "@/actions/auth/authActions";
 import MessageClient from "@/app/message/MessageClient";
 import EventMap from "@/utils/map";
 import EventActions from "./EventActions";
@@ -51,7 +51,7 @@ export async function generateMetadata({
   params,
 }: EventDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const event = await getEventById(id);
+  const event = await getEventDetails(id);
 
   if (!event) {
     return {
@@ -87,8 +87,8 @@ export default async function EventDetailPage({
 }: EventDetailPageProps) {
   const { id } = await params;
   const [event, userResponse, tokenAuth] = await Promise.all([
-    getEventById(id),
-    getUser(),
+    getEventDetails(id),
+    getCurrentUser(),
     getTokenFromCookie(),
   ]);
 

@@ -13,7 +13,7 @@ import AuthProvider from "@/context/AuthProvider";
 import Providers from "./providers";
 import styles from "./layout.module.scss";
 import { cookies } from "next/headers";
-import { getUser } from "@/actions/auth/authActions";
+import { getCurrentUser } from "@/lib/server-data";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -66,7 +66,7 @@ export default async function RootLayout({
     const hasSession =
       Boolean(cookieStore.get("token")?.value) ||
       Boolean(cookieStore.get("refreshToken")?.value);
-    const userResponse = hasSession ? await getUser() : null;
+    const userResponse = hasSession ? await getCurrentUser() : null;
     currentUser = userResponse?.user || null;
   } catch {
     currentUser = null;

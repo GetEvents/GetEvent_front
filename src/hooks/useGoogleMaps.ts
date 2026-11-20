@@ -103,8 +103,14 @@ export function loadGoogleMapsApi(
   return googleMapsPromise;
 }
 
+/**
+ * Charge Google Maps et indique quand il est prêt.
+ * `enabled: false` retarde le chargement (le script pèse ~260 Ko) jusqu'à ce
+ * que la page en ait besoin.
+ */
 export function useGoogleMaps(
   libraries: GoogleMapsLibrary[] = REQUIRED_LIBRARIES,
+  { enabled = true }: { enabled?: boolean } = {},
 ): boolean {
   const [ready, setReady] = useState(
     () => typeof window !== "undefined" && isGoogleMapsReady(),
@@ -112,6 +118,7 @@ export function useGoogleMaps(
   const librariesKey = [...libraries].sort().join(",");
 
   useEffect(() => {
+    if (!enabled) return undefined;
     let active = true;
     const requestedLibraries = librariesKey
       .split(",")
@@ -131,7 +138,7 @@ export function useGoogleMaps(
     return () => {
       active = false;
     };
-  }, [librariesKey]);
+  }, [librariesKey, enabled]);
 
   return ready;
 }

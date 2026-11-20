@@ -47,6 +47,11 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "5mb",
     },
+    // Cache de navigation côté client : une page dynamique déjà visitée est
+    // réaffichée sans nouvel appel au serveur pendant 30 s (0 par défaut
+    // depuis Next 15). router.refresh() et les actions qui revalident
+    // vident ce cache après une modification.
+    staleTimes: { dynamic: 30 },
   },
   async redirects() {
     return [
