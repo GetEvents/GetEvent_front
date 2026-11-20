@@ -5,14 +5,16 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/Input/input";
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
+  ArrowRight,
   CalendarDays,
   Check,
   CheckCircle2,
   Eye,
   Globe,
+  ImageUp,
   LockOpen,
   MapPin,
-  Pencil,
   Sparkles,
   Ticket,
   TriangleAlert,
@@ -25,6 +27,45 @@ import { useRouter } from "next/navigation";
 import { useNotification } from "@/components/Notification/NotificationProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { canSellTickets } from "@/lib/payment-countries";
+
+const CATEGORIES = [
+  { value: "tech", label: "Technologie" },
+  { value: "business", label: "Affaires" },
+  { value: "art", label: "Art & Culture" },
+  { value: "sport", label: "Sport" },
+  { value: "social", label: "Social" },
+  { value: "education", label: "Éducation" },
+  { value: "other", label: "Autre" },
+];
+
+const CATEGORY_LABELS = Object.fromEntries(
+  CATEGORIES.map(({ value, label }) => [value, label]),
+);
+
+// Les trois étapes du formulaire (suivi dans l'en-tête + titre de l'étape).
+const STEPS = [
+  {
+    title: "Général",
+    hint: "Titre, description, affiche",
+    heading: "Les informations",
+    text: "Ce que les participants verront en premier sur la fiche.",
+  },
+  {
+    title: "Logistique",
+    hint: "Dates, lieu, jauge",
+    heading: "Quand et où",
+    text: "Définissez les horaires, le lieu et le nombre de places.",
+  },
+  {
+    title: "Confirmation",
+    hint: "Vérification finale",
+    heading: "Tout est bon ?",
+    text: "Vérifiez les informations avant de publier.",
+  },
+];
+
+// Formulaire de création / modification d'événement en 3 étapes, avec un
+// aperçu en direct façon billet.
 const CreateEvent = ({ id }) => {
   const googleMapsReady = useGoogleMaps(["places", "marker"]);
   const createMutation = useCreateEvent();
@@ -223,141 +264,171 @@ const CreateEvent = ({ id }) => {
 
     mutation.mutate(formData);
   };
+  const hasCapacity = Number(form.capacity) > 0;
+  const categoryLabel = CATEGORY_LABELS[form.category] || "";
+  const priceLabel = form.isFree
+    ? "Gratuit"
+    : `${Number(form.paymentPrice || 0).toLocaleString("fr-FR")} FCFA`;
+  const previewDate = form.startDate
+    ? new Date(form.startDate).toLocaleDateString("fr-FR", {
+        weekday: "short",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
   return (
-    <div className={`${style.fullPageForm}`}>
-      <div
-        className={`${style.formContainer} ${currentStep === 3 ? style.fullWidthStep : ""}`}
-      >
-        {/* COLONNE GAUCHE: FORMULAIRE */}
-        <div className={`${style.formColumn}`}>
-          <div className={style.formHeader}>
-            <div className={style.headerTop}>
-              <button
-                type="button"
-                className={style.backButton}
-                onClick={() => router.back()}
-                title="Retour"
+    <div className={style.page}>
+      {/* ---- En-tête sombre + étapes ---- */}
+      <header className={style.hero}>
+        <div className={style.heroTop}>
+          <button
+            type="button"
+            className={style.backButton}
+            onClick={() => router.back()}
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            Retour
+          </button>
+          <span className={style.heroChip}>
+            {id ? "Modification" : "Nouvel événement"}
+          </span>
+        </div>
+
+        <p className={style.heroKicker}>Espace organisateur</p>
+        <h1 className={style.heroTitle}>
+          {id ? "Modifier" : "Créer"}{" "}
+          <span className={style.heroOutline}>
+            {id ? "l'événement" : "un événement"}
+          </span>
+        </h1>
+        <p className={style.heroSubtitle}>
+          Trois étapes : les informations, la logistique, puis la vérification
+          avant publication.
+        </p>
+
+        <ol className={style.stepper}>
+          {STEPS.map((step, index) => {
+            const number = index + 1;
+            const state =
+              number === currentStep
+                ? style.stepCurrent
+                : number < currentStep
+                  ? style.stepDone
+                  : "";
+            return (
+              <li
+                key={step.title}
+                className={`${style.step} ${state}`}
+                aria-current={number === currentStep ? "step" : undefined}
               >
-                ← Retour
-              </button>
-              <div>
-                {id != null ? (
-                  <h1>Modification d&apos;événements</h1>
-                ) : (
-                  <h1>Créer un nouvel événement</h1>
-                )}
-                <p className={style.subtitle}>
-                  Remplissez les informations étape par étape
-                </p>
-              </div>
+                <span className={style.stepNumber}>
+                  {number < currentStep ? (
+                    <Check size={18} aria-hidden="true" />
+                  ) : (
+                    String(number).padStart(2, "0")
+                  )}
+                </span>
+                <span className={style.stepName}>{step.title}</span>
+                <span className={style.stepHint}>{step.hint}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </header>
+
+      <div
+        className={`${style.layout} ${currentStep === 3 ? style.layoutFull : ""}`}
+      >
+        {/* ---- Formulaire ---- */}
+        <div className={style.formColumn}>
+          <form className={style.form} onSubmit={handleSubmit}>
+            <div className={style.stepHead}>
+              <p className={style.stepKicker}>
+                Étape {String(currentStep).padStart(2, "0")} / 03
+              </p>
+              <h2 className={style.stepTitle}>
+                {STEPS[currentStep - 1].heading}
+              </h2>
+              <p className={style.stepText}>{STEPS[currentStep - 1].text}</p>
             </div>
-          </div>
 
-          <form className={style.formContent} onSubmit={handleSubmit}>
-            {/* ÉTAPE 1: GÉNÉRAL */}
+            {/* ÉTAPE 1 : GÉNÉRAL */}
             {currentStep === 1 && (
-              <div>
-                <h3 className="mb-3">
-                  <Pencil
-                    size={18}
-                    aria-hidden="true"
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginRight: "6px",
-                    }}
-                  />
-                  Général
-                </h3>
-                <p className="text-muted mb-4">
-                  Renseignez les informations générales de votre événement
-                </p>
-
+              <div className={style.stepBody}>
                 <div className={style.formRow}>
-                  <div className="mb-3">
-                    <Input
-                      label="Titre de l'événement"
-                      type="text"
-                      name="title"
-                      placeholder="Ex: Conférence Tech 2024"
-                      required
-                      value={form.title}
-                      handleChange={handleInputChange}
-                    />
-                  </div>
+                  <Input
+                    label="Titre de l'événement"
+                    type="text"
+                    name="title"
+                    placeholder="Ex : Nuit du Cinéma Africain"
+                    required
+                    value={form.title}
+                    handleChange={handleInputChange}
+                  />
 
-                  <div className="mb-3">
-                    <label htmlFor="category" className="form-label">
+                  <div>
+                    <label htmlFor="category" className={style.fieldLabel}>
                       Catégorie
                     </label>
                     <select
                       id="category"
                       name="category"
-                      className={`form-select ${style.selectInput}`}
+                      className={style.selectInput}
                       value={form.category}
                       onChange={handleInputChange}
                       required
                     >
                       <option value="">Sélectionnez une catégorie</option>
-                      <option value="tech">Technologie</option>
-                      <option value="business">Affaires</option>
-                      <option value="art">Art & Culture</option>
-                      <option value="sport">Sport</option>
-                      <option value="social">Social</option>
-                      <option value="education">Éducation</option>
-                      <option value="other">Autre</option>
+                      {CATEGORIES.map((category) => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <div className={style.descriptionHeader}>
-                    <label htmlFor="description" className="form-label">
-                      Description de l&apos;événement
+                <div>
+                  <div className={style.labelRow}>
+                    <label htmlFor="description" className={style.fieldLabel}>
+                      Description
                     </label>
                     <span className={style.charCount}>
-                      {form.description.length}
+                      {form.description.length} caractères
                     </span>
                   </div>
                   <textarea
                     id="description"
                     name="description"
                     className={style.descriptionInput}
-                    placeholder="Décrivez votre événement en détail pour vos participants..."
+                    placeholder="Programme, artistes, intervenants, ce qu'il faut savoir avant de venir…"
                     required
                     value={form.description}
                     onChange={handleInputChange}
-                    rows="5"
+                    rows="6"
                   />
-                  <p className={style.descriptionHint}>
-                    <Sparkles
-                      size={16}
-                      aria-hidden="true"
-                      style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        marginRight: "6px",
-                      }}
-                    />
-                    Une bonne description aide les participants à comprendre
-                    votre événement
+                  <p className={style.fieldHint}>
+                    <Sparkles size={14} aria-hidden="true" />
+                    Une bonne description aide les participants à se décider.
                   </p>
                 </div>
+
                 {!id && (
-                  <div className={style.localizationHeader}>
-                    <h5 className={style.locTitle}>
-                      <Ticket
-                        size={16}
-                        aria-hidden="true"
-                        style={{
-                          display: "inline-block",
-                          verticalAlign: "middle",
-                          marginRight: "6px",
-                        }}
-                      />
-                      Billetterie
-                    </h5>
-                    <div className={style.toggleContainer}>
+                  <div className={style.optionRow}>
+                    <div className={style.optionText}>
+                      <h3 className={style.optionTitle}>
+                        <Ticket size={16} aria-hidden="true" />
+                        Billetterie
+                      </h3>
+                      <p className={style.optionHint}>
+                        {ticketSalesBlocked || form.isFree
+                          ? "Entrée gratuite, billet QR offert."
+                          : "Billets payants via Mobile Money ou carte."}
+                      </p>
+                    </div>
+                    <div className={style.switch}>
                       <input
                         type="checkbox"
                         id="isFree"
@@ -370,12 +441,18 @@ const CreateEvent = ({ id }) => {
                             ? "ticket-sales-blocked"
                             : undefined
                         }
-                        className={style.toggleInput}
+                        className={style.switchInput}
                       />
-                      <label htmlFor="isFree" className={style.toggleLabel}>
-                        {form.isFree ? "Événement gratuit" : "Événement payant"}
-                        <span className={style.toggleSlider}></span>
-                        <span className={style.toggleText}></span>
+                      <label htmlFor="isFree" className={style.switchLabel}>
+                        <span className={style.switchText}>
+                          {ticketSalesBlocked || form.isFree
+                            ? "Gratuit"
+                            : "Payant"}
+                        </span>
+                        <span
+                          className={style.switchTrack}
+                          aria-hidden="true"
+                        />
                       </label>
                     </div>
                   </div>
@@ -397,54 +474,50 @@ const CreateEvent = ({ id }) => {
                 )}
 
                 {!id && !ticketSalesBlocked && !form.isFree && (
-                  <div className="mb-3">
-                    <Input
-                      label="Prix du billet (FCFA)"
-                      type="number"
-                      name="paymentPrice"
-                      required
-                      min="0"
-                      step="0.01"
-                      value={form.paymentPrice}
-                      handleChange={handleInputChange}
-                    />
-                  </div>
+                  <Input
+                    label="Prix du billet (FCFA)"
+                    type="number"
+                    name="paymentPrice"
+                    required
+                    min="0"
+                    step="0.01"
+                    value={form.paymentPrice}
+                    handleChange={handleInputChange}
+                  />
                 )}
 
-                <div className="mb-3">
-                  <label htmlFor="imageInput" className="form-label">
-                    Image de couverture
-                  </label>
+                <div>
+                  <span className={style.fieldLabel}>Image de couverture</span>
                   <label
                     htmlFor="imageInput"
-                    className={style.imageUploadZone}
+                    className={`${style.uploadZone} ${eventImage ? style.uploadZoneFilled : ""}`}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
                       const file = e.dataTransfer.files[0];
                       if (file) handleEventImageChange(file);
                     }}
-                    style={{ cursor: "pointer", display: "block" }}
                   >
                     {eventImage ? (
-                      <div className={style.imagePreviewContainer}>
+                      <div className={style.uploadFile}>
                         {imagePreviewUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={imagePreviewUrl}
-                            alt="Aperçu"
-                            className={style.imagePreview}
+                            alt="Aperçu de l'image choisie"
+                            className={style.uploadThumb}
                           />
                         )}
-                        <div className={style.imageInfo}>
+                        <div className={style.uploadInfo}>
                           <p className={style.fileName}>{eventImage.name}</p>
                           <p className={style.fileSize}>
-                            {(eventImage.size / 1024).toFixed(2)} KB
+                            {(eventImage.size / 1024).toFixed(0)} Ko
                           </p>
                           <button
                             type="button"
                             className={style.changeBtn}
                             onClick={(e) => {
-                              // e.preventDefault() to avoid double-firing the label click
+                              // Évite le double déclenchement du label.
                               e.preventDefault();
                               document.getElementById("imageInput").click();
                             }}
@@ -455,23 +528,14 @@ const CreateEvent = ({ id }) => {
                       </div>
                     ) : (
                       <div className={style.uploadPrompt}>
-                        <svg
-                          width="48"
-                          height="48"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
+                        <span className={style.uploadIcon} aria-hidden="true">
+                          <ImageUp size={26} />
+                        </span>
                         <p className={style.uploadText}>
-                          Glissez votre image ici ou cliquez pour sélectionner
+                          Glissez votre affiche ici ou cliquez pour choisir
                         </p>
                         <p className={style.uploadSubtext}>
-                          Formats acceptés: JPG, PNG, WebP (Max 5MB)
+                          JPG, PNG ou WebP — 5 Mo maximum
                         </p>
                       </div>
                     )}
@@ -479,7 +543,7 @@ const CreateEvent = ({ id }) => {
                       id="imageInput"
                       type="file"
                       className={style.hiddenInput}
-                      accept="photo/*"
+                      accept="image/*"
                       onChange={(e) =>
                         handleEventImageChange(e.target.files[0])
                       }
@@ -489,98 +553,61 @@ const CreateEvent = ({ id }) => {
               </div>
             )}
 
-            {/* ÉTAPE 2: LOGISTIQUE */}
+            {/* ÉTAPE 2 : LOGISTIQUE */}
             {currentStep === 2 && (
-              <div>
-                <h3 className="mb-3">
-                  <CalendarDays
-                    size={18}
-                    aria-hidden="true"
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginRight: "6px",
-                    }}
-                  />
-                  Logistique de l&apos;événement
+              <div className={style.stepBody}>
+                <h3 className={style.groupTitle}>
+                  <CalendarDays size={16} aria-hidden="true" />
+                  Dates et horaires
                 </h3>
-                <p className="text-muted mb-4">
-                  Définissez quand et où votre événement aura lieu
-                </p>
-
-                <h5 className="mt-4 mb-3">
-                  <CalendarDays
-                    size={16}
-                    aria-hidden="true"
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginRight: "6px",
-                    }}
+                <div className={style.dateGrid}>
+                  <Input
+                    label="Date de début"
+                    type="date"
+                    name="startDate"
+                    required
+                    value={formatDate(form.startDate)}
+                    handleChange={handleInputChange}
                   />
-                  Temporalité
-                </h5>
-                <div className={style.formodifdiv}>
-                  <div className={style.fordivI}>
-                    <div className="mb-3">
-                      <Input
-                        label="Date de début"
-                        type="date"
-                        name="startDate"
-                        required
-                        value={formatDate(form.startDate)}
-                        handleChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <Input
-                        label="Heure de début"
-                        type="time"
-                        name="startTime"
-                        required
-                        value={formatTime(form.startTime)}
-                        handleChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  <div className={style.fordivI}>
-                    <div className="mb-3">
-                      <Input
-                        label="Date de fin"
-                        type="date"
-                        name="endDate"
-                        required
-                        value={formatDate(form.endDate)}
-                        handleChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <Input
-                        label="Heure de fin"
-                        type="time"
-                        name="endTime"
-                        required
-                        value={formatTime(form.endTime)}
-                        handleChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
+                  <Input
+                    label="Heure de début"
+                    type="time"
+                    name="startTime"
+                    required
+                    value={formatTime(form.startTime)}
+                    handleChange={handleInputChange}
+                  />
+                  <Input
+                    label="Date de fin"
+                    type="date"
+                    name="endDate"
+                    required
+                    value={formatDate(form.endDate)}
+                    handleChange={handleInputChange}
+                  />
+                  <Input
+                    label="Heure de fin"
+                    type="time"
+                    name="endTime"
+                    required
+                    value={formatTime(form.endTime)}
+                    handleChange={handleInputChange}
+                  />
                 </div>
 
-                <div className={style.localizationHeader}>
-                  <h5 className={style.locTitle}>
-                    <MapPin
-                      size={16}
-                      aria-hidden="true"
-                      style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        marginRight: "6px",
-                      }}
-                    />
-                    Localisation
-                  </h5>
-                  <div className={style.toggleContainer}>
+                <div className={style.optionRow}>
+                  <div className={style.optionText}>
+                    <h3 className={style.optionTitle}>
+                      <MapPin size={16} aria-hidden="true" />
+                      Localisation
+                    </h3>
+                    <p className={style.optionHint}>
+                      {form.isOnline
+                        ? "Les participants rejoignent en ligne."
+                        : "Indiquez l'adresse du lieu."}
+                    </p>
+                  </div>
+                  <div className={style.switch}>
                     <input
                       type="checkbox"
                       id="isOnline"
@@ -589,22 +616,20 @@ const CreateEvent = ({ id }) => {
                       onChange={(e) =>
                         setForm({ ...form, isOnline: e.target.checked })
                       }
-                      className={style.toggleInput}
+                      className={style.switchInput}
                     />
-                    <label htmlFor="isOnline" className={style.toggleLabel}>
-                      {form.isOnline
-                        ? "Événement en ligne"
-                        : "Événement en présentiel"}
-
-                      <span className={style.toggleSlider}></span>
-                      <span className={style.toggleText}></span>
+                    <label htmlFor="isOnline" className={style.switchLabel}>
+                      <span className={style.switchText}>
+                        {form.isOnline ? "En ligne" : "Présentiel"}
+                      </span>
+                      <span className={style.switchTrack} aria-hidden="true" />
                     </label>
                   </div>
                 </div>
 
                 {!form.isOnline && (
                   <div>
-                    <div className={`pac_card mb-3`} id="pac_card">
+                    <div className="pac_card" id="pac_card">
                       <Input
                         label="Lieu de l'événement"
                         type="text"
@@ -615,8 +640,8 @@ const CreateEvent = ({ id }) => {
                         handleChange={handleInputChange}
                       />
                     </div>
-                    <div id="maps" className="maps mb-3"></div>
-                    <div id="infowindow-content">
+                    <div id="maps" className="maps"></div>
+                    <div id="infowindow-content" className={style.mapInfo}>
                       <span id="place-name" className="title"></span>
                       <br />
                       <span id="place-address"></span>
@@ -624,237 +649,161 @@ const CreateEvent = ({ id }) => {
                   </div>
                 )}
 
-                <div className="mb-3">
-                  <Input
-                    label="Capacité"
-                    type="number"
-                    name="capacity"
-                    required
-                    value={form.capacity}
-                    handleChange={handleInputChange}
-                  />
-                </div>
+                <h3 className={style.groupTitle}>
+                  <Users size={16} aria-hidden="true" />
+                  Jauge
+                </h3>
+                <Input
+                  label="Capacité (nombre de places)"
+                  type="number"
+                  name="capacity"
+                  required
+                  value={form.capacity}
+                  handleChange={handleInputChange}
+                />
               </div>
             )}
 
-            {/* ÉTAPE 3: CONFIRMATION */}
+            {/* ÉTAPE 3 : CONFIRMATION */}
             {currentStep === 3 && (
-              <div>
-                <h3 className="mb-3">
-                  <CheckCircle2
-                    size={18}
-                    aria-hidden="true"
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                      marginRight: "6px",
-                    }}
-                  />
-                  Confirmation
-                </h3>
-                <p className="text-muted mb-4">
-                  Vérifiez les informations avant de finaliser
-                </p>
+              <div className={style.stepBody}>
                 <div className={style.confirmMessage}>
+                  <CheckCircle2 size={18} aria-hidden="true" />
                   <p>
-                    <Check
-                      size={16}
-                      aria-hidden="true"
-                      style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        marginRight: "6px",
-                      }}
-                    />
-                    Toutes les informations sont à jour dans le résumé
-                    ci-dessous
+                    Relisez le récapitulatif : vous pourrez encore modifier
+                    l&apos;événement après sa publication.
                   </p>
                 </div>
 
-                {/* Récapitulatif complet */}
-                <div className={style.recapFullPage}>
-                  <div className={style.recapSection}>
-                    <h6 className={style.sectionTitle}>Général</h6>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Titre:</span>
-                      <p className={style.value}>
-                        {form.title || "Non renseigné"}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Catégorie:</span>
-                      <p className={style.value}>
-                        {form.category || "Non sélectionnée"}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Description:</span>
-                      <p className={`${style.value} ${style.descValue}`}>
-                        {form.description || "Non renseignée"}
-                      </p>
-                    </div>
-                    {eventImage && (
-                      <div className={style.recapItem}>
-                        <span className={style.label}>Image:</span>
-                        <p className={`${style.value} ${style.success}`}>
-                          <Check
-                            size={16}
-                            aria-hidden="true"
-                            style={{
-                              display: "inline-block",
-                              verticalAlign: "middle",
-                              marginRight: "6px",
-                            }}
-                          />
-                          {eventImage.name}
-                        </p>
-                        {imagePreviewUrl && (
-                          <div className={style.imagePreview}>
-                            <img
-                              src={imagePreviewUrl}
-                              alt="Aperçu de l'image"
-                              className={style.previewImage}
-                            />
-                          </div>
-                        )}
-                      </div>
+                <div className={style.recapGrid}>
+                  <section className={style.recapPanel}>
+                    <h3 className={style.recapPanelTitle}>
+                      <span>01</span> Général
+                    </h3>
+                    {imagePreviewUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Image de couverture"
+                        className={style.recapImage}
+                      />
                     )}
-                  </div>
+                    <dl className={style.recapList}>
+                      <div>
+                        <dt>Titre</dt>
+                        <dd>{form.title || "Non renseigné"}</dd>
+                      </div>
+                      <div>
+                        <dt>Catégorie</dt>
+                        <dd>{categoryLabel || "Non sélectionnée"}</dd>
+                      </div>
+                      <div className={style.recapListFull}>
+                        <dt>Description</dt>
+                        <dd className={style.recapDescription}>
+                          {form.description || "Non renseignée"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </section>
 
-                  <div className={style.recapSection}>
-                    <h6 className={style.sectionTitle}>Logistique</h6>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Type:</span>
-                      <p className={style.value}>
-                        {form.isOnline ? (
-                          <>
-                            <Globe
-                              size={16}
-                              aria-hidden="true"
-                              style={{
-                                display: "inline-block",
-                                verticalAlign: "middle",
-                                marginRight: "6px",
-                              }}
-                            />
-                            En ligne
-                          </>
-                        ) : (
-                          <>
-                            <MapPin
-                              size={16}
-                              aria-hidden="true"
-                              style={{
-                                display: "inline-block",
-                                verticalAlign: "middle",
-                                marginRight: "6px",
-                              }}
-                            />
-                            En présentiel
-                          </>
-                        )}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Date de début:</span>
-                      <p className={style.value}>
-                        {formatDate(form.startDate) || "Non renseignée"}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Heure de début:</span>
-                      <p className={style.value}>
-                        {formatTime(form.startTime) || "Non renseignée"}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Date de fin:</span>
-                      <p className={style.value}>
-                        {formatDate(form.endDate) || "Non renseignée"}
-                      </p>
-                    </div>
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Heure de fin:</span>
-                      <p className={style.value}>
-                        {formatTime(form.endTime) || "Non renseignée"}
-                      </p>
-                    </div>
-                    {!form.isOnline && (
-                      <div className={style.recapItem}>
-                        <span className={style.label}>Lieu:</span>
-                        <p className={style.value}>
-                          {form.location || "Non renseigné"}
-                        </p>
+                  <section className={style.recapPanel}>
+                    <h3 className={style.recapPanelTitle}>
+                      <span>02</span> Logistique
+                    </h3>
+                    <dl className={style.recapList}>
+                      <div>
+                        <dt>Format</dt>
+                        <dd>
+                          {form.isOnline ? (
+                            <>
+                              <Globe size={14} aria-hidden="true" /> En ligne
+                            </>
+                          ) : (
+                            <>
+                              <MapPin size={14} aria-hidden="true" /> Présentiel
+                            </>
+                          )}
+                        </dd>
                       </div>
-                    )}
-                    <div className={style.recapItem}>
-                      <span className={style.label}>Capacité:</span>
-                      <p className={style.value}>
-                        {form.capacity || "Non renseignée"} personnes
-                      </p>
-                    </div>
-                    {!id && (
-                      <div className={style.recapItem}>
-                        <span className={style.label}>Billetterie:</span>
-                        <p className={style.value}>
-                          {form.isFree
-                            ? "Gratuit"
-                            : `${form.paymentPrice || "0"} FCFA`}
-                        </p>
+                      <div>
+                        <dt>Capacité</dt>
+                        <dd>
+                          {hasCapacity
+                            ? `${form.capacity} places`
+                            : "Non renseignée"}
+                        </dd>
                       </div>
-                    )}
-                  </div>
+                      <div>
+                        <dt>Début</dt>
+                        <dd>
+                          {formatDate(form.startDate) || "—"} ·{" "}
+                          {form.startTime ? formatTime(form.startTime) : "—"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Fin</dt>
+                        <dd>
+                          {formatDate(form.endDate) || "—"} ·{" "}
+                          {form.endTime ? formatTime(form.endTime) : "—"}
+                        </dd>
+                      </div>
+                      {!form.isOnline && (
+                        <div className={style.recapListFull}>
+                          <dt>Lieu</dt>
+                          <dd>{form.location || "Non renseigné"}</dd>
+                        </div>
+                      )}
+                      {!id && (
+                        <div className={style.recapListFull}>
+                          <dt>Billetterie</dt>
+                          <dd className={style.recapPrice}>{priceLabel}</dd>
+                        </div>
+                      )}
+                    </dl>
+                  </section>
                 </div>
               </div>
             )}
 
             <Input type="hidden" name="id" value={event?.id} />
 
-            {/* Navigation Buttons */}
-            <div
-              className={`mt-5 d-flex gap-2 justify-content-between ${style.navButtons}`}
-            >
+            {/* Navigation */}
+            <div className={style.navButtons}>
               <div>
                 {currentStep > 1 && (
                   <Button
                     type="button"
-                    className={`btn btn-outline-secondary ${style.btnNav}`}
-                    label="← Précédent"
+                    variant="outline-dark"
                     onClick={handlePrevStep}
-                  />
+                  >
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Précédent
+                  </Button>
                 )}
               </div>
 
-              <div className={style.stepInfo}>
-                <small>Étape {currentStep} sur 3</small>
-              </div>
+              <p className={style.stepInfo}>Étape {currentStep} sur 3</p>
 
               <div>
                 {currentStep < 3 && (
                   <Button
                     type="button"
-                    className={`btn btn-primary ${style.btnNav}`}
-                    label="Suivant →"
+                    variant="primary"
                     onClick={handleNextStep}
-                  />
+                  >
+                    Suivant
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Button>
                 )}
 
                 {currentStep === 3 && (
-                  <Button
-                    type="submit"
-                    className={`btn btn-success ${style.btnSubmit}`}
-                    disabled={pending}
-                  >
-                    <Check
-                      size={18}
-                      aria-hidden="true"
-                      style={{
-                        display: "inline-block",
-                        verticalAlign: "middle",
-                        marginRight: "6px",
-                      }}
-                    />
-                    {id ? "Modifier" : "Créer l'événement"}
+                  <Button type="submit" variant="accent" disabled={pending}>
+                    <Check size={18} aria-hidden="true" />
+                    {pending
+                      ? "Enregistrement…"
+                      : id
+                        ? "Enregistrer"
+                        : "Publier l'événement"}
                   </Button>
                 )}
               </div>
@@ -862,153 +811,99 @@ const CreateEvent = ({ id }) => {
           </form>
         </div>
 
-        {/* COLONNE DROITE: RÉCAPITULATIF */}
+        {/* ---- Aperçu en direct (étapes 1 et 2) ---- */}
         {currentStep !== 3 && (
-          <div className={`${style.recapColumn}`}>
-            <div className={`${style.recapStatic}`}>
-              <div className={style.recapCard}>
-                {/* Image Section */}
-                <div className={style.recapImageContainer}>
-                  {imagePreviewUrl ? (
-                    <>
-                      <img
-                        src={imagePreviewUrl}
-                        alt="Aperçu de l'événement"
-                        className={style.recapCardImage}
-                      />
-                      <div className={style.livePreviewBadge}>
-                        <span>
-                          <Eye
-                            size={16}
-                            aria-hidden="true"
-                            style={{
-                              display: "inline-block",
-                              verticalAlign: "middle",
-                              marginRight: "6px",
-                            }}
-                          />
-                          Aperçu en direct
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className={style.recapImagePlaceholder}>
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <rect
-                          x="3"
-                          y="3"
-                          width="18"
-                          height="18"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                      </svg>
-                      <p>Image à venir</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Content Section */}
-                <div className={style.recapCardContent}>
-                  {/* Title */}
-                  <h2 className={style.recapCardTitle}>
-                    {form.title || "Titre de l'événement"}
-                  </h2>
-
-                  {/* Description */}
-                  {form.description && (
-                    <p className={style.recapCardDescription}>
-                      {form.description}
-                    </p>
-                  )}
-
-                  {/* Date & Heure */}
-                  {form.startDate && (
-                    <div className={style.recapInfoBlock}>
-                      <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>
-                          <CalendarDays size={16} aria-hidden="true" />
-                        </span>
-                        <h6 className={style.recapInfoTitle}>Date & Heure</h6>
-                      </div>
-                      <div className={style.recapInfoContent}>
-                        <p className={style.recapInfoDate}>
-                          {new Date(form.startDate).toLocaleDateString(
-                            "fr-FR",
-                            {
-                              weekday: "short",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            },
-                          )}
-                        </p>
-                        <p className={style.recapInfoTime}>
-                          {formatTime(form.startTime)} —{" "}
-                          {formatTime(form.endTime) || "À définir"}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Location */}
-                  {!form.isOnline && form.location && (
-                    <div className={style.recapInfoBlock}>
-                      <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>
-                          <MapPin size={16} aria-hidden="true" />
-                        </span>
-                        <h6 className={style.recapInfoTitle}>Lieu</h6>
-                      </div>
-                      <div className={style.recapInfoContent}>
-                        <p className={style.recapInfoText}>{form.location}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Divider */}
-                  <hr className={style.recapDivider} />
-
-                  {/* Type d'accès */}
-                  <div className={style.recapInfoBlock}>
-                    <div className={style.recapInfoHeader}>
-                      <span className={style.recapInfoIcon}>
-                        <LockOpen size={16} aria-hidden="true" />
-                      </span>
-                      <h6 className={style.recapInfoTitle}>
-                        Type d&apos;accès
-                      </h6>
-                    </div>
-                    <p className={style.recapAccessType}>Public</p>
+          <aside className={style.previewColumn} aria-label="Aperçu en direct">
+            <div className={style.preview}>
+              <div className={style.previewVisual}>
+                {imagePreviewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={imagePreviewUrl}
+                    alt=""
+                    className={style.previewImage}
+                  />
+                ) : (
+                  <div className={style.previewPlaceholder}>
+                    <ImageUp size={30} aria-hidden="true" />
+                    <span>Votre affiche ici</span>
                   </div>
+                )}
+                <span className={style.previewBadge}>
+                  <Eye size={13} aria-hidden="true" />
+                  Aperçu en direct
+                </span>
+                {categoryLabel && (
+                  <span className={style.previewCategory}>{categoryLabel}</span>
+                )}
+              </div>
 
-                  {/* Capacity */}
-                  {form.capacity && (
-                    <div className={style.recapInfoBlock}>
-                      <div className={style.recapInfoHeader}>
-                        <span className={style.recapInfoIcon}>
-                          <Users size={16} aria-hidden="true" />
-                        </span>
-                        <h6 className={style.recapInfoTitle}>Capacité</h6>
-                      </div>
-                      <p className={style.recapCapacity}>
-                        {form.capacity} personnes
-                      </p>
-                    </div>
-                  )}
+              <div className={style.previewBody}>
+                <h2 className={style.previewTitle}>
+                  {form.title || "Titre de l'événement"}
+                </h2>
+
+                <ul className={style.previewMeta}>
+                  <li>
+                    <CalendarDays size={15} aria-hidden="true" />
+                    <span>
+                      {previewDate ? (
+                        <>
+                          {previewDate}
+                          {form.startTime && (
+                            <small>
+                              {formatTime(form.startTime)}
+                              {form.endTime && ` — ${formatTime(form.endTime)}`}
+                            </small>
+                          )}
+                        </>
+                      ) : (
+                        "Date à définir"
+                      )}
+                    </span>
+                  </li>
+                  <li>
+                    {form.isOnline ? (
+                      <Globe size={15} aria-hidden="true" />
+                    ) : (
+                      <MapPin size={15} aria-hidden="true" />
+                    )}
+                    <span>
+                      {form.isOnline
+                        ? "En ligne"
+                        : form.location || "Lieu à définir"}
+                    </span>
+                  </li>
+                </ul>
+
+                {form.description && (
+                  <p className={style.previewDescription}>{form.description}</p>
+                )}
+              </div>
+
+              {/* Talon du billet */}
+              <div className={style.previewStub}>
+                <div>
+                  <span className={style.stubLabel}>Accès</span>
+                  <span className={style.stubValue}>
+                    <LockOpen size={13} aria-hidden="true" /> Public
+                  </span>
                 </div>
+                <div>
+                  <span className={style.stubLabel}>Places</span>
+                  <span className={style.stubValue}>
+                    {hasCapacity ? form.capacity : "—"}
+                  </span>
+                </div>
+                {!id && (
+                  <div>
+                    <span className={style.stubLabel}>Prix</span>
+                    <span className={style.stubPrice}>{priceLabel}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          </aside>
         )}
       </div>
     </div>

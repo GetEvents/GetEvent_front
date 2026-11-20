@@ -1,6 +1,11 @@
+// Page du formulaire d'événement : base claire, pleine largeur.
 .page {
   width: 100%;
   min-height: 100vh;
-  padding: var(--app-space-10) 1rem;
-  background: var(--app-color-surface);
+  padding: 1.25rem 1rem 4rem;
+  background: var(--ge-paper);
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 5rem;
+  }
 }

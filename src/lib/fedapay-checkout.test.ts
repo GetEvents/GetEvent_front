@@ -18,9 +18,12 @@ function mockFedaPay(reason: unknown) {
   return init;
 }
 
+const RETURN_URL = "https://api.test/api/payments/fedapay/callback/signature";
+
 const session = {
   paymentUrl: "https://pay.test/hosted",
   paymentTransactionId: 42,
+  paymentReturnUrl: RETURN_URL,
 };
 
 describe("openFedaPayCheckout", () => {
@@ -59,7 +62,21 @@ describe("openFedaPayCheckout", () => {
         transaction: { id: 42 },
       }),
     );
-    expect(navigate).toHaveBeenCalledWith(fedapayReturnUrl(42));
+    expect(navigate).toHaveBeenCalledWith(`${RETURN_URL}?id=42`);
+    expect(fedapayReturnUrl(RETURN_URL, 42)).toBe(`${RETURN_URL}?id=42`);
+  });
+
+  it("se replie sur la page hébergée sans URL de retour signée", async () => {
+    const init = mockFedaPay(COMPLETED);
+    const navigate = vi.fn();
+    await expect(
+      openFedaPayCheckout(
+        { paymentUrl: "https://pay.test/hosted", paymentTransactionId: 42 },
+        { publicKey: "pk_sandbox_x", navigate },
+      ),
+    ).resolves.toBe("redirected");
+    expect(init).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith("https://pay.test/hosted");
   });
 
   it("affiche le formulaire dans le conteneur fourni, sans ouvrir la fenêtre FedaPay", async () => {

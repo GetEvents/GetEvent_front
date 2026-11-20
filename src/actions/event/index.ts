@@ -208,6 +208,7 @@ export async function joinEvent(
   EventActionState & {
     paymentUrl?: string;
     paymentTransactionId?: number | string;
+    paymentReturnUrl?: string;
   }
 > {
   const token = await requireToken();
@@ -226,10 +227,15 @@ export async function joinEvent(
 
   const payload = response.data as {
     message?: string;
-    data?: { paymentUrl?: string; paymentTransactionId?: number | string };
+    data?: {
+      paymentUrl?: string;
+      paymentTransactionId?: number | string;
+      paymentReturnUrl?: string;
+    };
   };
   const paymentUrl = payload.data?.paymentUrl;
   const paymentTransactionId = payload.data?.paymentTransactionId;
+  const paymentReturnUrl = payload.data?.paymentReturnUrl;
 
   return {
     error: false,
@@ -242,6 +248,7 @@ export async function joinEvent(
           : "Inscription confirmée. Votre billet est disponible dans vos participations."),
     paymentUrl,
     paymentTransactionId,
+    paymentReturnUrl,
   };
 }
 

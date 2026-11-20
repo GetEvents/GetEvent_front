@@ -22,9 +22,6 @@ const ENVIRONMENT =
   readEnv(() => process.env.NEXT_PUBLIC_FEDAPAY_ENVIRONMENT) === "live"
     ? "live"
     : "sandbox";
-const API_URL =
-  readEnv(() => process.env.NEXT_PUBLIC_API_ENDPOINT) ||
-  "http://localhost:3001";
 
 type CompleteHandler = (
   // eslint-disable-next-line no-unused-vars
@@ -52,6 +49,8 @@ export type CheckoutOutcome = "completed" | "dismissed" | "redirected";
 export type PaymentSession = {
   paymentUrl?: string;
   paymentTransactionId?: number | string;
+  /** URL de retour signée par le backend (obligatoire pour le widget). */
+  paymentReturnUrl?: string;
 };
 
 let scriptPromise: Promise<FedaPayGlobal> | null = null;
@@ -88,10 +87,15 @@ function loadCheckoutScript(): Promise<FedaPayGlobal> {
   return scriptPromise;
 }
 
-/** URL du retour backend : il vérifie la transaction, crée les billets puis
- *  redirige vers /participations/callback (même parcours que la page hébergée). */
-export function fedapayReturnUrl(transactionId: number | string) {
-  return `${API_URL}/api/payments/fedapay/callback?id=${encodeURIComponent(
+/** URL du retour backend : l'URL signée fournie par le backend, plus l'id de
+ *  la transaction (comme FedaPay le fait). Le backend vérifie la signature,
+ *  crée les billets puis redirige vers /participations/callback. */
+export function fedapayReturnUrl(
+  paymentReturnUrl: string,
+  transactionId: number | string,
+) {
+  const separator = paymentReturnUrl.includes("?") ? "&" : "?";
+  return `${paymentReturnUrl}${separator}id=${encodeURIComponent(
     String(transactionId),
   )}`;
 }
@@ -116,14 +120,18 @@ export async function openFedaPayCheckout(
     navigate?: (url: string) => void;
   } = {},
 ): Promise<CheckoutOutcome> {
-  const { paymentUrl, paymentTransactionId } = session;
+  const { paymentUrl, paymentTransactionId, paymentReturnUrl } = session;
 
   const redirect = (): CheckoutOutcome => {
     if (paymentUrl) navigate(paymentUrl);
     return "redirected";
   };
 
-  if (!publicKey || !paymentTransactionId) return redirect();
+  // Sans URL de retour signée, le backend refuserait le retour du widget :
+  // on passe par la page FedaPay (qui connaît l'URL signée).
+  if (!publicKey || !paymentTransactionId || !paymentReturnUrl) {
+    return redirect();
+  }
 
   let FedaPay: FedaPayGlobal;
   try {
@@ -141,7 +149,7 @@ export async function openFedaPayCheckout(
           : response;
 
       if (reason === FedaPay.CHECKOUT_COMPLETED) {
-        navigate(fedapayReturnUrl(paymentTransactionId));
+        navigate(fedapayReturnUrl(paymentReturnUrl, paymentTransactionId));
         resolve("completed");
       } else {
         resolve("dismissed");
