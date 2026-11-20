@@ -2,6 +2,18 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.23.0](https://github.com/GetEvents/GetEvent_front/compare/v0.22.0...v0.23.0) (2026-11-20)
+
+
+### Features
+
+* add notification events and enhance NotificationModal with improved UI and functionality ([ca985bf](https://github.com/GetEvents/GetEvent_front/commit/ca985bf2d979a2c764f570cd1fcc60cc37c07be9))
+* ajouter la gestion des ventes de billets pour les organisateurs basés au Bénin ([28f4d0c](https://github.com/GetEvents/GetEvent_front/commit/28f4d0c1f7ec79d41aac293fbfa507c01d94afc7))
+* implement new design system for the welcome page and authentica… ([728b0e8](https://github.com/GetEvents/GetEvent_front/commit/728b0e84d3f0f863fe1a5bf8f2a1fc821db15d5e))
+* implement payment checkout modal with FedaPay integration ([8ebc893](https://github.com/GetEvents/GetEvent_front/commit/8ebc893e8fb2122e7f1e2da7989914d5e1969d88))
+* refactor data fetching to use server-side caching and update image assets to WebP format ([da03fc4](https://github.com/GetEvents/GetEvent_front/commit/da03fc462569f5e64741b2d1f0ca25fbb5668214))
+* update FedaPay checkout to handle signed return URLs ([5c9248e](https://github.com/GetEvents/GetEvent_front/commit/5c9248ea7c69b7bad82d1cadbd604bed2ff3e228))
+
 ## [0.22.0](https://github.com/GetEvents/GetEvent_front/compare/v0.21.0...v0.22.0) (2026-11-18)
 
 
