@@ -1,22 +1,44 @@
 import { useState } from "react";
 import NotificationModal from "./NotificationModal";
 
+// Dates relatives à aujourd'hui, pour voir les groupes « Aujourd'hui »,
+// « Hier » et plus anciens.
+const minutesAgo = (minutes) =>
+  new Date(Date.now() - minutes * 60 * 1000).toISOString();
+
 const sampleNotifications = [
   {
     id: 1,
     title: "Participation confirmée",
-    message: "Votre billet QR code est disponible pour l'événement.",
+    message:
+      "Votre billet QR code est disponible pour Nuit du Cinéma Africain.",
     type: "success",
     isRead: false,
-    createdAt: "2026-07-06T10:30:00.000Z",
+    createdAt: minutesAgo(3),
   },
   {
     id: 2,
     title: "Nouveau message",
     message: "L'organisateur a publié une information importante.",
     type: "info",
+    isRead: false,
+    createdAt: minutesAgo(95),
+  },
+  {
+    id: 3,
+    title: "Événement bientôt complet",
+    message: "Plus que 12 places pour Forum des Jeunes Entrepreneurs.",
+    type: "warning",
     isRead: true,
-    createdAt: "2026-07-06T09:15:00.000Z",
+    createdAt: minutesAgo(60 * 26),
+  },
+  {
+    id: 4,
+    title: "Paiement échoué",
+    message: "Le paiement Mobile Money n'a pas abouti. Vous pouvez réessayer.",
+    type: "error",
+    isRead: true,
+    createdAt: minutesAgo(60 * 24 * 4),
   },
 ];
 

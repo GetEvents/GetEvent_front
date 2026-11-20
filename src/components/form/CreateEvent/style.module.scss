@@ -24,6 +24,14 @@
   @media (min-width: 768px) {
     padding: 2rem 2.25rem 1.75rem;
   }
+
+  // Mobile : le fond sombre occupe toute la largeur et monte jusqu'en haut
+  // de l'écran (il annule les marges de la page), coins arrondis en bas.
+  @media (max-width: 767px) {
+    margin: -1.25rem -1rem 0;
+    padding: 2rem 1.25rem 1.5rem;
+    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
+  }
 }
 
 .heroTop {
@@ -671,12 +679,18 @@
     gap: 0.45rem;
   }
 
+  // Mobile : boutons empilés sur toute la largeur — action principale
+  // (Suivant / Publier) en premier, « Précédent » dessous, puis l'étape.
   @media (max-width: 519px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
 
     > div:last-child {
-      grid-column: 2;
-      grid-row: 1;
+      order: -1;
+    }
+
+    > div:first-child:empty {
+      display: none;
     }
 
     button {
@@ -692,7 +706,7 @@
   text-align: center;
 
   @media (max-width: 519px) {
-    grid-column: 1 / -1;
+    margin-top: 0.2rem;
   }
 }
 

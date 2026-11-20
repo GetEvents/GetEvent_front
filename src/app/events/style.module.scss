@@ -79,6 +79,11 @@
 
 .createEventNavBtn {
   @include ds.button(primary, sm);
+
+  // Mobile : la création se fait depuis le bouton central de la barre du bas.
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .createEventLabel {
@@ -409,11 +414,19 @@
   margin: 0;
 }
 
+// Onglets et tri sur une même ligne, à la même hauteur (stretch).
 .headerActions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   gap: 0.6rem;
+
+  // Petit écran : onglets puis tri, chacun sur toute la largeur.
+  @media (max-width: 899px) {
+    > * {
+      flex: 1 1 100%;
+    }
+  }
 }
 
 // Onglets À venir / Passés / Mes participations.
@@ -427,7 +440,9 @@
 
 .timelineBtn {
   display: inline-flex;
+  flex: 1 1 auto;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   padding: 0.6rem 0.8rem;
   border: 0;
@@ -491,6 +506,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  // Même hauteur que les onglets (49 px).
+  min-height: 3.05rem;
 }
 
 .sortIcon,
@@ -509,7 +526,12 @@
 }
 
 .sortSelect {
-  padding: 0.75rem 2.2rem 0.75rem 2.2rem;
+  // Toute la hauteur du conteneur : même taille que les onglets.
+  align-self: stretch;
+  height: auto;
+  width: 100%;
+  min-width: 12.5rem;
+  padding: 0 2.4rem 0 2.3rem;
   border: 1px solid rgba(17, 17, 19, 0.25);
   border-radius: var(--ge-radius-control);
   background: var(--ge-paper-raised);

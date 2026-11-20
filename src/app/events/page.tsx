@@ -7,6 +7,7 @@ import { ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import EventCard from "@/components/ui/EventCart";
 import NotificationModal from "@/components/NotificationModal/NotificationModal";
 import { fetchGetNotifications } from "@/actions/notification";
+import { NEW_NOTIFICATION_EVENT } from "@/components/Notification/notification-events";
 import type { Event, EventFilters } from "@/actions/types/event";
 import type { Notification } from "@/actions/types/notification";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,6 +120,23 @@ export default function Welcome() {
       active = false;
     };
   }, [userId, eventsReady]);
+
+  // Notification reçue en temps réel (voir RealtimeNotifications) : ajoutée
+  // en tête de liste et comptée comme non lue, sans recharger la page.
+  useEffect(() => {
+    const handleNew = (event: globalThis.Event) => {
+      const notification = (event as CustomEvent<Notification>).detail;
+      if (!notification?.id) return;
+      setNotifications((current) =>
+        current.some((item) => item.id === notification.id)
+          ? current
+          : [notification, ...current],
+      );
+      if (!notification.isRead) setNotificationCount((count) => count + 1);
+    };
+    window.addEventListener(NEW_NOTIFICATION_EVENT, handleNew);
+    return () => window.removeEventListener(NEW_NOTIFICATION_EVENT, handleNew);
+  }, []);
 
   const isSearching = isFetching;
   // Squelette seulement s'il n'y a encore aucune donnée : pendant un

@@ -1,27 +1,403 @@
+@use "../../styles/design" as ds;
+
+// Centre de notifications — design affiche : panneau latéral à droite
+// (feuille en bas d'écran sur mobile), en-tête sombre, liste claire.
+
 .backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  // Au-dessus de la barre de navigation mobile (sidebar : 10005 et 10006).
+  z-index: 10010;
+  border: 0;
+  background: rgba(17, 17, 19, 0.6);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.modal {
+.panel {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1001;
-  width: 90%;
-  max-width: 450px;
-  max-height: 80vh;
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  top: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 10011;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 1.5rem));
+  overflow: hidden;
+  border-radius: var(--ge-radius-panel);
+  background: var(--ge-paper);
+  color: var(--ge-ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  animation: slideFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+  // Mobile : feuille qui monte du bas.
+  @media (max-width: 639px) {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 88dvh;
+    border-radius: var(--ge-radius-panel) var(--ge-radius-panel) 0 0;
+    animation-name: slideFromBottom;
+  }
 }
+
+// ---- En-tête -----------------------------------------------------------------
+
+.header {
+  flex-shrink: 0;
+  padding: 1.4rem 1.25rem 0;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(0, 179, 255, 0.22),
+      transparent 55%
+    ),
+    var(--ge-night);
+  color: var(--ge-night-ink);
+}
+
+.headerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.kicker {
+  @include ds.kicker(var(--ge-sky));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+}
+
+.title {
+  @include ds.display(clamp(1.7rem, 5vw, 2.2rem));
+  margin: 0;
+}
+
+.closeBtn {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--ge-radius-control);
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #ffffff;
+  }
+
+  @include ds.focus-ring(var(--ge-sky));
+}
+
+// Onglets « Toutes / Non lues », posés sur le bas de l'en-tête.
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tab {
+  @include ds.label(var(--ge-night-muted));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font-size: 0.72rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ge-night-ink);
+  }
+
+  @include ds.focus-ring(var(--ge-sky));
+}
+
+.tabActive {
+  border-bottom-color: var(--ge-cyan);
+  color: var(--ge-night-ink);
+
+  .tabCount {
+    background: var(--ge-cyan);
+    color: var(--ge-ink);
+  }
+}
+
+.tabCount {
+  min-width: 1.4rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ge-night-ink);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+// ---- Liste -------------------------------------------------------------------
+
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 0.5rem 0.75rem 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.group + .group {
+  margin-top: 0.5rem;
+}
+
+.groupLabel {
+  @include ds.label(var(--ge-ink-muted));
+  position: sticky;
+  top: -0.5rem;
+  z-index: 1;
+  margin: 0;
+  padding: 0.85rem 0.5rem 0.5rem;
+  background: var(--ge-paper);
+  font-size: 0.68rem;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.85rem;
+  padding: 0.9rem 0.9rem 0.9rem 1rem;
+  border: 1px solid var(--ge-line);
+  border-radius: var(--ge-radius-card);
+  background: var(--ge-paper-raised);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: rgba(17, 17, 19, 0.25);
+    box-shadow: 0 6px 18px rgba(17, 17, 19, 0.08);
+
+    .actions {
+      opacity: 1;
+    }
+  }
+
+  &:focus-within .actions {
+    opacity: 1;
+  }
+}
+
+// Non lue : liseré cyan à gauche.
+.unread {
+  border-color: rgba(0, 179, 255, 0.35);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    left: -1px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--ge-cyan);
+  }
+}
+
+.read {
+  background: transparent;
+
+  .itemTitle {
+    font-weight: 700;
+  }
+
+  .icon {
+    opacity: 0.6;
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-ink);
+  color: var(--ge-cyan);
+}
+
+.success .icon {
+  color: #34d399;
+}
+
+.warning .icon {
+  color: #fbbf24;
+}
+
+.error .icon {
+  color: #f87171;
+}
+
+.content {
+  min-width: 0;
+}
+
+.itemTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ge-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 179, 255, 0.2);
+}
+
+.itemMessage {
+  margin: 0 0 0.45rem;
+  color: var(--ge-ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--ge-ink-muted);
+  font-size: 0.75rem;
+}
+
+.typeLabel {
+  @include ds.label(var(--ge-blue));
+  font-size: 0.62rem;
+}
+
+// Actions : visibles au survol sur ordinateur, toujours sur écran tactile.
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  @media (hover: none) {
+    opacity: 1;
+  }
+}
+
+.actionBtn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--ge-line);
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-paper-raised);
+  color: var(--ge-ink);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--ge-ink);
+    background: var(--ge-ink);
+    color: var(--ge-cyan);
+  }
+
+  @include ds.focus-ring;
+}
+
+.deleteBtn:hover {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+// ---- État vide ---------------------------------------------------------------
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+
+  p {
+    @include ds.display(1.15rem);
+    margin: 0.5rem 0 0;
+  }
+
+  > span:last-child {
+    color: var(--ge-ink-muted);
+    font-size: 0.88rem;
+  }
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--ge-ink);
+  color: var(--ge-cyan);
+}
+
+// ---- Pied --------------------------------------------------------------------
+
+.footer {
+  flex-shrink: 0;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--ge-line);
+  background: var(--ge-paper-raised);
+
+  @media (max-width: 639px) {
+    padding-bottom: calc(0.9rem + env(safe-area-inset-bottom));
+  }
+}
+
+.markAllBtn {
+  @include ds.button(primary);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+// ---- Animations --------------------------------------------------------------
 
 @keyframes fadeIn {
   from {
@@ -32,391 +408,34 @@
   }
 }
 
-@keyframes slideIn {
+@keyframes slideFromRight {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%);
+    transform: translateX(24px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateX(0);
   }
 }
 
-.modalContent {
-  background: white;
-  border-radius: 20px;
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.15),
-    0 10px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: 80vh;
-}
-
-// Header
-.modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-
-  .headerTitle {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #1a202c;
-    }
-
-    svg {
-      color: #667eea;
-      width: 28px;
-      height: 28px;
-    }
+@keyframes slideFromBottom {
+  from {
+    transform: translateY(100%);
   }
-}
-
-.closeBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  color: #4b5563;
-
-  &:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-// Body
-.modalBody {
-  overflow-y: auto;
-  flex: 1;
-  padding: 1rem 0;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
-    border-radius: 3px;
-
-    &:hover {
-      background: #a0aec0;
-    }
-  }
-}
-
-.notificationsList {
-  display: flex;
-  flex-direction: column;
-}
-
-.notificationItem {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
-  transition: all 0.2s ease;
-  align-items: flex-start;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: #f9fafb;
-
-    .notificationActions {
-      opacity: 1;
-    }
-  }
-
-  // États de lecture
-  &.unread {
-    background: #f0f4ff;
-    border-left: 4px solid #667eea;
-  }
-
-  &.read {
-    opacity: 0.8;
-  }
-
-  // Types de notifications
-  &.error {
-    .notificationIcon {
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    &.unread {
-      background: #fef2f2;
-      border-left-color: #ef4444;
-    }
-  }
-
-  &.success {
-    .notificationIcon {
-      color: #10b981;
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    &.unread {
-      background: #f0fdf4;
-      border-left-color: #10b981;
-    }
-  }
-
-  &.warning {
-    .notificationIcon {
-      color: #f59e0b;
-      background: rgba(245, 158, 11, 0.1);
-    }
-
-    &.unread {
-      background: #fffbf0;
-      border-left-color: #f59e0b;
-    }
-  }
-
-  &.info {
-    .notificationIcon {
-      color: #667eea;
-      background: rgba(102, 126, 234, 0.1);
-    }
-
-    &.unread {
-      background: #eff6ff;
-      border-left-color: #3b82f6;
-    }
-  }
-}
-
-.notificationIcon {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-.notificationContent {
-  flex: 1;
-
-  h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #1a202c;
-  }
-
-  p {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.85rem;
-    color: #4b5563;
-    line-height: 1.4;
-  }
-}
-
-.notificationTime {
-  display: inline-block;
-  font-size: 0.75rem;
-  color: #a0aec0;
-}
-
-.notificationActions {
-  display: flex;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  align-self: center;
-  flex-shrink: 0;
-}
-
-.actionBtn,
-.deleteBtn {
-  padding: 0.4rem 0.6rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    background: #e5e7eb;
-    color: #1f2937;
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-.deleteBtn {
-  &:hover {
-    background: #fee2e2;
-    color: #dc2626;
-  }
-}
-
-// Loading state
-.loadingState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
-  color: #6b7280;
-  font-size: 0.95rem;
-
-  p {
-    margin: 0;
-    animation: pulse 1.5s infinite;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
-  }
-}
-
-// Empty State
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1.5rem;
-  text-align: center;
-
-  svg {
-    color: #cbd5e0;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-  }
-
-  p {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1a202c;
-  }
-
-  span {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
-    color: #718096;
-  }
-}
-
-// Footer
-.modalFooter {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #f0f0f0;
-  background: #f9fafb;
-  display: flex;
-  gap: 1rem;
-}
-
-.markAllBtn {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  &:active {
+  to {
     transform: translateY(0);
   }
 }
 
-// Responsive
-@media (max-width: 640px) {
-  .modal {
-    width: 95%;
-    max-width: 100%;
-    max-height: 90vh;
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel {
+    animation: none;
   }
 
-  .modalHeader {
-    padding: 1rem;
-
-    .headerTitle h2 {
-      font-size: 1.1rem;
-    }
-  }
-
-  .modalBody {
-    max-height: calc(90vh - 120px);
-  }
-
-  .notificationItem {
-    padding: 0.875rem 1rem;
-    gap: 0.75rem;
-  }
-
-  .emptyState {
-    padding: 2rem 1rem;
-
-    svg {
-      width: 40px;
-      height: 40px;
-    }
-  }
-
-  .notificationActions {
-    opacity: 1 !important;
+  .item,
+  .actions {
+    transition: none;
   }
 }

@@ -6,6 +6,7 @@ import NavbarWrapper from "@/components/ui/NavBar/NavbarWrapper";
 import Sidebar from "@/components/ui/sidebar";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import PushNotificationManager from "@/components/Notification/PushNotificationManager";
+import RealtimeNotifications from "@/components/Notification/RealtimeNotifications";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import CookieConsent from "@/components/CookieConsent/CookieConsent";
 import AppSplashScreen from "@/components/AppSplashScreen";
@@ -100,6 +101,7 @@ export default async function RootLayout({
               <Footer currentUser={isLoggedIn} />
               <PwaInstallPrompt />
               <PushNotificationManager isLoggedIn={isLoggedIn} />
+              <RealtimeNotifications userId={currentUser?.id ?? null} />
               <CookieConsent hasMobileSidebar={isLoggedIn} />
             </Providers>
           </NotificationProvider>

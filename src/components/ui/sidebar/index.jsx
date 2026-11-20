@@ -9,6 +9,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
   Settings,
   TicketCheck,
 } from "lucide-react";
@@ -77,6 +78,16 @@ const Sidebar = ({ visible }) => {
 
     return items;
   }, [isOrganizer]);
+
+  // Barre du bas (mobile) : bouton « Créer » au centre pour les organisateurs.
+  const createPosition = Math.ceil(menuItems.length / 2);
+  const mobileItems = isOrganizer
+    ? [
+        ...menuItems.slice(0, createPosition),
+        { isCreate: true, href: "/events/createvent" },
+        ...menuItems.slice(createPosition),
+      ]
+    : menuItems;
 
   if (!visible) return null;
 
@@ -154,10 +165,32 @@ const Sidebar = ({ visible }) => {
         </ul>
       </nav>
 
-      <div className={styles.sidebarFooter}>
+      <div
+        className={`${styles.sidebarFooter} ${
+          isOrganizer ? styles.withCreate : ""
+        }`}
+      >
         <div className={styles.mobileNav}>
-          {menuItems.map((item) => {
+          {mobileItems.map((item) => {
             const isActive = pathname === item.href;
+            if (item.isCreate) {
+              return (
+                <Link
+                  key="create"
+                  href={item.href}
+                  className={`${styles.mobileCreate} ${
+                    isActive ? styles.active : ""
+                  }`}
+                  title="Créer un événement"
+                  aria-label="Créer un événement"
+                >
+                  <span className={styles.mobileCreateIcon}>
+                    <Plus size={26} aria-hidden="true" />
+                  </span>
+                  <span className={styles.mobileCreateLabel}>Créer</span>
+                </Link>
+              );
+            }
             return (
               <Link
                 key={item.href}
