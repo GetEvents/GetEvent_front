@@ -59,7 +59,7 @@ export default function Input({
             className="form-control"
             name={name}
             id={id}
-            placeholder={label}
+            placeholder={inputProps.placeholder ?? label}
             required={required}
             onChange={handleInputChange}
             value={value}
@@ -73,7 +73,7 @@ export default function Input({
               name={name}
               id={id}
               disabled={disabled}
-              placeholder={label}
+              placeholder={inputProps.placeholder ?? label}
               required={required}
               onChange={handleInputChange}
               value={type === "file" ? undefined : value}

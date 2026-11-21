@@ -8,7 +8,7 @@ interface PageProps {
 export default async function CreateEventPage({ params }: PageProps) {
   const response = await getCurrentUser();
 
-  if (!response?.user) redirect("/auth/login?from=/events/createvent");
+  if (!response?.user) redirect("/auth/login?from=/events/new");
   if (!["ORGANISATEUR", "ADMIN"].includes(response.user.role)) {
     redirect("/events");
   }

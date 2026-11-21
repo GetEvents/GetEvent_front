@@ -26,8 +26,8 @@ export default function Navbar({ currentUser }) {
     ? [
         { href: "/", label: "Accueil" },
         { href: "/events", label: "Événements" },
-        { href: "/events/my-events", label: "Mes événements" },
-        { href: "/message", label: "Messages" },
+        { href: "/dashboard", label: "Mes événements" },
+        { href: "/messages", label: "Messages" },
       ]
     : [
         { href: "/", label: "Accueil" },

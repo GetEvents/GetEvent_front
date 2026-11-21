@@ -36,7 +36,8 @@ const Sidebar = ({ visible }) => {
     if (!pathname) return false;
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length === 2 && segments[0] === "events") {
-      const reserved = ["my-events", "createvent", "editEvent", "test"];
+      // /events/new est une page, pas une fiche (/events/[id]).
+      const reserved = ["new", "test"];
       return !reserved.includes(segments[1]);
     }
     return false;
@@ -54,7 +55,7 @@ const Sidebar = ({ visible }) => {
 
     if (isOrganizer) {
       items.push({
-        href: "/events/my-events",
+        href: "/dashboard",
         title: "Tableau de bord",
         shortTitle: "Dashboard",
         icon: <LayoutDashboard size={22} aria-hidden="true" />,
@@ -63,7 +64,7 @@ const Sidebar = ({ visible }) => {
 
     items.push(
       {
-        href: "/participations",
+        href: "/tickets",
         title: "Billets",
         shortTitle: "Billets",
         icon: <TicketCheck size={22} aria-hidden="true" />,
@@ -84,7 +85,7 @@ const Sidebar = ({ visible }) => {
   const mobileItems = isOrganizer
     ? [
         ...menuItems.slice(0, createPosition),
-        { isCreate: true, href: "/events/createvent" },
+        { isCreate: true, href: "/events/new" },
         ...menuItems.slice(createPosition),
       ]
     : menuItems;

@@ -3,10 +3,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PROTECTED_ROUTES = [
-  "/events/my-events",
-  "/events/createvent",
-  "/events/editEvent",
-  "/participations",
+  "/events/new",
+  "/tickets",
+  "/messages",
   "/settings",
   "/dashboard",
 ];
@@ -171,9 +170,15 @@ function redirectToLogin(request: NextRequest): NextResponse {
   return clearSession(NextResponse.redirect(loginUrl));
 }
 
+// Modification d'un événement : /events/<id>/edit.
+const EDIT_EVENT_ROUTE = /^\/events\/[^/]+\/edit\/?$/;
+
 function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  return (
+    EDIT_EVENT_ROUTE.test(pathname) ||
+    PROTECTED_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    )
   );
 }
 

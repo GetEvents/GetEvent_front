@@ -288,10 +288,7 @@ export default function Welcome() {
               </div>
               <div className={style.navRight}>
                 {user?.role === "ORGANISATEUR" && (
-                  <Link
-                    href="/events/createvent"
-                    className={style.createEventNavBtn}
-                  >
+                  <Link href="/events/new" className={style.createEventNavBtn}>
                     <span aria-hidden="true">+</span>
                     <span className={style.createEventLabel}>
                       Créer un événement

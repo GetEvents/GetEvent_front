@@ -50,7 +50,7 @@ export default function ParticipationCallbackClient() {
       setStatus("success");
       setMessage(result.message || "Redirection...");
       timeoutRef.current = setTimeout(() => {
-        router.replace("/participations");
+        router.replace("/tickets");
       }, REDIRECT_DELAY);
     };
 

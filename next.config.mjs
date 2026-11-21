@@ -53,13 +53,52 @@ const nextConfig = {
     // vident ce cache après une modification.
     staleTimes: { dynamic: 30 },
   },
+  // Anciennes URL → nouvelles (URL en anglais, minuscules, tirets).
+  // Redirections permanentes : les liens déjà envoyés (e-mails, retours de
+  // paiement, favoris) restent valables. Les paramètres (?token=…,
+  // ?status=…) sont conservés.
   async redirects() {
     return [
+      { source: "/events/create", destination: "/events/new", permanent: true },
       {
-        source: "/events/create",
-        destination: "/events/createvent",
+        source: "/events/createvent/:path*",
+        destination: "/events/new/:path*",
         permanent: true,
       },
+      {
+        source: "/events/editEvent/:id",
+        destination: "/events/:id/edit",
+        permanent: true,
+      },
+      {
+        source: "/events/my-events",
+        destination: "/dashboard",
+        permanent: true,
+      },
+      {
+        source: "/participations/:path*",
+        destination: "/tickets/:path*",
+        permanent: true,
+      },
+      { source: "/message", destination: "/messages", permanent: true },
+      {
+        source: "/auth/emailVerify",
+        destination: "/auth/verify-email",
+        permanent: true,
+      },
+      {
+        source: "/auth/edit_pass",
+        destination: "/auth/reset-password",
+        permanent: true,
+      },
+      // Pages qui n'ont jamais existé, appelées par d'anciennes versions du
+      // backend (paiement échoué, retour de configuration Stripe).
+      {
+        source: "/payment/failed",
+        destination: "/tickets/callback?status=failed",
+        permanent: false,
+      },
+      { source: "/seller/:path*", destination: "/settings", permanent: false },
     ];
   },
 };

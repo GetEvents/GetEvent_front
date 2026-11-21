@@ -90,28 +90,48 @@ describe("initMapAuto", () => {
     ).toBe("Porto-Novo");
   });
 
-  it("enveloppe l'autocomplete dans un conteneur visuellement aligné sur les autres champs", () => {
+  it("enveloppe l'autocomplete dans un conteneur aligné sur les autres champs", () => {
     initMapAuto(vi.fn());
 
     const wrapper = document.querySelector(
       "[data-autocomplete-wrapper='location-form']",
     );
+    const style = document.getElementById("getevent-place-autocomplete-styles");
 
     expect(wrapper).not.toBeNull();
-    expect(wrapper?.className).toContain("form-control");
-    const styles = wrapper?.getAttribute("style") ?? "";
-    expect(styles).toContain("border: 1px solid");
-    expect(styles).toContain("background-color: rgb(255, 255, 255)");
+    // Même habillage que les champs du site (mixin « field ») : bordure,
+    // hauteur, focus.
+    expect(style?.textContent).toContain(
+      "[data-autocomplete-wrapper='location-form']",
+    );
+    expect(style?.textContent).toContain(
+      "border: 1px solid rgba(17, 17, 19, 0.2)",
+    );
+    expect(style?.textContent).toContain(":focus-within");
   });
 
-  it("injecte des styles pour supprimer le contour de focus du composant Google", () => {
+  it("injecte une seule fois les styles qui masquent le contour Google", () => {
+    initMapAuto(vi.fn());
     initMapAuto(vi.fn());
 
-    const style = document.querySelector("style[data-autocomplete-styles]");
+    const styles = document.querySelectorAll(
+      "#getevent-place-autocomplete-styles",
+    );
 
-    expect(style).not.toBeNull();
-    expect(style?.textContent).toContain("::part(focus-ring)");
-    expect(style?.textContent).toContain("display: none");
+    expect(styles).toHaveLength(1);
+    expect(styles[0].textContent).toContain("::part(focus-ring)");
+    expect(styles[0].textContent).toContain("display: none");
+  });
+
+  it("ne laisse pas de cadre en double quand l'étape est rouverte", () => {
+    const cleanup = initMapAuto(vi.fn());
+    initMapAuto(vi.fn());
+
+    expect(
+      document.querySelectorAll("[data-autocomplete-wrapper]"),
+    ).toHaveLength(1);
+
+    cleanup?.();
   });
 
   it("alerte quand le lieu ne possede pas de position", async () => {

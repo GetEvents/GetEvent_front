@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext } from "@/context/AuthContext";
 import { NotificationProvider } from "@/components/Notification/NotificationProvider";
 import CreateEvent from "./index";
+// Mêmes marges que la vraie page (/events/new).
+import pageStyles from "@/app/events/new/style.module.scss";
 
 // Formulaire de création d'événement, vu par un organisateur connecté.
 const withProviders = (pays) => {
@@ -30,13 +32,7 @@ const withProviders = (pays) => {
           }}
         >
           <NotificationProvider>
-            <div
-              style={{
-                minHeight: "100vh",
-                padding: "1.25rem 1rem 4rem",
-                background: "var(--ge-paper)",
-              }}
-            >
+            <div className={pageStyles.page}>
               <Story />
             </div>
           </NotificationProvider>

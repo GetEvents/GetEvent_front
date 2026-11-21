@@ -1,0 +1,370 @@
+@use "../../styles/design" as ds;
+
+// Messagerie d'un événement — design affiche : en-tête sombre pleine largeur,
+// fil de discussion clair, bulles noires (moi) et blanches (les autres).
+// La discussion (.container …) sert aussi dans la fiche d'un événement.
+
+.page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  // En bas : place pour la barre de navigation mobile (fixe).
+  padding: 1.25rem 1rem 7rem;
+  background: var(--ge-paper);
+  color: var(--ge-ink);
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem 2rem;
+  }
+}
+
+// ---- En-tête -----------------------------------------------------------------
+
+.pageHeader {
+  @include ds.panel-dark;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  // Toute la largeur, depuis le haut de l'écran, coins arrondis en bas.
+  margin: -1.25rem -1rem 1.25rem;
+  padding: 2.25rem 1.25rem 1.75rem;
+  border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(0, 179, 255, 0.22), transparent 45%),
+    var(--ge-night);
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin: -2rem -1.5rem 1.5rem;
+    padding: 2.75rem 2.5rem 2.25rem;
+  }
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.eyebrow {
+  @include ds.kicker(var(--ge-sky));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+}
+
+.headerTitle {
+  @include ds.display(clamp(1.6rem, 4.5vw, 2.8rem));
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.headerHint {
+  margin: 0;
+  color: var(--ge-night-muted);
+}
+
+.headerLink {
+  @include ds.button(outline-light, sm);
+  flex-shrink: 0;
+  align-self: flex-start;
+  gap: 0.4rem;
+
+  @media (min-width: 768px) {
+    align-self: flex-end;
+  }
+}
+
+// Aucun événement choisi
+.emptyState {
+  @include ds.card;
+  display: grid;
+  min-height: 420px;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+
+  h1 {
+    @include ds.display(clamp(1.5rem, 4vw, 2.2rem));
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    color: var(--ge-ink-muted);
+  }
+
+  a {
+    @include ds.button(primary, sm);
+  }
+}
+
+// ---- Discussion --------------------------------------------------------------
+
+.container {
+  @include ds.card;
+  display: flex;
+  flex-direction: column;
+  height: clamp(420px, calc(100dvh - 19rem), 760px);
+  overflow: hidden;
+  border-radius: var(--ge-radius-panel);
+
+  @media (min-width: 768px) {
+    height: clamp(480px, calc(100dvh - 17rem), 760px);
+  }
+}
+
+.chatBox {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 0;
+  padding: 1.25rem 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(rgba(17, 17, 19, 0.05) 1px, transparent 1px) 0 0 / 18px 18px,
+    var(--ge-paper);
+
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+.noMessages {
+  @include ds.label(var(--ge-ink-muted));
+  margin: auto;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+// ---- Bulles ------------------------------------------------------------------
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: min(78%, 34rem);
+  padding: 0.65rem 0.9rem 0.5rem;
+  border-radius: 14px;
+  animation: slideIn 0.2s ease;
+
+  @media (max-width: 480px) {
+    max-width: 88%;
+  }
+}
+
+.senderInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.senderName {
+  @include ds.label(var(--ge-blue));
+  font-size: 0.66rem;
+}
+
+.creatorBadge {
+  @include ds.chip(accent);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.58rem;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.date {
+  margin-top: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+// Mes messages : bulle noire à droite.
+.myMessage {
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  background: var(--ge-ink);
+  color: #ffffff;
+
+  .date {
+    align-self: flex-end;
+    color: var(--ge-sky);
+    opacity: 0.85;
+  }
+}
+
+// Messages des autres : bulle blanche à gauche.
+.otherMessage {
+  align-self: flex-start;
+  border: 1px solid var(--ge-line);
+  border-bottom-left-radius: 4px;
+  background: var(--ge-paper-raised);
+  color: var(--ge-ink);
+}
+
+// Arrivée d'un participant, etc.
+.systemMessage {
+  @include ds.label(var(--ge-ink-muted));
+  align-self: center;
+  max-width: 90%;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(17, 17, 19, 0.06);
+  font-size: 0.64rem;
+  text-align: center;
+
+  .text {
+    font-size: inherit;
+  }
+}
+
+// Message envoyé d'ici, en attente de confirmation du serveur.
+.pending {
+  opacity: 0.6;
+}
+
+// Envoi échoué : contour rouge et bouton « Réessayer ».
+.failed {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fca5a5;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @include ds.focus-ring;
+}
+
+// ---- Saisie ------------------------------------------------------------------
+
+.inputBox {
+  flex-shrink: 0;
+  padding: 0.75rem;
+  border-top: 1px solid var(--ge-line);
+  background: var(--ge-paper-raised);
+
+  @media (min-width: 768px) {
+    padding: 1rem 1.25rem;
+  }
+
+  form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  input {
+    @include ds.field;
+    flex: 1;
+    min-width: 0;
+    padding: 0.8rem 1rem;
+  }
+
+  button[type="submit"] {
+    @include ds.button(accent);
+    flex-shrink: 0;
+    gap: 0.45rem;
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+}
+
+// Petit écran : bouton d'envoi réduit à l'icône.
+@media (max-width: 480px) {
+  .buttonText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .inputBox button[type="submit"] {
+    padding-inline: 0.9rem;
+  }
+}
+
+.characterCount {
+  flex-shrink: 0;
+  color: var(--ge-ink-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.accessMessage {
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--ge-ink-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.errorMessage {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #ef4444;
+  border-radius: var(--ge-radius-control);
+  background: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message {
+    animation: none;
+  }
+}

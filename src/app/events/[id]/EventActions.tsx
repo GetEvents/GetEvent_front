@@ -130,7 +130,7 @@ export default function EventActions({
         if (result.error) return notify(result.message, "error");
         notify(result.message, "success");
         setIsDeleteModalOpen(false);
-        router.push(result.redirect || "/events/my-events");
+        router.push(result.redirect || "/dashboard");
       },
       onError: () => notify("Impossible de supprimer l'événement.", "error"),
     });
@@ -144,7 +144,7 @@ export default function EventActions({
       <>
         <div className={styles.actionButtons}>
           <Link
-            href={isExpired ? "#" : `/events/editEvent/${eventId}`}
+            href={isExpired ? "#" : `/events/${eventId}/edit`}
             className={`${styles.button} ${styles.primary} ${isExpired ? styles.disabled : ""}`}
             aria-disabled={isExpired}
             onClick={(event) => {
@@ -171,7 +171,7 @@ export default function EventActions({
           </div>
           <div className={styles.mobileStickyBarBtnWrap}>
             <Link
-              href={isExpired ? "#" : `/events/editEvent/${eventId}`}
+              href={isExpired ? "#" : `/events/${eventId}/edit`}
               className={`${styles.button} ${styles.primary} ${styles.stickyBtn} ${isExpired ? styles.disabled : ""}`}
             >
               <Pencil size={16} /> Modifier

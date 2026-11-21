@@ -158,6 +158,8 @@ export function useLeaveEvent() {
       if (result.error) return;
       void queryClient.invalidateQueries({ queryKey: eventKeys.all });
       void queryClient.invalidateQueries({ queryKey: participantKeys.all });
+      // Une désinscription payante crée une demande de remboursement.
+      void queryClient.invalidateQueries({ queryKey: ["payments", "refunds"] });
     },
   });
 }

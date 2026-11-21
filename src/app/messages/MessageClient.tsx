@@ -7,8 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Send } from "lucide-react";
-import { useParticipantRegistration } from "@/hooks/useParticipants";
+import { RotateCcw, Send } from "lucide-react";
 import type { EventMessage } from "@/actions/types/event";
 import type { User } from "@/actions/types/auth";
 import {
@@ -19,7 +18,8 @@ import {
   onSocketError,
   onUserJoined,
   sendMessage,
-  updateSocketAuth,
+  type SendMessageAck,
+  type SocketMessage,
 } from "@/socket";
 import styles from "./style.module.scss";
 
@@ -33,13 +33,20 @@ type ChatMessage = {
   createdAt: string;
   self?: boolean;
   isSystem?: boolean;
+  /** Identifiant temporaire du navigateur (message envoyé depuis ici). */
+  clientId?: string;
+  /** pending : affiché tout de suite, en attente du serveur ; failed : échec. */
+  status?: "pending" | "failed";
 };
 
 type MessageClientProps = {
   eventId: number;
   token: string;
   currentUserId: number;
+  currentUser?: Partial<ChatSender>;
   organizerId: number;
+  /** Accès vérifié côté serveur (organisateur, admin ou billet valide). */
+  canChat: boolean;
   initialMessages: EventMessage[];
 };
 
@@ -56,85 +63,101 @@ const mapInitialMessages = (
     createdAt: message.createdAt,
   }));
 
+const newClientId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export default function MessageClient({
   eventId,
   token,
   currentUserId,
+  currentUser,
   organizerId,
+  canChat,
   initialMessages,
 }: MessageClientProps) {
-  const isOrganizer = String(currentUserId) === String(organizerId);
   const [message, setMessage] = useState("");
   const [socketError, setSocketError] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     mapInitialMessages(initialMessages, currentUserId),
   );
-  const registrationQuery = useParticipantRegistration(eventId, !isOrganizer);
-  const registrationValue = registrationQuery.data?.isRegistered;
-  const isRegistered =
-    !registrationQuery.isError &&
-    (typeof registrationValue === "object" && registrationValue !== null
-      ? Boolean(
-          "isRegistered" in registrationValue
-            ? registrationValue.isRegistered
-            : registrationValue,
-        )
-      : Boolean(registrationValue));
-  const canChat = isOrganizer || isRegistered;
-  const accessChecked = isOrganizer || !registrationQuery.isPending;
   const chatRef = useRef<HTMLDivElement>(null);
   const announcedJoinedUsersRef = useRef<Set<string>>(new Set());
 
+  // Connexion (réutilisée si déjà ouverte, par exemple pour les
+  // notifications) puis entrée dans la discussion, sans attendre.
   useEffect(() => {
     getSocket(token);
-    updateSocketAuth(token);
   }, [token]);
 
   useEffect(() => {
-    if (!accessChecked || !canChat) return;
+    if (!canChat) return;
 
     joinEvent(eventId);
 
     return () => {
       leaveEvent(eventId);
     };
-  }, [accessChecked, canChat, eventId]);
+  }, [canChat, eventId]);
+
+  // Message confirmé par le serveur : remplace sa version provisoire (même
+  // clientId) ou s'ajoute, sans doublon.
+  const upsertServerMessage = useCallback(
+    (received: SocketMessage) => {
+      setMessages((currentMessages) => {
+        const confirmed: ChatMessage = {
+          id: received.id,
+          text: received.text,
+          senderId: received.senderId,
+          self: String(received.senderId) === String(currentUserId),
+          sender: {
+            id: received.senderId,
+            prenom: received.senderName?.trim().split(/\s+/)[0] || "",
+            nom: received.senderName?.trim().split(/\s+/).slice(1).join(" "),
+            photo: received.senderPhoto,
+          },
+          createdAt: received.createdAt,
+        };
+
+        if (
+          received.clientId &&
+          currentMessages.some((item) => item.clientId === received.clientId)
+        ) {
+          return currentMessages
+            .filter(
+              (item) =>
+                item.clientId === received.clientId ||
+                String(item.id) !== String(received.id),
+            )
+            .map((item) =>
+              item.clientId === received.clientId
+                ? // clientId conservé : même clé React, pas de clignotement.
+                  { ...confirmed, clientId: received.clientId }
+                : item,
+            );
+        }
+
+        if (
+          currentMessages.some(
+            (item) => String(item.id) === String(received.id),
+          )
+        ) {
+          return currentMessages;
+        }
+
+        return [...currentMessages, confirmed];
+      });
+    },
+    [currentUserId],
+  );
 
   useEffect(() => {
     if (!canChat) return;
 
     const unsubscribeMessage = onMessageReceived((receivedMessage) => {
       if (String(receivedMessage.eventId) !== String(eventId)) return;
-
-      setMessages((currentMessages) => {
-        if (
-          currentMessages.some(
-            (currentMessage) =>
-              String(currentMessage.id) === String(receivedMessage.id),
-          )
-        ) {
-          return currentMessages;
-        }
-
-        const senderNameParts = receivedMessage.senderName?.trim().split(/\s+/);
-
-        return [
-          ...currentMessages,
-          {
-            id: receivedMessage.id,
-            text: receivedMessage.text,
-            senderId: receivedMessage.senderId,
-            self: String(receivedMessage.senderId) === String(currentUserId),
-            sender: {
-              id: receivedMessage.senderId,
-              prenom: senderNameParts?.[0] || "",
-              nom: senderNameParts?.slice(1).join(" ") || "",
-              photo: receivedMessage.senderPhoto,
-            },
-            createdAt: receivedMessage.createdAt,
-          },
-        ];
-      });
+      upsertServerMessage(receivedMessage);
     });
 
     const unsubscribeUserJoined = onUserJoined((data) => {
@@ -174,7 +197,7 @@ export default function MessageClient({
       unsubscribeMessage();
       unsubscribeUserJoined();
     };
-  }, [canChat, currentUserId, eventId]);
+  }, [canChat, currentUserId, eventId, upsertServerMessage]);
 
   useEffect(() => {
     return onSocketError((error) => {
@@ -182,11 +205,41 @@ export default function MessageClient({
     });
   }, []);
 
+  // Défile en bas à chaque nouveau message, et quand le dernier change
+  // d'état (« Non envoyé · Réessayer » ajoute une ligne sous la bulle).
+  const lastMessageState = `${messages.length}:${messages.at(-1)?.status ?? ""}`;
   useEffect(() => {
     const chat = chatRef.current;
     if (!chat) return;
     chat.scrollTo({ top: chat.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [lastMessageState, socketError]);
+
+  // Envoi d'un message déjà affiché (nouveau ou renvoi après échec).
+  const deliver = useCallback(
+    (clientId: string, text: string) => {
+      const handleAck = (response: SendMessageAck) => {
+        if (response.ok) {
+          upsertServerMessage(response.message);
+          return;
+        }
+        setMessages((currentMessages) =>
+          currentMessages.map((item) =>
+            item.clientId === clientId ? { ...item, status: "failed" } : item,
+          ),
+        );
+        setSocketError(response.error);
+      };
+
+      const sent = sendMessage({
+        eventId,
+        text,
+        clientId,
+        onAck: handleAck,
+      });
+      if (!sent) handleAck({ ok: false, error: "Message invalide." });
+    },
+    [eventId, upsertServerMessage],
+  );
 
   const handleSendMessage = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -195,13 +248,40 @@ export default function MessageClient({
       const content = message.trim();
       if (!content || !canChat) return;
 
+      // Affichage immédiat, confirmé ensuite par le serveur.
+      const clientId = newClientId();
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `local-${clientId}`,
+          clientId,
+          text: content,
+          senderId: currentUserId,
+          sender: currentUser,
+          self: true,
+          createdAt: new Date().toISOString(),
+          status: "pending",
+        },
+      ]);
+      setMessage("");
       setSocketError("");
-      if (sendMessage({ eventId, text: content })) {
-        setMessage("");
-      }
+      deliver(clientId, content);
     },
-    [canChat, eventId, message],
+    [canChat, currentUser, currentUserId, deliver, message],
   );
+
+  const handleRetry = (failedMessage: ChatMessage) => {
+    if (!failedMessage.clientId) return;
+    setSocketError("");
+    setMessages((currentMessages) =>
+      currentMessages.map((item) =>
+        item.clientId === failedMessage.clientId
+          ? { ...item, status: "pending" }
+          : item,
+      ),
+    );
+    deliver(failedMessage.clientId, failedMessage.text);
+  };
 
   const formatTime = (date: string) => {
     const parsedDate = new Date(date);
@@ -216,20 +296,22 @@ export default function MessageClient({
   return (
     <section className={styles.container} aria-label="Conversation">
       <div ref={chatRef} className={styles.chatBox} aria-live="polite">
-        {accessChecked && canChat && messages.length === 0 && (
+        {canChat && messages.length === 0 && (
           <p className={styles.noMessages}>Aucun message pour le moment.</p>
         )}
 
         {canChat &&
           messages.map((chatMessage) => (
             <article
-              key={chatMessage.id}
+              key={chatMessage.clientId || chatMessage.id}
               className={`${styles.message} ${
                 chatMessage.isSystem
                   ? styles.systemMessage
                   : chatMessage.self
                     ? styles.myMessage
                     : styles.otherMessage
+              } ${chatMessage.status === "pending" ? styles.pending : ""} ${
+                chatMessage.status === "failed" ? styles.failed : ""
               }`}
             >
               {!chatMessage.self && !chatMessage.isSystem && (
@@ -248,10 +330,26 @@ export default function MessageClient({
 
               <p className={styles.text}>{chatMessage.text}</p>
 
-              {!chatMessage.isSystem && (
-                <time className={styles.date} dateTime={chatMessage.createdAt}>
-                  {formatTime(chatMessage.createdAt)}
-                </time>
+              {!chatMessage.isSystem && chatMessage.status === "failed" ? (
+                <button
+                  type="button"
+                  className={styles.retryButton}
+                  onClick={() => handleRetry(chatMessage)}
+                >
+                  <RotateCcw size={13} aria-hidden="true" />
+                  Non envoyé · Réessayer
+                </button>
+              ) : (
+                !chatMessage.isSystem && (
+                  <time
+                    className={styles.date}
+                    dateTime={chatMessage.createdAt}
+                  >
+                    {chatMessage.status === "pending"
+                      ? "Envoi…"
+                      : formatTime(chatMessage.createdAt)}
+                  </time>
+                )
               )}
             </article>
           ))}
@@ -263,9 +361,7 @@ export default function MessageClient({
             {socketError}
           </p>
         )}
-        {!accessChecked ? (
-          <p className={styles.accessMessage}>Vérification de votre accès...</p>
-        ) : canChat ? (
+        {canChat ? (
           <form onSubmit={handleSendMessage}>
             <input
               value={message}

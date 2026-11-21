@@ -2,19 +2,18 @@
 
 import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import {
-  Check,
+  ArrowUpRight,
+  CheckCircle2,
   CreditCard,
   LogOut,
   ShieldCheck,
   Trash2,
+  TriangleAlert,
   UserRound,
 } from "lucide-react";
-import {
-  createSellerAccountLink,
-  getStripeOnboardingStatus,
-} from "@/actions/payment";
+import { canSellTickets } from "@/lib/payment-countries";
 import Profil from "@/components/profile";
 import ProfilForm from "@/components/form/RegisterForm";
 import DelectModal from "@/components/DelectModal";
@@ -51,7 +50,7 @@ function SettingsSkeleton() {
     >
       <div className={styles.container}>
         <div className={styles.skeletonHeader} />
-        <div className={styles.content}>
+        <div className={`${styles.content} ${styles.inner}`}>
           <aside className={styles.profileColumn}>
             <div className={`${styles.card} ${styles.skeletonProfile}`} />
           </aside>
@@ -79,8 +78,6 @@ export default function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
   const [passwordState, setPasswordState] =
     useState<PasswordState>(initialPasswordState);
-  const [stripeLoading, setStripeLoading] = useState(false);
-  const [stripeActionError, setStripeActionError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const router = useRouter();
@@ -99,25 +96,17 @@ export default function SettingsPage() {
   const canConfigurePayments =
     user?.role === "ORGANISATEUR" || user?.role === "ADMIN";
 
-  const stripeQuery = useQuery({
-    queryKey: ["payments", "stripe-onboarding", user?.id],
-    queryFn: getStripeOnboardingStatus,
-    enabled: canConfigurePayments,
-    staleTime: 5 * 60 * 1000,
-  });
-  const stripeStatus = stripeQuery.isPending
-    ? "checking"
-    : stripeQuery.data?.success && stripeQuery.data.isComplete
-      ? "onboarded"
-      : "not_onboarded";
-  const stripeError =
-    stripeActionError ||
-    (stripeQuery.data && !stripeQuery.data.success
-      ? stripeQuery.data.message
-      : "") ||
-    (stripeQuery.isError ? "Impossible de vérifier le statut Stripe." : "");
+  // Ventes de billets : encaissées par FedaPay, réservées aux pays autorisés.
+  const salesAllowed = canSellTickets(user?.pays);
 
-  const stripeComingSoon = true;
+  const sections = [
+    { id: "profil", label: "Profil", icon: UserRound },
+    ...(canConfigurePayments
+      ? [{ id: "paiements", label: "Paiements", icon: CreditCard }]
+      : []),
+    { id: "securite", label: "Sécurité", icon: ShieldCheck },
+    { id: "compte", label: "Compte", icon: Trash2 },
+  ];
 
   if (authLoading) return <SettingsSkeleton />;
 
@@ -167,28 +156,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleStripeConnect = async () => {
-    if (stripeStatus === "onboarded" || stripeLoading) return;
-
-    setStripeLoading(true);
-    setStripeActionError("");
-
-    try {
-      const result = await createSellerAccountLink();
-
-      if (!result.success || !result.accountLinkUrl) {
-        setStripeActionError(result.message);
-        return;
-      }
-
-      window.location.assign(result.accountLinkUrl);
-    } catch {
-      setStripeActionError("Impossible d'ouvrir la configuration Stripe.");
-    } finally {
-      setStripeLoading(false);
-    }
-  };
-
   const handleConfirmDeleteAccount = async () => {
     if (deleteAccountMutation.isPending) return;
 
@@ -215,19 +182,31 @@ export default function SettingsPage() {
     <main className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h1>Paramètres du compte</h1>
-          <p>Gérez votre profil, votre sécurité et vos paiements.</p>
+          <div className={styles.inner}>
+            <p className={styles.eyebrow}>Votre espace</p>
+            <h1>Paramètres du compte</h1>
+            <p>Gérez votre profil, votre sécurité et vos paiements.</p>
+          </div>
         </header>
 
-        <div className={styles.content}>
+        <div className={`${styles.content} ${styles.inner}`}>
           <aside className={styles.profileColumn}>
-            <div className={styles.card}>
+            <div className={`${styles.card} ${styles.profileCard}`}>
               <Profil />
             </div>
+            {/* Raccourcis vers les sections (pastilles sur mobile). */}
+            <nav className={styles.sectionNav} aria-label="Sections">
+              {sections.map(({ id, label, icon: Icon }) => (
+                <a key={id} href={`#${id}`} className={styles.sectionLink}>
+                  <Icon aria-hidden="true" />
+                  {label}
+                </a>
+              ))}
+            </nav>
           </aside>
 
           <div className={styles.settingsColumn}>
-            <section className={styles.card}>
+            <section id="profil" className={styles.card}>
               <div className={styles.sectionTitle}>
                 <UserRound aria-hidden="true" />
                 <div>
@@ -241,81 +220,56 @@ export default function SettingsPage() {
             </section>
 
             {canConfigurePayments && (
-              <section className={`${styles.card} ${styles.paymentComingSoon}`}>
+              <section id="paiements" className={styles.card}>
                 <div className={styles.sectionTitle}>
                   <CreditCard aria-hidden="true" />
                   <div>
-                    <h2>
-                      Paiements Stripe
-                      {stripeComingSoon && (
-                        <span className={styles.comingSoonBadge}>
-                          Fonctionnalité à venir
-                        </span>
-                      )}
-                    </h2>
+                    <h2>Paiements</h2>
                     <p>
-                      Configurez le compte qui recevra vos ventes de billets.
+                      Comment vos ventes de billets sont encaissées et
+                      reversées.
                     </p>
                   </div>
                 </div>
 
-                {stripeError && (
-                  <p className={styles.message_error} role="alert">
-                    {stripeError}
-                  </p>
-                )}
-
-                {stripeStatus === "checking" ? (
-                  <div
-                    className={`${styles.paymentRow} ${styles.paymentSkeleton}`}
-                    aria-busy="true"
-                    aria-label="Vérification du compte Stripe"
-                  >
-                    <div>
-                      <span className={styles.skeletonTitle} />
-                      <span className={styles.skeletonLineShort} />
-                    </div>
-                    <span className={styles.skeletonControl} />
-                  </div>
-                ) : (
+                <dl className={styles.paymentList}>
                   <div className={styles.paymentRow}>
-                    <div>
-                      <h3>Compte de réception</h3>
-                      <p>Associez votre compte bancaire à votre espace.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStripeConnect}
-                      className={
-                        stripeComingSoon
-                          ? styles.btn_disabled
-                          : stripeStatus === "onboarded"
-                            ? styles.btn_success
-                            : styles.btn_primary
-                      }
-                      disabled={
-                        stripeComingSoon ||
-                        stripeLoading ||
-                        stripeStatus === "onboarded"
-                      }
-                    >
-                      {stripeStatus === "onboarded" && !stripeComingSoon && (
-                        <Check aria-hidden="true" />
-                      )}
-                      {stripeComingSoon
-                        ? "Fonctionnalité à venir"
-                        : stripeStatus === "onboarded"
-                          ? "Compte configuré"
-                          : stripeLoading
-                            ? "Connexion..."
-                            : "Configurer Stripe"}
-                    </button>
+                    <dt>Encaissement</dt>
+                    <dd>
+                      FedaPay : Mobile Money et carte bancaire. Aucun compte à
+                      configurer.
+                    </dd>
                   </div>
-                )}
+                  <div className={styles.paymentRow}>
+                    <dt>Billets payants</dt>
+                    <dd>
+                      {salesAllowed ? (
+                        <span className={styles.status_ok}>
+                          <CheckCircle2 aria-hidden="true" />
+                          Disponible
+                        </span>
+                      ) : (
+                        <span className={styles.status_warning}>
+                          <TriangleAlert aria-hidden="true" />
+                          Réservé aux organisateurs basés au Bénin
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                  <div className={styles.paymentRow}>
+                    <dt>Solde et retraits</dt>
+                    <dd>
+                      <Link href="/dashboard" className={styles.inlineLink}>
+                        Voir le tableau de bord
+                        <ArrowUpRight aria-hidden="true" />
+                      </Link>
+                    </dd>
+                  </div>
+                </dl>
               </section>
             )}
 
-            <section className={styles.card}>
+            <section id="securite" className={styles.card}>
               <div className={styles.sectionTitle}>
                 <ShieldCheck aria-hidden="true" />
                 <div>
@@ -388,33 +342,14 @@ export default function SettingsPage() {
             </section>
 
             <section
-              className={`${styles.card} ${styles.mobileOnlyLogoutCard}`}
+              id="compte"
+              className={`${styles.card} ${styles.card_danger}`}
             >
-              <div className={styles.sectionTitle}>
-                <LogOut aria-hidden="true" />
-                <div>
-                  <h2>Déconnexion</h2>
-                  <p>Fermer votre session active sur cet appareil.</p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className={styles.btn_logout}
-                onClick={handleLogOut}
-                disabled={logoutMutation.isPending}
-              >
-                <LogOut aria-hidden="true" />
-                {logoutMutation.isPending ? "Déconnexion..." : "Se déconnecter"}
-              </button>
-            </section>
-
-            <section className={`${styles.card} ${styles.card_danger}`}>
               <div className={styles.sectionTitle}>
                 <Trash2 aria-hidden="true" />
                 <div>
-                  <h2>Supprimer le compte</h2>
-                  <p>Cette action effacera définitivement vos données.</p>
+                  <h2>Compte</h2>
+                  <p>Session et suppression de votre compte.</p>
                 </div>
               </div>
 
@@ -424,17 +359,42 @@ export default function SettingsPage() {
                 </p>
               )}
 
-              <button
-                type="button"
-                className={styles.btn_danger}
-                onClick={() => setIsDeleteModalOpen(true)}
-                disabled={deleteAccountMutation.isPending}
-              >
-                <Trash2 aria-hidden="true" />
-                {deleteAccountMutation.isPending
-                  ? "Suppression..."
-                  : "Supprimer mon compte"}
-              </button>
+              {/* Déconnexion : ici seulement sur mobile (sinon barre latérale). */}
+              <div className={`${styles.accountRow} ${styles.mobileOnly}`}>
+                <div>
+                  <h3>Déconnexion</h3>
+                  <p>Fermer votre session sur cet appareil.</p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.btn_logout}
+                  onClick={handleLogOut}
+                  disabled={logoutMutation.isPending}
+                >
+                  <LogOut aria-hidden="true" />
+                  {logoutMutation.isPending
+                    ? "Déconnexion..."
+                    : "Se déconnecter"}
+                </button>
+              </div>
+
+              <div className={styles.accountRow}>
+                <div>
+                  <h3>Supprimer le compte</h3>
+                  <p>Efface définitivement votre profil et vos données.</p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.btn_danger}
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  disabled={deleteAccountMutation.isPending}
+                >
+                  <Trash2 aria-hidden="true" />
+                  {deleteAccountMutation.isPending
+                    ? "Suppression..."
+                    : "Supprimer mon compte"}
+                </button>
+              </div>
             </section>
           </div>
         </div>

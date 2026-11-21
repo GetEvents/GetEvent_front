@@ -99,7 +99,7 @@ export default function Home() {
           </p>
 
           <div className={styles.ctaGroup}>
-            <Link href="/events/createvent" className={styles.primaryBtn}>
+            <Link href="/events/new" className={styles.primaryBtn}>
               Créer mon événement
               <ArrowUpRight size={18} aria-hidden="true" />
             </Link>

@@ -6,6 +6,9 @@ import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import styles from "./style.module.scss";
 import Link from "next/link";
 import {
+  CalendarDays,
+  Check,
+  Copy,
   LayoutDashboard,
   QrCode,
   RotateCcw,
@@ -217,7 +220,7 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
             placeholder="Rechercher un événement..."
             aria-label="Rechercher un événement"
           />
-          <Link href="/events/createvent" className={styles.create_btn}>
+          <Link href="/events/new" className={styles.create_btn}>
             + Créer
           </Link>
         </div>
@@ -286,7 +289,7 @@ function SearchableEventsSection({ eventsList, isDeleting, onDelete }) {
                           {ICONS.view}
                         </Link>
                         <Link
-                          href={`/events/editEvent/${event.id}`}
+                          href={`/events/${event.id}/edit`}
                           className={styles.edit}
                           title="Modifier"
                         >
@@ -597,13 +600,79 @@ const ParticipantsSection = React.memo(function ParticipantsSection({
   );
 });
 
+const REFUND_STATUS_LABELS = {
+  PENDING: "En attente",
+  COMPLETED: "Remboursé",
+  FAILED: "Échec",
+  REJECTED: "Rejeté",
+};
+
+const formatRefundAmount = (refund) =>
+  new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: refund.currency || "XOF",
+    maximumFractionDigits: 0,
+  }).format(refund.amount);
+
+const formatRefundDate = (value) => {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+};
+
+// Valeur à recopier dans FedaPay (ID de transaction, e-mail), avec bouton de
+// copie : l'admin retrouve la transaction et valide le remboursement sans
+// ressaisie.
+function CopyableValue({ label, value }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(String(value));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Presse-papiers indisponible : la valeur reste sélectionnable.
+    }
+  };
+
+  return (
+    <div className={styles.refund_detail}>
+      <dt>{label}</dt>
+      <dd>
+        <span className={styles.refund_detail_value}>{value}</span>
+        <button
+          type="button"
+          className={styles.refund_copy}
+          onClick={handleCopy}
+          aria-label={copied ? `${label} copié` : `Copier : ${label}`}
+          title={copied ? "Copié" : "Copier"}
+        >
+          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+        </button>
+      </dd>
+    </div>
+  );
+}
+
+// Demandes de remboursement (admin) : une carte par demande, lisible sur
+// mobile comme sur ordinateur (montant en avant, actions séparées).
 function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
   const [providerReferences, setProviderReferences] = useState({});
 
   return (
     <section className={styles.table_card}>
       <div className={styles.table_header_actions}>
-        <h3>Demandes de remboursement</h3>
+        <h3>
+          Demandes de remboursement
+          {refunds.length > 0 && (
+            <span className={styles.refund_count}>{refunds.length}</span>
+          )}
+        </h3>
       </div>
 
       {message && (
@@ -619,107 +688,149 @@ function RefundsSection({ refunds, message, isUpdating, onUpdate }) {
         </p>
       )}
 
-      <div style={{ overflowX: "auto" }}>
-        <table className={`${styles.modern_table} ${styles.stack_table}`}>
-          <thead>
-            <tr>
-              <th>Participant</th>
-              <th>Événement</th>
-              <th>Montant</th>
-              <th>Motif</th>
-              <th>Statut</th>
-              <th>Traitement</th>
-            </tr>
-          </thead>
-          <tbody>
-            {refunds.length === 0 ? (
-              <tr>
-                <td colSpan="6" className={styles.cell_empty}>
-                  Aucune demande de remboursement.
-                </td>
-              </tr>
-            ) : (
-              refunds.map((refund) => {
-                const participant = refund.ticket?.user;
-                const participantName =
-                  [participant?.prenom, participant?.nom]
-                    .filter(Boolean)
-                    .join(" ") ||
-                  participant?.email ||
-                  "Participant";
+      {refunds.length === 0 ? (
+        <p className={styles.refund_empty}>Aucune demande de remboursement.</p>
+      ) : (
+        <ul className={styles.refund_list}>
+          {refunds.map((refund) => {
+            const participant = refund.ticket?.user;
+            const participantName =
+              [participant?.prenom, participant?.nom]
+                .filter(Boolean)
+                .join(" ") ||
+              participant?.email ||
+              "Participant";
+            const requestedAt = formatRefundDate(refund.createdAt);
+            const reference = providerReferences[refund.id] || "";
+            // Pour retrouver la transaction dans FedaPay : son ID, ou à défaut
+            // la référence marchand GetEvent.
+            const fedapayTransactionId =
+              refund.transaction?.providerTransactionId;
+            const merchantReference = refund.transaction?.providerId;
+            const referenceId = `refund-reference-${refund.id}`;
 
-                return (
-                  <tr key={refund.id}>
-                    <td data-label="Participant">{participantName}</td>
-                    <td data-label="Événement">
-                      {refund.ticket?.event?.title || "Événement"}
-                    </td>
-                    <td data-label="Montant">
-                      {new Intl.NumberFormat("fr-FR", {
-                        style: "currency",
-                        currency: refund.currency || "XOF",
-                        maximumFractionDigits: 0,
-                      }).format(refund.amount)}
-                    </td>
-                    <td data-label="Motif">{refund.reason || "Aucun motif"}</td>
-                    <td data-label="Statut">{refund.status}</td>
-                    <td data-label="Traitement">
-                      {refund.status === "PENDING" ? (
-                        <div className={styles.refund_admin_actions}>
-                          <input
-                            type="text"
-                            value={providerReferences[refund.id] || ""}
-                            onChange={(event) =>
-                              setProviderReferences((current) => ({
-                                ...current,
-                                [refund.id]: event.target.value,
-                              }))
-                            }
-                            placeholder="Référence FedaPay"
-                            disabled={isUpdating}
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              onUpdate(
-                                refund.id,
-                                "COMPLETED",
-                                providerReferences[refund.id]?.trim(),
-                              )
-                            }
-                            disabled={
-                              isUpdating ||
-                              !providerReferences[refund.id]?.trim()
-                            }
-                          >
-                            Remboursé
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onUpdate(refund.id, "FAILED")}
-                            disabled={isUpdating}
-                          >
-                            Échec
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onUpdate(refund.id, "REJECTED")}
-                            disabled={isUpdating}
-                          >
-                            Rejeter
-                          </button>
-                        </div>
-                      ) : (
-                        refund.providerRefundId || "Traité"
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+            return (
+              <li key={refund.id} className={styles.refund_item}>
+                <div className={styles.refund_top}>
+                  <div className={styles.refund_who}>
+                    <strong>{participantName}</strong>
+                    <span>{refund.ticket?.event?.title || "Événement"}</span>
+                  </div>
+                  <div className={styles.refund_amount}>
+                    {formatRefundAmount(refund)}
+                  </div>
+                </div>
+
+                <div className={styles.refund_meta}>
+                  <span
+                    className={`${styles.refund_status} ${
+                      styles[`refund_status_${refund.status?.toLowerCase()}`] ||
+                      ""
+                    }`}
+                  >
+                    {REFUND_STATUS_LABELS[refund.status] || refund.status}
+                  </span>
+                  {requestedAt && (
+                    <span className={styles.refund_date}>
+                      <CalendarDays aria-hidden="true" />
+                      Demandé le {requestedAt}
+                    </span>
+                  )}
+                </div>
+
+                {(fedapayTransactionId ||
+                  merchantReference ||
+                  participant?.email) && (
+                  <dl className={styles.refund_details}>
+                    {fedapayTransactionId ? (
+                      <CopyableValue
+                        label="ID transaction FedaPay"
+                        value={fedapayTransactionId}
+                      />
+                    ) : (
+                      merchantReference && (
+                        <CopyableValue
+                          label="Référence FedaPay"
+                          value={merchantReference}
+                        />
+                      )
+                    )}
+                    {participant?.email && (
+                      <CopyableValue
+                        label="E-mail du participant"
+                        value={participant.email}
+                      />
+                    )}
+                  </dl>
+                )}
+
+                <p
+                  className={`${styles.refund_reason} ${
+                    refund.reason ? "" : styles.refund_reason_empty
+                  }`}
+                >
+                  {refund.reason || "Aucun motif renseigné"}
+                </p>
+
+                {refund.status === "PENDING" ? (
+                  <div className={styles.refund_admin_actions}>
+                    <label htmlFor={referenceId}>
+                      Référence du remboursement FedaPay
+                    </label>
+                    <input
+                      id={referenceId}
+                      type="text"
+                      value={reference}
+                      onChange={(event) =>
+                        setProviderReferences((current) => ({
+                          ...current,
+                          [refund.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Ex. 123456"
+                      disabled={isUpdating}
+                    />
+                    <div className={styles.refund_buttons}>
+                      <button
+                        type="button"
+                        className={styles.refund_btn_done}
+                        onClick={() =>
+                          onUpdate(refund.id, "COMPLETED", reference.trim())
+                        }
+                        disabled={isUpdating || !reference.trim()}
+                      >
+                        Marquer remboursé
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.refund_btn_secondary}
+                        onClick={() => onUpdate(refund.id, "FAILED")}
+                        disabled={isUpdating}
+                      >
+                        Échec
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.refund_btn_secondary}
+                        onClick={() => onUpdate(refund.id, "REJECTED")}
+                        disabled={isUpdating}
+                      >
+                        Rejeter
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className={styles.refund_done}>
+                    {refund.providerRefundId
+                      ? `Référence FedaPay : ${refund.providerRefundId}`
+                      : "Demande traitée"}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }

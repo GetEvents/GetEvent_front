@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTokenFromCookie } from "@/actions/auth/authActions";
 import { getCurrentUser, getEventDetails } from "@/lib/server-data";
+import ConversationHeader from "./ConversationHeader";
 import MessageClient from "./MessageClient";
 import styles from "./style.module.scss";
 
@@ -37,27 +38,40 @@ export default async function MessagePage({ searchParams }: MessagePageProps) {
   ]);
 
   if (!userResponse?.user || !token) {
-    redirect(`/auth/login?from=/message?eventId=${eventId}`);
+    redirect(`/auth/login?from=/messages?eventId=${eventId}`);
   }
 
   if (!event) notFound();
 
+  // Accès à la discussion, calculé ici (le serveur Socket.IO le revérifie) :
+  // la page rejoint la conversation tout de suite, sans appel de plus.
+  const user = userResponse.user;
+  const canChat =
+    user.role === "ADMIN" ||
+    String(user.id) === String(event.organisateurId) ||
+    (event.tickets || []).some(
+      (ticket) =>
+        String(ticket.userId) === String(user.id) &&
+        ticket.status !== "CANCELLED",
+    );
+
   return (
     <main className={styles.page}>
-      <header className={styles.pageHeader}>
-        <div>
-          <p className={styles.eyebrow}>Conversation</p>
-          <h1>{event.title}</h1>
-        </div>
-        <Link href={`/events/${event.id}`}>Voir l&apos;événement</Link>
-      </header>
+      <ConversationHeader eventId={event.id} title={event.title} />
 
       <MessageClient
         key={event.id}
         eventId={event.id}
         token={token}
-        currentUserId={userResponse.user.id}
+        currentUserId={user.id}
+        currentUser={{
+          id: user.id,
+          prenom: user.prenom,
+          nom: user.nom,
+          photo: user.photo,
+        }}
         organizerId={event.organisateurId}
+        canChat={canChat}
         initialMessages={event.messages || []}
       />
     </main>

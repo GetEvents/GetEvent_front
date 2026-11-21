@@ -33,7 +33,7 @@ const journeys = [
     id: "organisateur",
     tab: "J'organise",
     lead: "Lancez votre billetterie. On s'occupe du reste.",
-    cta: { href: "/events/createvent", text: "Créer mon événement" },
+    cta: { href: "/events/new", text: "Créer mon événement" },
     steps: [
       {
         icon: UserPlus,

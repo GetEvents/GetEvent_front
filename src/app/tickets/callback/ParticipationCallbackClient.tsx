@@ -36,7 +36,7 @@ export default function ParticipationCallbackClient() {
           message:
             "Votre paiement a été validé et votre inscription est maintenant active.",
           actionLabel: "Voir mes participations",
-          actionHref: "/participations",
+          actionHref: "/tickets",
         };
 
       case "pending":
@@ -72,7 +72,7 @@ export default function ParticipationCallbackClient() {
           message:
             "Nous n'avons pas pu déterminer l'état du paiement. Vérifiez vos participations ou réessayez plus tard.",
           actionLabel: "Voir mes participations",
-          actionHref: "/participations",
+          actionHref: "/tickets",
         };
     }
   }, [status]);
@@ -81,7 +81,7 @@ export default function ParticipationCallbackClient() {
     if (status !== "success") return;
 
     timeoutRef.current = setTimeout(() => {
-      router.replace("/participations");
+      router.replace("/tickets");
     }, REDIRECT_DELAY);
 
     return () => {

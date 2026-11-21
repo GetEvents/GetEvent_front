@@ -257,7 +257,7 @@ export default function EventCard({
     try {
       const response = await deleteEventMutation.mutateAsync(eventToDelete.id);
       if (response?.redirect) {
-        router.push("/events/my-events");
+        router.push("/dashboard");
       }
       closeDeleteModal();
     } catch {
@@ -410,9 +410,7 @@ export default function EventCard({
                       <div className={styles.editdelect}>
                         <Link
                           className={styles.actionBtn}
-                          href={
-                            eventExpired ? "#" : `/events/editEvent/${event.id}`
-                          }
+                          href={eventExpired ? "#" : `/events/${event.id}/edit`}
                           aria-disabled={eventExpired}
                           tabIndex={eventExpired ? -1 : 0}
                           title={eventExpired ? expiredMessage : "Modifier"}

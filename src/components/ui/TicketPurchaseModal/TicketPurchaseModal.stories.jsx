@@ -44,6 +44,11 @@ export const DejaInscrit = {
   args: { alreadyRegisteredCount: 2 },
 };
 
+// 10 places déjà détenues : limite par personne atteinte, achat impossible.
+export const LimiteAtteinte = {
+  args: { alreadyRegisteredCount: 10 },
+};
+
 export const EnCours = {
   args: { isLoading: true },
 };
