@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { getCurrentUser, getEventDetails } from "@/lib/server-data";
 import { getTokenFromCookie } from "@/actions/auth/authActions";
-import MessageClient from "@/app/message/MessageClient";
+import MessageClient from "@/app/messages/MessageClient";
 import EventMap from "@/utils/map";
 import EventActions from "./EventActions";
 import TicketQRCode from "./TicketQRCode";
@@ -190,10 +190,7 @@ export default async function EventDetailPage({
                       : "Votre place est réservée. Présentez votre QR code d'accès à l'entrée."}
                   </p>
                 </div>
-                <Link
-                  href="/participations"
-                  className={styles.registeredBannerBtn}
-                >
+                <Link href="/tickets" className={styles.registeredBannerBtn}>
                   <span>Mes billets ({userTicketsCount})</span>
                   <span aria-hidden="true">→</span>
                 </Link>
@@ -306,7 +303,15 @@ export default async function EventDetailPage({
                     eventId={event.id}
                     token={tokenAuth}
                     currentUserId={currentUser.id}
+                    currentUser={{
+                      id: currentUser.id,
+                      prenom: currentUser.prenom,
+                      nom: currentUser.nom,
+                      photo: currentUser.photo,
+                    }}
                     organizerId={event.organisateurId}
+                    // Section affichée seulement si canAccessMessages.
+                    canChat
                     initialMessages={event.messages || []}
                   />
                 </div>
@@ -355,7 +360,7 @@ export default async function EventDetailPage({
                           <strong>{userTicketsCount} billets</strong> au total.
                         </p>
                         <Link
-                          href="/participations"
+                          href="/tickets"
                           className={styles.multiTicketsLink}
                         >
                           Voir tous mes billets & QR codes →

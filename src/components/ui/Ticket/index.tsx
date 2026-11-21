@@ -30,6 +30,8 @@ import styles from "./style.module.scss";
 interface TicketProps {
   ticket?: ParticipationTicket;
   tickets?: ParticipationTicket[];
+  /** Événement terminé : carte atténuée, mention « Terminé ». */
+  isPast?: boolean;
 }
 
 const emptySubscribe = () => () => {};
@@ -75,7 +77,7 @@ const formatTime = (value?: string | null) => {
   }).format(date);
 };
 
-export default function Ticket({ ticket, tickets }: TicketProps) {
+export default function Ticket({ ticket, tickets, isPast }: TicketProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isMounted = useSyncExternalStore(
@@ -344,7 +346,9 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
 
   return (
     <>
-      <article className={styles.ticket}>
+      <article
+        className={`${styles.ticket} ${isPast ? styles.ticket_past : ""}`}
+      >
         <button
           type="button"
           className={styles.ticket_open}
@@ -352,15 +356,26 @@ export default function Ticket({ ticket, tickets }: TicketProps) {
           aria-label={`Afficher les QR codes pour ${event.title}`}
         >
           <span className={styles.ticket_image}>
-            <Image
-              src={event.image || "/images/ev1.jpg"}
-              alt=""
-              fill
-              sizes="(max-width: 700px) 100vw, 420px"
-            />
+            {event.image ? (
+              <Image
+                src={event.image}
+                alt=""
+                fill
+                sizes="(max-width: 700px) 100vw, 420px"
+              />
+            ) : (
+              // Pas d'affiche : visuel de repli aux couleurs du site.
+              <span className={styles.image_fallback} aria-hidden="true">
+                {event.category || "GetEvent"}
+              </span>
+            )}
             <span className={styles.image_overlay} />
             <span className={styles.ticket_label}>GETEVENT · PASS</span>
-            {allValidated ? (
+            {isPast && !allValidated ? (
+              <span className={styles.past_badge}>
+                <span>Terminé</span>
+              </span>
+            ) : allValidated ? (
               <span className={styles.validated_badge}>
                 <CheckCircle2 aria-hidden="true" />
                 <span>Déjà validé</span>

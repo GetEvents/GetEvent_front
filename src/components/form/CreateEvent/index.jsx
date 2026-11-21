@@ -634,6 +634,7 @@ const CreateEvent = ({ id }) => {
                         label="Lieu de l'événement"
                         type="text"
                         name="location"
+                        placeholder="Ville, salle ou adresse"
                         id="pac_input"
                         required={!form.isOnline}
                         value={form.location}

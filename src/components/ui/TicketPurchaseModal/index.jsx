@@ -19,6 +19,9 @@ import styles from "./style.module.scss";
 
 const emptySubscribe = () => () => {};
 
+// Même valeur que MAX_TICKETS_PER_USER côté backend (participation.service).
+const MAX_TICKETS_PER_USER = 10;
+
 export default function TicketPurchaseModal({
   isOpen,
   onClose,
@@ -53,21 +56,32 @@ export default function TicketPurchaseModal({
 
   const unitPrice = isFree ? 0 : Number(event.paymentPrice);
   const currency = event.currency || "XOF";
-  const totalPrice = unitPrice * quantity;
 
-  // Max places: default max 10 per purchase
-  const maxPlaces = 10;
+  // Même limite que le backend : 10 places par personne et par événement,
+  // tous achats confondus, et jamais plus que les places restantes.
+  const remainingPlaces =
+    typeof event?.capacity === "number" && Array.isArray(event?.tickets)
+      ? Math.max(
+          0,
+          event.capacity -
+            event.tickets.filter((t) => t.status !== "CANCELLED").length,
+        )
+      : Infinity;
+  const maxPlaces = Math.max(
+    0,
+    Math.min(MAX_TICKETS_PER_USER - alreadyRegisteredCount, remainingPlaces),
+  );
+  const canBuy = maxPlaces > 0;
+  // La quantité choisie ne dépasse jamais ce qu'il reste possible d'acheter.
+  const selectedQuantity = Math.max(1, Math.min(quantity, maxPlaces || 1));
+  const totalPrice = unitPrice * selectedQuantity;
 
   const handleIncrement = () => {
-    if (quantity < maxPlaces) {
-      setQuantity((prev) => prev + 1);
-    }
+    if (selectedQuantity < maxPlaces) setQuantity(selectedQuantity + 1);
   };
 
   const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity((prev) => prev - 1);
-    }
+    if (selectedQuantity > 1) setQuantity(selectedQuantity - 1);
   };
 
   const handleQuickSelect = (num) => {
@@ -178,8 +192,10 @@ export default function TicketPurchaseModal({
             <span>
               Vous avez déjà {alreadyRegisteredCount} billet
               {alreadyRegisteredCount > 1 ? "s" : ""} enregistré
-              {alreadyRegisteredCount > 1 ? "s" : ""}. Vous pouvez ajouter des
-              places supplémentaires ci-dessous.
+              {alreadyRegisteredCount > 1 ? "s" : ""}.{" "}
+              {canBuy
+                ? `Vous pouvez encore ajouter jusqu'à ${maxPlaces} place${maxPlaces > 1 ? "s" : ""}.`
+                : `Vous avez atteint la limite de ${MAX_TICKETS_PER_USER} places par personne.`}
             </span>
           </div>
         )}
@@ -198,16 +214,16 @@ export default function TicketPurchaseModal({
               type="button"
               className={styles.counterBtn}
               onClick={handleDecrement}
-              disabled={quantity <= 1 || isLoading}
+              disabled={selectedQuantity <= 1 || isLoading}
               aria-label="Diminuer le nombre de places"
             >
               <Minus size={18} />
             </button>
 
             <div className={styles.counterDisplay}>
-              <span className={styles.counterValue}>{quantity}</span>
+              <span className={styles.counterValue}>{selectedQuantity}</span>
               <span className={styles.counterUnit}>
-                {quantity > 1 ? "personnes" : "personne"}
+                {selectedQuantity > 1 ? "personnes" : "personne"}
               </span>
             </div>
 
@@ -215,7 +231,7 @@ export default function TicketPurchaseModal({
               type="button"
               className={styles.counterBtn}
               onClick={handleIncrement}
-              disabled={quantity >= maxPlaces || isLoading}
+              disabled={selectedQuantity >= maxPlaces || isLoading}
               aria-label="Augmenter le nombre de places"
             >
               <Plus size={18} />
@@ -229,10 +245,10 @@ export default function TicketPurchaseModal({
                 type="button"
                 key={num}
                 className={`${styles.quickBtn} ${
-                  quantity === num ? styles.active : ""
+                  selectedQuantity === num ? styles.active : ""
                 }`}
                 onClick={() => handleQuickSelect(num)}
-                disabled={isLoading}
+                disabled={isLoading || num > maxPlaces}
               >
                 {num} {num === 1 ? "place" : "places"}
               </button>
@@ -253,7 +269,7 @@ export default function TicketPurchaseModal({
 
           <div className={styles.priceRow}>
             <span>Nombre de places</span>
-            <span>× {quantity}</span>
+            <span>× {selectedQuantity}</span>
           </div>
 
           <div className={`${styles.priceRow} ${styles.totalRow}`}>
@@ -290,14 +306,17 @@ export default function TicketPurchaseModal({
           <button
             type="button"
             className={styles.confirmButton}
-            onClick={() => onConfirm(quantity)}
-            disabled={isLoading}
+            onClick={() => onConfirm(selectedQuantity)}
+            disabled={isLoading || !canBuy}
           >
             {isLoading ? (
               <span>Traitement en cours...</span>
             ) : isFree ? (
               <span>
-                Valider {quantity > 1 ? `les ${quantity} places` : "la place"}
+                Valider{" "}
+                {selectedQuantity > 1
+                  ? `les ${selectedQuantity} places`
+                  : "la place"}
               </span>
             ) : (
               <>

@@ -59,9 +59,7 @@ describe("WelcomePage", () => {
 
     expect(getByText(container, /Billetterie & gestion/)).toBeTruthy();
     expect(getByText(container, /paiement Mobile Money/)).toBeTruthy();
-    expect(
-      container.querySelector('a[href="/events/createvent"]'),
-    ).toBeTruthy();
+    expect(container.querySelector('a[href="/events/new"]')).toBeTruthy();
     expect(container.querySelector('a[href="/events"]')).toBeTruthy();
 
     await unmount();

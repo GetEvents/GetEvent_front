@@ -229,9 +229,7 @@ export default function EventCard({ count }) {
                       <div className={styles.editdelect}>
                         <Link
                           className={styles.edit}
-                          href={
-                            eventExpired ? "#" : `/events/editEvent/${event.id}`
-                          }
+                          href={eventExpired ? "#" : `/events/${event.id}/edit`}
                           aria-disabled={eventExpired}
                           tabIndex={eventExpired ? -1 : 0}
                           title={eventExpired ? expiredMessage : "Modifier"}

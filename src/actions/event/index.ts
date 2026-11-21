@@ -150,7 +150,7 @@ export async function addEvent(
     ? {
         error: false,
         message: "Événement créé avec succès.",
-        redirect: "/events/my-events",
+        redirect: "/dashboard",
       }
     : {
         error: true,
@@ -193,7 +193,7 @@ export async function deleteEvent(id: number): Promise<EventActionState> {
     ? {
         error: false,
         message: "Événement supprimé avec succès.",
-        redirect: "/events/my-events",
+        redirect: "/dashboard",
       }
     : {
         error: true,

@@ -134,11 +134,6 @@
 .heroSection {
   position: relative;
   z-index: 30;
-  padding: 0 1rem;
-
-  @media (max-width: 767px) {
-    padding: 0;
-  }
 }
 
 .heroContent {
@@ -146,28 +141,26 @@
   // panel-dark coupe le contenu qui dépasse (overflow: clip) : on le rouvre
   // pour que le menu déroulant des filtres puisse sortir de la bande.
   overflow: visible;
-  max-width: 1240px;
-  margin: 1rem auto 0;
+  // Toute la largeur, sans marge au-dessus, coins arrondis en bas.
+  margin: 0;
   padding: 3rem 1.25rem 2.25rem;
+  border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
 
   @media (min-width: 768px) {
-    padding: 4rem 3rem 3rem;
-  }
-
-  // Mobile : la bande sombre occupe toute la largeur, sans marge au-dessus,
-  // coins arrondis en bas seulement.
-  @media (max-width: 767px) {
-    margin-top: 0;
-    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
+    // Le contenu reste aligné sur la liste des événements (1240 px max).
+    padding: 4rem max(1.5rem, calc((100% - 1240px) / 2 + 1rem)) 3rem;
   }
 }
 
-// Visiteur (barre de navigation publique flottante) : sur mobile, la bande
-// remonte jusqu'en haut de l'écran, derrière la barre de navigation.
+// Visiteur (barre de navigation publique flottante) : la bande remonte
+// jusqu'en haut de l'écran, derrière la barre de navigation.
 .withPublicNavbar .heroContent {
-  @media (max-width: 767px) {
-    margin-top: -5.75rem;
-    padding-top: calc(3rem + 5.75rem);
+  margin-top: -5.75rem;
+  padding-top: calc(3rem + 5.75rem);
+
+  @media (min-width: 769px) {
+    margin-top: -6.25rem;
+    padding-top: calc(4rem + 6.25rem);
   }
 }
 

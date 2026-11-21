@@ -26,20 +26,22 @@
     radial-gradient(circle at 90% 0%, rgba(0, 179, 255, 0.22), transparent 45%),
     var(--ge-night);
 
-  @media (min-width: 768px) {
-    padding: 2.5rem;
-  }
+  // Le fond sombre occupe toute la largeur de la page et part du haut de
+  // l'écran (il annule les marges de la page), coins arrondis en bas.
+  margin: -1.25rem -1rem 1.75rem;
+  padding: 2.5rem 1.25rem 2rem;
+  border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
 
-  // Mobile : le fond sombre occupe toute la largeur et monte jusqu'en haut
-  // de l'écran (il annule les marges de la page), coins arrondis en bas.
-  @media (max-width: 767px) {
-    margin: -1.25rem -1rem 1.75rem;
-    padding: 2.5rem 1.25rem 2rem;
-    border-radius: 0 0 var(--ge-radius-panel) var(--ge-radius-panel);
+  @media (min-width: 768px) {
+    margin: -2rem -1.5rem 1.75rem;
+    padding: 3rem 2.5rem 2.5rem;
   }
 }
 
+// Contenu limité à 1200 px et centré, comme le tableau de bord.
 .header_content {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -91,7 +93,102 @@
 .content_section {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2.75rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Billets à venir / passés — même en-tête que la page Événements.
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.section_header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ge-line);
+
+  @media (min-width: 900px) {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.section_title,
+.refunds_section h2 {
+  @include ds.display(clamp(1.35rem, 6vw, 3rem));
+  margin: 0 0 0.5rem;
+}
+
+.section_subtitle {
+  @include ds.label(var(--ge-ink-muted));
+  margin: 0;
+}
+
+// Onglets côte à côte (pleine largeur sur mobile).
+.timeline_toggle {
+  display: flex;
+  padding: 0.25rem;
+  border: 1px solid var(--ge-line);
+  border-radius: var(--ge-radius-control);
+  background: var(--ge-paper-raised);
+
+  @media (min-width: 900px) {
+    display: inline-flex;
+  }
+}
+
+.timeline_btn {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ge-ink-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    color: var(--ge-ink);
+  }
+
+  &.active {
+    background: var(--ge-ink);
+    color: #ffffff;
+  }
+
+  @include ds.focus-ring;
+}
+
+.timeline_count {
+  min-width: 1.4rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(17, 17, 19, 0.08);
+  font-size: 0.7rem;
+  text-align: center;
+
+  .active & {
+    background: var(--ge-cyan);
+    color: var(--ge-ink);
+  }
 }
 
 .ticket_grid {
@@ -140,6 +237,15 @@
   }
 }
 
+.state_compact {
+  padding: 1.75rem 1.25rem;
+}
+
+.state_action {
+  @include ds.button(primary);
+  margin-top: 0.5rem;
+}
+
 .error {
   border-color: rgba(239, 68, 68, 0.5);
   background: rgba(239, 68, 68, 0.06);
@@ -149,11 +255,10 @@
 
 // ---- Remboursements ----------------------------------------------------------
 
-.refunds_section {
-  h2 {
-    @include ds.display(clamp(1.3rem, 3vw, 1.9rem));
-    margin: 0 0 1rem;
-  }
+.refunds_section h2 {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ge-line);
 }
 
 .refunds_list {

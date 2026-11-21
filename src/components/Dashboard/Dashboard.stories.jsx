@@ -69,6 +69,38 @@ const PARTICIPANTS = {
   ],
 };
 
+// Demandes de remboursement en attente (onglet « Remboursements », admin).
+const REFUNDS = [
+  {
+    id: "r1",
+    amount: 5000,
+    currency: "XOF",
+    status: "PENDING",
+    reason: "Empêchement de dernière minute, je ne pourrai pas venir.",
+    createdAt: "2026-11-18T10:00:00.000Z",
+    transaction: { providerTransactionId: 460512, providerId: "GE-1-8f2c" },
+    ticket: {
+      id: 101,
+      user: { prenom: "Awa", nom: "Diallo", email: "awa@example.com" },
+      event: { id: 1, title: "Nuit du Cinéma Africain" },
+    },
+  },
+  {
+    id: "r2",
+    amount: 15000,
+    currency: "XOF",
+    status: "PENDING",
+    reason: null,
+    createdAt: "2026-11-20T15:30:00.000Z",
+    transaction: { providerTransactionId: 460587, providerId: "GE-2-a91d" },
+    ticket: {
+      id: 102,
+      user: { prenom: "Koffi", nom: "Mensah", email: "koffi@example.com" },
+      event: { id: 2, title: "Forum des Jeunes Entrepreneurs" },
+    },
+  },
+];
+
 const buildClient = () => {
   const client = new QueryClient({
     defaultOptions: { queries: { staleTime: Infinity, retry: false } },
@@ -88,7 +120,7 @@ const buildClient = () => {
   });
   client.setQueryData(paymentKeys.refunds("PENDING"), {
     success: true,
-    refunds: [],
+    refunds: REFUNDS,
   });
   return client;
 };

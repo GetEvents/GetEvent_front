@@ -49,6 +49,9 @@ const RAW = {
     ticket(103, events.forum),
     ticket(104, events.forum, "USED"),
     ticket(105, events.concert, "USED"),
+    // Billet en attente de remboursement (liste en cache pas encore
+    // rafraîchie) : il ne doit pas être compté dans les billets à venir.
+    ticket(106, events.cinema),
   ],
 };
 
@@ -100,6 +103,7 @@ export const AvecBillets = {
     withProviders(RAW, [
       {
         id: "r1",
+        ticketId: 106,
         amount: 500,
         currency: "XOF",
         status: "PENDING",

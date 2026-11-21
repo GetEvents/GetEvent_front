@@ -89,7 +89,7 @@ function loadCheckoutScript(): Promise<FedaPayGlobal> {
 
 /** URL du retour backend : l'URL signée fournie par le backend, plus l'id de
  *  la transaction (comme FedaPay le fait). Le backend vérifie la signature,
- *  crée les billets puis redirige vers /participations/callback. */
+ *  crée les billets puis redirige vers /tickets/callback. */
 export function fedapayReturnUrl(
   paymentReturnUrl: string,
   transactionId: number | string,

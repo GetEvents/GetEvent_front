@@ -47,12 +47,66 @@
 .ticket_image {
   position: relative;
   display: block;
-  aspect-ratio: 16 / 9;
+  // Plus bas sur mobile : un billet ne doit pas occuper tout l'écran.
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  // Taille du texte de repli relative à la largeur de la carte.
+  container-type: inline-size;
   background: var(--ge-night);
 
   img {
     object-fit: cover;
   }
+
+  @media (min-width: 700px) {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+// Visuel de repli (événement sans affiche) : dégradé sombre + catégorie en
+// grand, façon affiche.
+.image_fallback {
+  @include ds.display(clamp(1.8rem, 15cqi, 3.4rem));
+  @include ds.outline-text(rgba(0, 179, 255, 0.55), 1.5px);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0.9rem 2.9rem;
+  background:
+    radial-gradient(
+      circle at 85% 10%,
+      rgba(0, 179, 255, 0.35),
+      transparent 55%
+    ),
+    var(--ge-night);
+  line-height: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// Événement terminé : visuel en noir et blanc, carte atténuée.
+.ticket_past {
+  .ticket_image {
+    filter: grayscale(1);
+  }
+
+  .ticket_open {
+    opacity: 0.72;
+  }
+
+  .ticket_open:hover {
+    opacity: 1;
+  }
+}
+
+.past_badge {
+  @include ds.chip(dark);
+  position: absolute;
+  top: 0.7rem;
+  right: 0.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ge-ink);
 }
 
 .image_overlay {

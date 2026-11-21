@@ -20,7 +20,17 @@ export interface SocketMessage {
   senderName: string;
   senderPhoto?: string | null;
   createdAt: string;
+  /** Identifiant temporaire envoyé par l'expéditeur (affichage immédiat). */
+  clientId?: string;
 }
+
+/** Accusé de réception de l'envoi d'un message. */
+export type SendMessageAck =
+  | { ok: true; message: SocketMessage }
+  | { ok: false; error: string };
+
+// Au-delà, l'envoi est considéré comme échoué (le message peut être renvoyé).
+const SEND_ACK_TIMEOUT_MS = 10_000;
 
 interface MessageSentPayload {
   messageId: number;
@@ -77,7 +87,10 @@ interface ServerToClientEvents {
 interface ClientToServerEvents {
   joinEvent: (eventId: Id) => void;
   leaveEvent: (eventId: Id) => void;
-  sendMessage: (payload: { eventId: Id; text: string }) => void;
+  sendMessage: (
+    payload: { eventId: Id; text: string; clientId?: string },
+    ack: (response: SendMessageAck) => void,
+  ) => void;
   editMessage: (payload: { messageId: Id; eventId: Id; text: string }) => void;
   deleteMessage: (payload: { messageId: Id; eventId: Id }) => void;
   startTyping: (eventId: Id) => void;
@@ -213,26 +226,75 @@ export const leaveEvent = (eventId: Id): boolean => {
   return true;
 };
 
+/**
+ * Envoie un message. `onAck` reçoit la réponse du serveur (message
+ * enregistré, ou erreur), ou une erreur après SEND_ACK_TIMEOUT_MS.
+ */
 export const sendMessage = ({
   eventId,
   text,
+  clientId,
+  onAck,
   socket: providedSocket,
 }: {
   eventId: Id;
   text: string;
+  clientId?: string;
+  // eslint-disable-next-line no-unused-vars
+  onAck?: (response: SendMessageAck) => void;
   socket?: AppSocket;
 }): boolean => {
   const content = text.trim();
   if (!eventId || !content) return false;
 
+  // Une seule réponse par envoi, au plus tard SEND_ACK_TIMEOUT_MS après
+  // l'appel, même si la connexion n'est jamais établie.
+  const startedAt = Date.now();
+  let settled = false;
+  const settle = (response: SendMessageAck) => {
+    if (settled) return;
+    settled = true;
+    window.clearTimeout(timer);
+    onAck?.(response);
+  };
+  const timer = window.setTimeout(
+    () =>
+      settle({
+        ok: false,
+        error: "Le serveur ne répond pas. Réessayez.",
+      }),
+    SEND_ACK_TIMEOUT_MS,
+  );
+
+  const emit = (client: AppSocket) => {
+    // Délai déjà écoulé avant la connexion : on n'envoie plus (le message
+    // est marqué « non envoyé », l'utilisateur peut le renvoyer).
+    if (settled) return;
+    const remaining = Math.max(
+      1000,
+      SEND_ACK_TIMEOUT_MS - (Date.now() - startedAt),
+    );
+    client
+      .timeout(remaining)
+      .emit(
+        "sendMessage",
+        { eventId, text: content, clientId },
+        (error: Error | null, response: SendMessageAck) => {
+          settle(
+            error
+              ? { ok: false, error: "Le serveur ne répond pas. Réessayez." }
+              : response,
+          );
+        },
+      );
+  };
+
   if (providedSocket?.connected) {
-    providedSocket.emit("sendMessage", { eventId, text: content });
+    emit(providedSocket);
     return true;
   }
 
-  return emitWhenConnected((client) =>
-    client.emit("sendMessage", { eventId, text: content }),
-  );
+  return emitWhenConnected(emit);
 };
 
 export const editMessage = (
@@ -352,8 +414,13 @@ export const deleteNotificationRealtime = (notificationId: Id): boolean => {
 };
 
 export const updateSocketAuth = (token: string | null): void => {
+  const tokenChanged = token !== currentToken;
   currentToken = token;
   const client = getSocket(token);
+
+  // Même jeton et déjà connecté : rien à refaire (une reconnexion retarderait
+  // la discussion et les notifications).
+  if (!tokenChanged && client.connected) return;
 
   if (client.connected) client.disconnect();
   connect(client);

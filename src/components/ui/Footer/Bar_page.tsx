@@ -20,7 +20,7 @@ export default function Footer({ currentUser }: FooterProps) {
       <div className={styles.maxContainer}>
         <div className={styles.topRow}>
           <p className={styles.brandTitle}>GetEvent</p>
-          <Link href="/events/createvent" className={styles.publishButton}>
+          <Link href="/events/new" className={styles.publishButton}>
             Publier mon événement
             <ArrowUpRight size={16} aria-hidden="true" />
           </Link>

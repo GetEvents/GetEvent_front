@@ -72,3 +72,37 @@
   @include ds.chip(accent);
   margin-top: 0.35rem;
 }
+
+// Mobile : avatar à gauche, infos à droite (la carte n'occupe plus l'écran).
+@media (max-width: 899px) {
+  .profil {
+    flex-direction: row;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .avatar {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(0, 179, 255, 0.25);
+  }
+
+  .avatarFallback {
+    font-size: 1.3rem;
+  }
+
+  .infouser {
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .infousername {
+    font-size: 1.05rem;
+  }
+
+  .roleBadge {
+    margin-top: 0.2rem;
+  }
+}
