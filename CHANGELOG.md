@@ -2,6 +2,16 @@
 
 Toutes les modifications importantes apportées à ce projet seront documentées dans ce fichier. Voir [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.24.0](https://github.com/GetEvents/GetEvent_front/compare/v0.23.0...v0.24.0) (2026-11-21)
+
+
+### Features
+
+* add messaging feature with event-specific chat functionality ([f7d9340](https://github.com/GetEvents/GetEvent_front/commit/f7d9340a4bd14cef5827d9a6146e264f20c03a25))
+* add messaging feature with event-specific chat functionality ([564a0ed](https://github.com/GetEvents/GetEvent_front/commit/564a0ed4e18dff347cbb3803b5c35c6a0d9432d7))
+* ajuster le style des pages pour améliorer l'affichage sur mobil… ([c8b50fc](https://github.com/GetEvents/GetEvent_front/commit/c8b50fcacea37b23c517b228470bf09154c0ac43))
+* ajuster le style des pages pour améliorer l'affichage sur mobile avec des marges et des coins arrondis ([6d7e9fa](https://github.com/GetEvents/GetEvent_front/commit/6d7e9faec56d72501ce4138ee198f27c55812761))
+
 ## [0.23.0](https://github.com/GetEvents/GetEvent_front/compare/v0.22.0...v0.23.0) (2026-11-20)
 
 
